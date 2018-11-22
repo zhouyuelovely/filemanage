@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.inventoryandinquire.dao.FileQueryMapper">
+	<resultMap type="filemanage.inventoryandinquire.vo.FileExtendVo" id="fileExtendVoMap">
+		<id property="archiveFileId" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+		<result property="archiveFileFileNumber" column="ARCHIVEFILE_FILENUMBER" jdbcType="VARCHAR"/>
+		<result property="archiveFileReferenceNumber" column="ARCHIVEFILE_REFERENCENUMBER" jdbcType="VARCHAR"/>
+		<result property="archiveFileResponsible" column="ARCHIVEFILE_RESPONSIBLE" jdbcType="VARCHAR"/>
+		<result property="archiveFileTitle" column="ARCHIVEFILE_TITLE" jdbcType="VARCHAR"/>
+		<result property="archiveFileCreatetime" column="ARCHIVEFILE_CREATETIME" jdbcType="VARCHAR"/>
+		<result property="afSecurityClassrification" column="AF_SECURITYCLASSRIFICATION" jdbcType="VARCHAR"/>
+		<result property="archiveFilePages" column="ARCHIVEFILE_PAGES" jdbcType="VARCHAR"/>
+		<result property="archiveFileRemark" column="ARCHIVEFILE_REMARK" jdbcType="VARCHAR"/>
+		<result property="boxnumber" column="boxnumber" jdbcType="VARCHAR"/>
+		<result property="storageRacknumber" column="storageRacknumber" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="fileSql">
+		SELECT 
+		ACA.ARCHIVEFILE_ID,
+	    ACA.ARCHIVEFILE_FILENUMBER,
+	    ACA.ARCHIVEFILE_REFERENCENUMBER,
+	    ACA.ARCHIVEFILE_RESPONSIBLE,
+	    ACA.ARCHIVEFILE_TITLE,
+	    ACA.ARCHIVEFILE_CREATETIME,
+	    ACA.AF_SECURITYCLASSRIFICATION,
+	    ACA.ARCHIVEFILE_PAGES,
+	    ACA.ARCHIVEFILE_REMARK,
+	    ACA.ARCHIVEFILE_ANUAL,
+	    ACB.BOX_NUMBER AS boxnumber,
+	    AMQ.QUANZONG_ID,
+	    AMQ.QUANZONG_NUMBER,
+	    AMQ.QUANZONG_NAME,
+	    AMP.PC_ID,
+	    AMP.PC_NAME,
+	    AMS.SC_ID,
+	    AMS.SC_NAME,
+	    AMR.RETENTIONPERIOD_ID, 
+	    AWS.STORAGE_RACKNUMBER AS storageRacknumber
+	    FROM AM_CO_ARCHIVEFILE ACA 
+	    INNER JOIN AM_MA_SM_QUANZONG AMQ ON ACA.QUANZONG_ID=AMQ.QUANZONG_ID
+	    INNER JOIN AM_CO_BOX ACB ON ACA.BOX_ID=ACB.BOX_ID
+	    INNER JOIN AM_MA_SM_PRIMARYCLASSIFICATION AMP ON ACA.PRIMARYCLASSIFICATION_ID=AMP.PC_ID
+	    INNER JOIN AM_MA_SM_SCLASSIFICATION AMS ON ACA.SECONDARYCLASSIFICATION_ID=AMS.SC_ID
+	    INNER JOIN AM_MA_SM_RETENTIONPERIOD AMR ON ACA.RETENTIONPERIOD_ID=AMR.RETENTIONPERIOD_ID
+	    LEFT JOIN AM_WAREHOUSE_STORAGE AWS ON ACB.STORAGE_ID=AWS.STORAGE_ID WHERE ACB.BOX_STATUS='2'
+	</sql>
+	
+	<!-- 查询所有件并分页 -->
+	<select id="queryFileList" resultMap="fileExtendVoMap">
+		SELECT A.* FROM(
+			SELECT AC.*,ROWNUM ROW_NUM
+			FROM(
+				<include refid="fileSql"/>
+				)AC
+			)A
+			WHERE A.ROW_NUM BETWEEN #{begin} AND #{end}
+	</select>
+	<!-- 统计件数 -->
+	<select id="countFile" resultType="int">
+		SELECT COUNT(*) FROM (<include refid="fileSql"/>)
+	</select>
+	<!-- 统计页数之和 -->
+	<select id="countArchivefilePages" resultType="int">
+		SELECT SUM(ARCHIVEFILE_PAGES) FROM (<include refid="fileSql"/>)
+	</select>
+	
+	<!-- 按条件查询所有件信息 -->
+	<select id="queryFileListByCondition" resultMap="fileExtendVoMap" parameterType="Map">
+		SELECT A.* FROM(
+			SELECT AC.*,ROWNUM ROW_NUM
+				FROM(
+					<include refid="fileSql"/>
+					<if test="fileConditionVo.quanzongNumber!='' and fileConditionVo.quanzongNumber!=null">
+						AND AMQ.QUANZONG_NUMBER=#{fileConditionVo.quanzongNumber,jdbcType=VARCHAR}
+					</if>
+					<if test="fileConditionVo.quanzongName!='' and fileConditionVo.quanzongName!=null">
+						AND AMQ.QUANZONG_NAME=#{fileConditionVo.quanzongName,jdbcType=VARCHAR}
+					</if>
+					<if test="fileConditionVo.pcId!='' and fileConditionVo.pcId!=null">
+						AND AMP.PC_ID=#{fileConditionVo.pcId,jdbcType=VARCHAR}
+					</if>
+					<if test="fileConditionVo.scId!='' and fileConditionVo.scId!=null">
+						AND AMS.SC_ID=#{fileConditionVo.scId,jdbcType=VARCHAR}
+					</if>
+					<if test="fileConditionVo.archiveFileAnual!='' and fileConditionVo.archiveFileAnual!=null">
+						AND ACA.ARCHIVEFILE_ANUAL=#{fileConditionVo.archiveFileAnual,jdbcType=VARCHAR}
+					</if>
+					<if test="fileConditionVo.retentionperiodid!='' and fileConditionVo.retentionperiodid!=null">
+						AND AMR.RETENTIONPERIOD_ID=#{fileConditionVo.retentionperiodid,jdbcType=VARCHAR}
+					</if>
+					<if test="fileConditionVo.archiveFileFileNumber!='' and fileConditionVo.archiveFileFileNumber!=null">
+						AND ACA.ARCHIVEFILE_FILENUMBER=#{fileConditionVo.archiveFileFileNumber,jdbcType=VARCHAR}
+					</if>
+					<if test="fileConditionVo.boxnumber!='' and fileConditionVo.boxnumber!=null">
+						AND ACB.BOX_NUMBER=#{fileConditionVo.boxnumber,jdbcType=VARCHAR}
+					</if>
+					<if test="fileConditionVo.archiveFileCreatetime!='' and fileConditionVo.archiveFileCreatetime!=null">
+						AND ACA.ARCHIVEFILE_CREATETIME=#{fileConditionVo.archiveFileCreatetime,jdbcType=VARCHAR}
+					</if>
+					<if test="fileConditionVo.storageRacknumber!='' and fileConditionVo.storageRacknumber!=null">
+						AND AWS.STORAGE_RACKNUMBER=#{fileConditionVo.storageRacknumber,jdbcType=VARCHAR}
+					</if>
+					<if test="fileConditionVo.condition!='' and fileConditionVo.condition!=null">
+						AND AMQ.QUANZONG_NUMBER||AMQ.QUANZONG_NAME||AMP.PC_NAME||AMS.SC_NAME||ACA.ARCHIVEFILE_ANUAL||AMR.RETENTIONPERIOD_NAME||ACA.ARCHIVEFILE_FILENUMBER||ACB.BOX_NUMBER||ACA.ARCHIVEFILE_CREATETIME||AWS.STORAGE_RACKNUMBER||ACA.ARCHIVEFILE_REFERENCENUMBER like 
+						CONCAT(CONCAT('%',#{fileConditionVo.condition,jdbcType=VARCHAR}),'%') 
+					</if>
+				)AC
+			)A
+			WHERE A.ROW_NUM BETWEEN #{begin} AND #{end}
+	</select>
+	
+	<!-- 按条件统计所有件 -->
+	<select id="countFileByCondition" parameterType="filemanage.inventoryandinquire.vo.FileConditionVo" resultType="int">
+		SELECT COUNT(ARCHIVEFILE_ID)
+		FROM(
+		<include refid="fileSql"/>
+		<if test="quanzongNumber!='' and quanzongNumber!=null">
+			AND AMQ.QUANZONG_NUMBER=#{quanzongNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="quanzongName!='' and quanzongName!=null">
+			AND AMQ.QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+		</if>
+		<if test="pcId!='' and pcId!=null">
+			AND AMP.PC_ID=#{pcId,jdbcType=VARCHAR}
+		</if>
+		<if test="scId!='' and scId!=null">
+			AND AMS.SC_ID=#{scId,jdbcType=VARCHAR}
+		</if>
+		<if test="archiveFileAnual!='' and archiveFileAnual!=null">
+			AND ACA.ARCHIVEFILE_ANUAL=#{archiveFileAnual,jdbcType=VARCHAR}
+		</if>
+		<if test="retentionperiodid!='' and retentionperiodid!=null">
+			AND AMR.RETENTIONPERIOD_ID=#{retentionperiodid,jdbcType=VARCHAR}
+		</if>
+		<if test="archiveFileFileNumber!='' and archiveFileFileNumber!=null">
+			AND ACA.ARCHIVEFILE_FILENUMBER=#{archiveFileFileNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="boxnumber!='' and boxnumber!=null">
+			AND ACB.BOX_NUMBER=#{boxnumber,jdbcType=VARCHAR}
+		</if>
+		<if test="archiveFileCreatetime!='' and archiveFileCreatetime!=null">
+			AND ACA.ARCHIVEFILE_CREATETIME=#{archiveFileCreatetime,jdbcType=VARCHAR}
+		</if>
+		<if test="storageRacknumber!='' and storageRacknumber!=null">
+			AND AWS.STORAGE_RACKNUMBER=#{storageRacknumber,jdbcType=VARCHAR}
+		</if>
+		<if test="condition!='' and condition!=null">
+			AND AMQ.QUANZONG_NUMBER||AMQ.QUANZONG_NAME||AMP.PC_NAME||AMS.SC_NAME||ACA.ARCHIVEFILE_ANUAL||AMR.RETENTIONPERIOD_NAME||ACA.ARCHIVEFILE_FILENUMBER||ACB.BOX_NUMBER||ACA.ARCHIVEFILE_CREATETIME||AWS.STORAGE_RACKNUMBER LIKE
+			CONCAT(CONCAT('%',#{condition,jdbcType=VARCHAR}),'%')
+		</if>
+	)
+	</select>
+	
+	<!-- 按条件统计所有页数 -->
+	<select id="countFilePagesByCondition" parameterType="filemanage.inventoryandinquire.vo.FileConditionVo" resultType="int">
+	  SELECT SUM(ARCHIVEFILE_PAGES) 
+	  	FROM (
+  		<include refid="fileSql"/>
+		<if test="quanzongNumber!='' and quanzongNumber!=null">
+			AND AMQ.QUANZONG_NUMBER=#{quanzongNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="quanzongName!='' and quanzongName!=null">
+			AND AMQ.QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+		</if>
+		<if test="pcId!='' and pcId!=null">
+			AND AMP.PC_ID=#{pcId,jdbcType=VARCHAR}
+		</if>
+		<if test="scId!='' and scId!=null">
+			AND AMS.SC_ID=#{scId,jdbcType=VARCHAR}
+		</if>
+		<if test="archiveFileAnual!='' and archiveFileAnual!=null">
+			AND ACA.ARCHIVEFILE_ANUAL=#{archiveFileAnual,jdbcType=VARCHAR}
+		</if>
+		<if test="retentionperiodid!='' and retentionperiodid!=null">
+			AND AMR.RETENTIONPERIOD_ID=#{retentionperiodid,jdbcType=VARCHAR}
+		</if>
+		<if test="archiveFileFileNumber!='' and archiveFileFileNumber!=null">
+			AND ACA.ARCHIVEFILE_FILENUMBER=#{archiveFileFileNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="boxnumber!='' and boxnumber!=null">
+			AND ACB.BOX_NUMBER=#{boxnumber,jdbcType=VARCHAR}
+		</if>
+		<if test="archiveFileCreatetime!='' and archiveFileCreatetime!=null">
+			AND ACA.ARCHIVEFILE_CREATETIME=#{archiveFileCreatetime,jdbcType=VARCHAR}
+		</if>
+		<if test="storageRacknumber!='' and storageRacknumber!=null">
+			AND AWS.STORAGE_RACKNUMBER=#{storageRacknumber,jdbcType=VARCHAR}
+		</if>
+		<if test="condition!='' and condition!=null">
+			AND AMQ.QUANZONG_NUMBER||AMQ.QUANZONG_NAME||AMP.PC_NAME||AMS.SC_NAME||ACA.ARCHIVEFILE_ANUAL||AMR.RETENTIONPERIOD_NAME||ACA.ARCHIVEFILE_FILENUMBER||ACB.BOX_NUMBER||ACA.ARCHIVEFILE_CREATETIME||AWS.STORAGE_RACKNUMBER LIKE
+			CONCAT(CONCAT('%',#{condition,jdbcType=VARCHAR}),'%')
+		</if>
+	)
+	</select>
+	
+	
+	<resultMap type="filemanage.systemmanage.pojo.AmMaSmRetentionperiod" id="retentionperiodMap">
+		<id property="retentionperiodid" column="RETENTIONPERIOD_ID" jdbcType="VARCHAR"/>
+		<result property="retentionperiodname" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<!-- 查询所有保管期限名称 -->
+	<select id="queryRetentionperiodName" resultMap="retentionperiodMap">
+		SELECT DISTINCT RETENTIONPERIOD_ID,RETENTIONPERIOD_NAME FROM AM_MA_SM_RETENTIONPERIOD
+	</select>
+	
+	<resultMap type="filemanage.inventoryandinquire.vo.BoxExtendVo" id="boxExtendVoMap">
+		<id column="BOX_ID" property="boxId" jdbcType="VARCHAR" />
+		<result column="BOX_ANUAL" property="boxAnual" jdbcType="VARCHAR" />
+		<result column="BOX_STARTNUMBER" property="boxStartNumber" jdbcType="VARCHAR" />
+		<result column="BOX_ENDNUMBER" property="boxEndNumber" jdbcType="VARCHAR" />
+		<result column="BOX_NUMBER" property="boxNumber" jdbcType="VARCHAR" />
+		<result column="BOX_THICKNESS" property="boxthickness" jdbcType="VARCHAR" />
+		<result column="QUANZONG_NUMBER" property="quanzongNumber" jdbcType="VARCHAR" />
+		<result column="QUANZONG_NAME" property="quanzongName" jdbcType="VARCHAR" />
+		<result column="SC_NAME" property="scName" jdbcType="VARCHAR" />
+		<result column="RETENTIONPERIOD_NAME" property="retentionPeriodName" jdbcType="VARCHAR" />
+		<result column="STORAGE_RACKNUMBER" property="storageRacknumber" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<sql id="boxsql">
+		 SELECT
+		 ACB.BOX_ID,
+		 ACB.BOX_STARTNUMBER,
+		 ACB.BOX_ENDNUMBER,
+		 ACB.BOX_NUMBER,
+		 ACB.BOX_THICKNESS,
+		 ACB.BOX_ANUAL,
+		 ACB.BOX_CASESNUMBER,
+		 AMQ.QUANZONG_NUMBER,
+		 AMQ.QUANZONG_NAME,
+		 AMS.SC_ID,
+		 AMS.SC_NAME,
+		 AMR.RETENTIONPERIOD_ID,
+		 AMR.RETENTIONPERIOD_NAME,
+		 AMP.PC_ID,
+		 AMP.PC_NAME,
+		 AWS.STORAGE_RACKNUMBER
+		 FROM AM_CO_BOX ACB
+		 INNER JOIN AM_MA_SM_QUANZONG AMQ ON ACB.QUANZONG_ID=AMQ.QUANZONG_ID
+		 INNER JOIN AM_MA_SM_RETENTIONPERIOD AMR ON ACB.RETENTIONPERIOD_ID=AMR.RETENTIONPERIOD_ID
+		 INNER JOIN AM_MA_SM_SCLASSIFICATION AMS ON ACB.SC_ID=AMS.SC_ID
+		 INNER JOIN AM_MA_SM_PRIMARYCLASSIFICATION AMP ON AMS.PC_ID=AMP.PC_ID
+		 INNER JOIN AM_CO_BOXATTACHMENT ACM ON ACM.BOX_ID=ACB.BOX_ID
+		 LEFT JOIN AM_WAREHOUSE_STORAGE AWS ON ACB.STORAGE_ID=AWS.STORAGE_ID WHERE ACB.BOX_STATUS='2'
+	</sql>
+	
+	<!-- 查询盒表与全宗表、机构表、保管期限表、入库表相关联的信息 -->
+	<select id="queryBoxList" resultMap="boxExtendVoMap" parameterType="map">
+		SELECT A.* FROM(
+			SELECT AC.*,ROWNUM ROW_NUM
+			FROM(
+				<include refid="boxsql"/>
+				)AC
+			)A
+			WHERE A.ROW_NUM BETWEEN #{begin} AND #{end}
+	</select>
+	
+	<!-- 按条件查询盒信息 -->
+	<select id="queryBoxListByCondition" resultMap="boxExtendVoMap" parameterType="map">
+		SELECT A.* FROM(
+			SELECT AC.*,ROWNUM ROW_NUM
+				FROM(
+					<include refid="boxsql"/>
+					<if test="boxConditionVo.quanzongNumber!='' and boxConditionVo.quanzongNumber!=null">
+						AND AMQ.QUANZONG_NUMBER=#{boxConditionVo.quanzongNumber,jdbcType=VARCHAR}
+					</if>
+					<if test="boxConditionVo.quanzongName!='' and boxConditionVo.quanzongName!=null">
+						AND AMQ.QUANZONG_NAME=#{boxConditionVo.quanzongName,jdbcType=VARCHAR}
+					</if>
+					<if test="boxConditionVo.pcId!='' and boxConditionVo.pcId!=null">
+						AND AMP.PC_ID=#{boxConditionVo.pcId,jdbcType=VARCHAR}
+					</if>
+					<if test="boxConditionVo.scId!='' and boxConditionVo.scId!=null">
+						AND AMS.SC_ID=#{boxConditionVo.scId,jdbcType=VARCHAR}
+					</if>
+					<if test="boxConditionVo.boxanual!='' and boxConditionVo.boxanual!=null">
+						AND ACB.BOX_ANUAL=#{boxConditionVo.boxanual,jdbcType=VARCHAR}
+					</if>
+					<if test="boxConditionVo.retentionperiodId!='' and boxConditionVo.retentionperiodId!=null">
+						AND AMR.RETENTIONPERIOD_ID=#{boxConditionVo.retentionperiodId,jdbcType=VARCHAR}
+					</if>
+					<if test="boxConditionVo.boxNumber!='' and boxConditionVo.boxNumber!=null">
+						AND ACB.BOX_NUMBER=#{boxConditionVo.boxNumber,jdbcType=VARCHAR}
+					</if>
+					<if test="boxConditionVo.storageRacknumber!='' and boxConditionVo.storageRacknumber!=null">
+						AND AWS.STORAGE_RACKNUMBER=#{boxConditionVo.storageRacknumber,jdbcType=VARCHAR}
+					</if>
+					<if test="boxConditionVo.condition!='' and boxConditionVo.condition!=null">
+						AND AMQ.QUANZONG_NUMBER
+						||AMQ.QUANZONG_NAME
+						||AMP.PC_NAME
+						||AMS.SC_NAME
+						||ACB.BOX_ANUAL
+						||AMR.RETENTIONPERIOD_NAME
+						||ACB.BOX_NUMBER
+						||AWS.STORAGE_RACKNUMBER like 
+						CONCAT(CONCAT('%',#{boxConditionVo.condition,jdbcType=VARCHAR}),'%') 
+					</if>
+				)AC
+			)A
+			WHERE A.ROW_NUM BETWEEN #{begin} AND #{end}
+	</select>
+	
+	
+	
+	<!-- 统计盒子数量 -->
+	<select id="countBoxNum" resultType="int">
+		SELECT COUNT(BOX_ID) FROM (<include refid="boxsql"/>)
+	</select>
+	
+	<!-- 统计件数之和 -->
+	<select id="countBoxFileCasesNumber" resultType="int">
+		SELECT SUM(BOX_CASESNUMBER) FROM(<include refid="boxsql"/>)
+	</select>
+	
+	<!-- 根据条件统计数量 -->
+	<select id="countBoxListByCondition" parameterType="filemanage.inventoryandinquire.vo.BoxConditionVo" resultType="int">
+		SELECT COUNT(BOX_ID)
+		FROM(
+		<include refid="boxsql"/>
+		<if test="quanzongNumber!='' and quanzongNumber!=null">
+			AND AMQ.QUANZONG_NUMBER=#{quanzongNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="quanzongName!='' and quanzongName!=null">
+			AND AMQ.QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+		</if>
+		<if test="pcId!='' and pcId!=null">
+			AND AMP.PC_ID=#{pcId,jdbcType=VARCHAR}
+		</if>
+		<if test="scId!='' and scId!=null">
+			AND AMS.SC_ID=#{scId,jdbcType=VARCHAR}
+		</if>
+		<if test="boxanual!='' and boxanual!=null">
+			AND ACB.BOX_ANUAL=#{boxanual,jdbcType=VARCHAR}
+		</if>
+		<if test="retentionperiodId!='' and retentionperiodId!=null">
+			AND AMR.RETENTIONPERIOD_ID=#{retentionperiodId,jdbcType=VARCHAR}
+		</if>
+		<if test="boxNumber!='' and boxNumber!=null">
+			AND	ACB.BOX_NUMBER=#{boxNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="storageRacknumber!='' and storageRacknumber!=null">
+			AND	AWS.STORAGE_RACKNUMBER=#{storageRacknumber,jdbcType=VARCHAR}
+		</if>
+		<if test="condition!='' and condition!=null">
+			AND AMQ.QUANZONG_NUMBER||AMQ.QUANZONG_NAME||AMP.PC_NAME||AMS.SC_NAME||ACB.BOX_ANUAL||AMR.RETENTIONPERIOD_NAME||ACB.BOX_NUMBER||AWS.STORAGE_RACKNUMBER LIKE
+			CONCAT(CONCAT('%',#{condition,jdbcType=VARCHAR}),'%')
+		</if>
+	)
+	</select>
+	
+	<!-- 按条件统计所有件 -->
+	<select id="countFileNumByCondition" parameterType="filemanage.inventoryandinquire.vo.BoxConditionVo" resultType="int">
+	   SELECT SUM(BOX_CASESNUMBER) 
+	   FROM(
+   		<include refid="boxsql"/>
+		<if test="quanzongNumber!='' and quanzongNumber!=null">
+			AND AMQ.QUANZONG_NUMBER=#{quanzongNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="quanzongName!='' and quanzongName!=null">
+			AND AMQ.QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+		</if>
+		<if test="pcId!='' and pcId!=null">
+			AND AMP.PC_ID=#{pcId,jdbcType=VARCHAR}
+		</if>
+		<if test="scId!='' and scId!=null">
+			AND AMS.SC_ID=#{scId,jdbcType=VARCHAR}
+		</if>
+		<if test="boxanual!='' and boxanual!=null">
+			AND ACB.BOX_ANUAL=#{boxanual,jdbcType=VARCHAR}
+		</if>
+		<if test="retentionperiodId!='' and retentionperiodId!=null">
+			AND AMR.RETENTIONPERIOD_ID=#{retentionperiodId,jdbcType=VARCHAR}
+		</if>
+		<if test="boxNumber!='' and boxNumber!=null">
+			AND	ACB.BOX_NUMBER=#{boxNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="storageRacknumber!='' and storageRacknumber!=null">
+			AND	AWS.STORAGE_RACKNUMBER=#{storageRacknumber,jdbcType=VARCHAR}
+		</if>
+		<if test="condition!='' and condition!=null">
+			AND AMQ.QUANZONG_NUMBER||AMQ.QUANZONG_NAME||AMP.PC_NAME||AMS.SC_NAME||ACB.BOX_ANUAL||AMR.RETENTIONPERIOD_NAME||ACB.BOX_NUMBER||AWS.STORAGE_RACKNUMBER LIKE
+			CONCAT(CONCAT('%',#{condition,jdbcType=VARCHAR}),'%')
+		</if>
+	)
+	</select>
+	
+	<resultMap type="filemanage.collectandorganize.pojo.AmCoBoxattachment" id="amCoBoxattachmentMap">
+		<id property="boxattachmentId" column="BOXATTACHMENT_ID" jdbcType="VARCHAR"/>
+		<result property="boxattachmentBox" column="BOXATTACHMENT_BOX" jdbcType="VARCHAR"/>
+		<result property="boxattachmentFile" column="BOXATTACHMENT_FILE" jdbcType="VARCHAR"/>
+		<result property="boxattachmentForm" column="BOXATTACHMENT_FORM" jdbcType="VARCHAR"/>
+		<result property="boxId" column="BOX_ID" jdbcType="VARCHAR"/>
+		<result property="boxYear" column="BOX_YEAR" jdbcType="VARCHAR"/>
+		<result property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+	</resultMap>
+	<!-- 根据盒子主键集合获取归档文件目录集合 -->
+	<select id="findBoxattachmentFilePathList" parameterType="List" resultType="java.lang.String">
+		SELECT
+		DISTINCT BOXATTACHMENT_FILE
+		FROM AM_CO_BOXATTACHMENT WHERE BOX_ID IN
+		<foreach collection="boxIdList" item="boxId" open="("
+			close=")" separator=",">
+			#{boxId}
+		</foreach>
+	</select>
+	<!-- 查询盒附件表归档文件目录地址(在线打印归档文件目录) -->
+	<select id="queryBoxattachmentFilePath" parameterType="String" resultMap="amCoBoxattachmentMap">
+		SELECT 
+		BOXATTACHMENT_FILE 
+		FROM AM_CO_BOXATTACHMENT
+		WHERE BOX_ID=#{boxId,jdbcType=VARCHAR}
+	</select>
+	
+	<resultMap type="filemanage.inventoryandinquire.vo.HistoryDataExtendVo" id="historyDataExtendVoMap">
+		<id property="historydataId" column="HISTORYDATA_ID" jdbcType="VARCHAR"/>
+		<result property="historydataNumber" column="HISTORYDATA_NUMBER" jdbcType="VARCHAR"/>
+		<result property="historydataReferencenumber" column="HISTORYDATA_REFERENCENUMBER" jdbcType="VARCHAR"/>
+		<result property="historydataAFResponsible" column="HISTORYDATA_AF_RESPONSIBLE" jdbcType="VARCHAR"/>
+		<result property="historydataTitle" column="HISTORYDATA_TITLE" jdbcType="VARCHAR"/>
+		<result property="historydataFiledate" column="HISTORYDATA_FILEDATE" jdbcType="VARCHAR"/>
+		<result property="historydataSecurityLevel" column="HISTORYDATA_SECURITY_LEVEL" jdbcType="VARCHAR"/>
+		<result property="historydataPages" column="HISTORYDATA_PAGES" jdbcType="VARCHAR"/>
+		<result property="historydataNotes" column="HISTORYDATA_NOTES" jdbcType="VARCHAR"/>
+		<result property="historydataBoxNumber" column="HISTORYDATA_BOXNUMBER" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<sql id="historyDataSql">
+		 SELECT
+		 HISTORYDATA_ID,
+		 HISTORYDATA_NUMBER,
+		 HISTORYDATA_REFERENCENUMBER,
+		 HISTORYDATA_AF_RESPONSIBLE,
+		 HISTORYDATA_TITLE,
+		 HISTORYDATA_FILEDATE,
+		 HISTORYDATA_SECURITY_LEVEL,
+		 HISTORYDATA_PAGES,
+		 HISTORYDATA_NOTES,
+		 HISTORYDATA_BOXNUMBER,
+		 HISTORYDATA_ARCHIVALYEAR,
+		 QUANZONG_NUMBER,
+		 QUANZONG_NAME,
+		 HISTORYDATA_TYPE,
+		 ORGANIZATION_NAME,
+		 RETENTIONPERIOD_NAME
+		 FROM AM_FD_HISTORYDATA
+	</sql>
+	
+	<!-- 统计历史数据数量 -->
+	<select id="countHistoryData" resultType="int">
+		SELECT COUNT(HISTORYDATA_ID) FROM (<include refid="historyDataSql"/>)
+	</select>
+	
+	<!-- 统计历史数据页数之和 -->
+	<select id="countHistoryDataPageSum" resultType="int">
+		SELECT SUM(HISTORYDATA_PAGES) FROM(<include refid="historyDataSql"/>)
+	</select>
+	<!-- 查询历史数据 -->
+	<select id="queryHistoryData" resultMap="historyDataExtendVoMap" parameterType="map">
+		SELECT A.* FROM(
+			SELECT AC.*,ROWNUM ROW_NUM
+			FROM(
+				<include refid="historyDataSql"/>
+				)AC
+			)A
+			WHERE A.ROW_NUM BETWEEN #{begin} AND #{end}
+	</select>
+	
+	<!-- 按条件查询历史数据信息 -->
+	<select id="queryHistoryDataByCondition" resultMap="historyDataExtendVoMap" parameterType="map">
+		SELECT A.* FROM(
+			SELECT AC.*,ROWNUM ROW_NUM
+				FROM(
+					<include refid="historyDataSql"/>
+					<where>
+						<if test="historyDataConditionVo.quanzongNumber!='' and historyDataConditionVo.quanzongNumber!=null">
+							AND QUANZONG_NUMBER=#{historyDataConditionVo.quanzongNumber,jdbcType=VARCHAR}
+						</if>
+						<if test="historyDataConditionVo.quanzongName!='' and historyDataConditionVo.quanzongName!=null">
+							AND QUANZONG_NAME=#{historyDataConditionVo.quanzongName,jdbcType=VARCHAR}
+						</if>
+						<if test="historyDataConditionVo.pcId!='' and historyDataConditionVo.pcId!=null">
+							AND HISTORYDATA_TYPE=#{historyDataConditionVo.pcId,jdbcType=VARCHAR}
+						</if>
+						<if test="historyDataConditionVo.scId!='' and historyDataConditionVo.scId!=null">
+							AND ORGANIZATION_NAME=#{historyDataConditionVo.scId,jdbcType=VARCHAR}
+						</if>
+						<if test="historyDataConditionVo.archiveFileAnual!='' and historyDataConditionVo.archiveFileAnual!=null">
+							AND HISTORYDATA_ARCHIVALYEAR=#{historyDataConditionVo.archiveFileAnual,jdbcType=VARCHAR}
+						</if>
+						<if test="historyDataConditionVo.retentionperiodId!='' and historyDataConditionVo.retentionperiodId!=null">
+							AND RETENTIONPERIOD_NAME=#{historyDataConditionVo.retentionperiodId,jdbcType=VARCHAR}
+						</if>
+						<if test="historyDataConditionVo.archiveFileFileNumber!='' and historyDataConditionVo.archiveFileFileNumber!=null">
+							AND HISTORYDATA_NUMBER=#{historyDataConditionVo.archiveFileFileNumber,jdbcType=VARCHAR}
+						</if>
+						<if test="historyDataConditionVo.boxNumber!='' and historyDataConditionVo.boxNumber!=null">
+							AND HISTORYDATA_BOXNUMBER=#{historyDataConditionVo.boxNumber,jdbcType=VARCHAR}
+						</if>
+						<if test="historyDataConditionVo.archiveFileCreatetime!='' and historyDataConditionVo.archiveFileCreatetime!=null">
+							AND HISTORYDATA_FILEDATE=#{historyDataConditionVo.archiveFileCreatetime,jdbcType=VARCHAR}
+						</if>
+						<if test="historyDataConditionVo.condition!='' and historyDataConditionVo.condition!=null">
+							AND QUANZONG_NUMBER
+							||QUANZONG_NAME
+							||HISTORYDATA_TYPE
+							||ORGANIZATION_NAME
+							||HISTORYDATA_ARCHIVALYEAR
+							||RETENTIONPERIOD_NAME
+							||HISTORYDATA_NUMBER
+							||HISTORYDATA_BOXNUMBER
+							||HISTORYDATA_FILEDATE like 
+							CONCAT(CONCAT('%',#{historyDataConditionVo.condition,jdbcType=VARCHAR}),'%') 
+						</if>
+					</where>
+				)AC
+			)A
+			WHERE A.ROW_NUM BETWEEN #{begin} AND #{end}
+	</select>
+	
+	<!-- 根据条件统计数量 -->
+	<select id="countHistoryDataByCondition" parameterType="filemanage.inventoryandinquire.vo.HistoryDataConditionVo" resultType="int">
+		SELECT COUNT(HISTORYDATA_ID)
+		FROM AM_FD_HISTORYDATA
+		<where>
+			<if test="quanzongNumber!='' and quanzongNumber!=null">
+				AND QUANZONG_NUMBER=#{quanzongNumber,jdbcType=VARCHAR}
+			</if>
+			<if test="quanzongName!='' and quanzongName!=null">
+				AND QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+			</if>
+			<if test="pcId!='' and pcId!=null">
+				AND HISTORYDATA_TYPE=#{pcId,jdbcType=VARCHAR}
+			</if>
+			<if test="scId!='' and scId!=null">
+				AND ORGANIZATION_NAME=#{scId,jdbcType=VARCHAR}
+			</if>
+			<if test="archiveFileAnual!='' and archiveFileAnual!=null">
+				AND HISTORYDATA_ARCHIVALYEAR=#{archiveFileAnual,jdbcType=VARCHAR}
+			</if>
+			<if test="retentionperiodId!='' and retentionperiodId!=null">
+				AND RETENTIONPERIOD_NAME=#{retentionperiodId,jdbcType=VARCHAR}
+			</if>
+			<if test="archiveFileFileNumber!='' and archiveFileFileNumber!=null">
+				AND HISTORYDATA_NUMBER=#{archiveFileFileNumber,jdbcType=VARCHAR}
+			</if>
+			<if test="boxNumber!='' and boxNumber!=null">
+				AND HISTORYDATA_BOXNUMBER=#{boxNumber,jdbcType=VARCHAR}
+			</if>
+			<if test="archiveFileCreatetime!='' and archiveFileCreatetime!=null">
+				AND HISTORYDATA_FILEDATE=#{archiveFileCreatetime,jdbcType=VARCHAR}
+			</if>
+			<if test="condition!='' and condition!=null">
+				AND QUANZONG_NUMBER
+				||QUANZONG_NAME
+				||HISTORYDATA_TYPE
+				||ORGANIZATION_NAME
+				||HISTORYDATA_ARCHIVALYEAR
+				||RETENTIONPERIOD_NAME
+				||HISTORYDATA_NUMBER
+				||HISTORYDATA_BOXNUMBER
+				||HISTORYDATA_FILEDATE like 
+				CONCAT(CONCAT('%',#{condition,jdbcType=VARCHAR}),'%') 
+			</if>
+		</where> 
+	</select>
+	
+	
+</mapper>

@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.warehouse.dao.WareHouseStorageMapper">
+	<resultMap type="filemanage.warehouse.vo.ArchiveInWareHouseAssist" id="boxingMap">
+		<id property="boxId" column="BOX_ID" jdbcType="VARCHAR" />
+		<result property="boxAnual" column="BOX_ANUAL" jdbcType="VARCHAR" />
+		<result property="boxNumber" column="BOX_NUMBER" jdbcType="VARCHAR" />
+		<result property="boxSericalNumber" column="BOX_SERICALNUMBER" jdbcType="VARCHAR" />
+		<result property="boxThickness" column="BOX_THICKNESS" jdbcType="VARCHAR" />
+		<result property="boxStatus" column="BOX_STATUS" jdbcType="VARCHAR"/>
+		<result property="boxCasesNumber" column="BOX_CASESNUMBER" jdbcType="VARCHAR"/>
+		<result property="boxAuditStart" column="BOX_AUDITSTART" jdbcType="VARCHAR"/>
+		
+		<result property="wareHouseBuildId" column="WAREHOUSEBUILD_ID" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildNumber" column="WAREHOUSEBUILD_NUMBER" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildName" column="WAREHOUSEBUILD_NAME" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildShelfNumber" column="WAREHOUSEBUILD_SHELFNUMBER" jdbcType="DATE" />
+		<result property="wareHouseBuildGroupNumber" column="WAREHOUSEBUILD_GROUPNUMBER" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildLatticeNumber" column="WAREHOUSEBUILD_LATTICENUMBER" jdbcType="DATE" />
+		
+		<result property="storageId" column="STORAGE_ID" jdbcType="VARCHAR" />
+		<result property="storageRackNumber" column="STORAGE_RACKNUMBER" jdbcType="VARCHAR" />
+		<result property="storageIsplan" column="STORAGE_ISPLAN" jdbcType="VARCHAR" />
+		<result property="planId" column="PLAN_ID" jdbcType="VARCHAR" />
+		
+		<result property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR" />
+		<result property="quanzongNumber" column="QUANZONG_NUMBER" jdbcType="VARCHAR" />
+		<result property="quanzongName" column="QUANZONG_NAME" jdbcType="VARCHAR" />
+		
+		<result property="retentionperiodId" column="RETENTIONPERIOD_ID" jdbcType="VARCHAR" />
+		<result property="retentionperiodCode" column="RETENTIONPERIOD_CODE" jdbcType="VARCHAR" />
+		<result property="retentionperiodName" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR" />
+		
+		<result property="pcId" column="PC_ID" jdbcType="VARCHAR" />
+		<result property="pcCode" column="PC_CODE" jdbcType="VARCHAR" />
+		<result property="pcName" column="PC_NAME" jdbcType="VARCHAR" />
+		
+		<result property="scId" column="SC_ID" jdbcType="VARCHAR" />
+		<result property="scCode" column="SC_CODE" jdbcType="VARCHAR" />
+		<result property="scName" column="SC_NAME" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<!-- 入库弹框_库房辅助部分 -->
+	<resultMap type="filemanage.warehouse.pojo.WareHouseBuild" id="wareHouseMap">
+		<id property="wareHouseBuildId" column="WAREHOUSEBUILD_ID" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildNumber" column="WAREHOUSEBUILD_NUMBER" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildName" column="WAREHOUSEBUILD_NAME" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildLong" column="WAREHOUSEBUILD_LONG" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildWidth" column="WAREHOUSEBUILD_WIDTH" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildHigh" column="WAREHOUSEBUILD_HIGH" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildArea" column="WAREHOUSEBUILD_AREA" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildVolume" column="WAREHOUSEBUILD_VOLUME" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildDoor" column="WAREHOUSEBUILD_DOOR" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildWindow" column="WAREHOUSEBUILD_WINDOW" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildTemperature" column="WAREHOUSEBUILD_TEMPERATURE" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildHumidity" column="WAREHOUSEBUILD_HUMIDITY" jdbcType="DATE" />
+		<result property="wareHouseBuildShelvesNum" column="WAREHOUSEBUILD_SHELVESNUM" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildDirection" column="WAREHOUSEBUILD_DIRECTION" jdbcType="DATE" />
+		<result property="wareHouseBuildNamingDirection" column="WAREHOUSEBUILD_NAMINGDIRECTION" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildShelfNumber" column="WAREHOUSEBUILD_SHELFNUMBER" jdbcType="DATE" />
+		<result property="wareHouseBuildGroupsNum" column="WAREHOUSEBUILD_GROUPSNUM" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildGroupNameDirect" column="WAREHOUSEBUILD_GROUPNAMEDIRECT" jdbcType="DATE" />
+		<result property="wareHouseBuildGroupNumber" column="WAREHOUSEBUILD_GROUPNUMBER" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildLatticeNum" column="WAREHOUSEBUILD_LATTICENUM" jdbcType="DATE" />
+		<result property="wareHouseBuildLattiNameDirect" column="WAREHOUSEBUILD_LATTINAMEDIRECT" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildLatticeNumber" column="WAREHOUSEBUILD_LATTICENUMBER" jdbcType="DATE" />
+	</resultMap>
+	
+	<!-- 档案入库页面档案盒数据展示 -->
+	<select id="boxInfoListShow" parameterType="Map" resultMap="boxingMap">
+	select a.* 
+    from (
+      select ac.*,rownum row_num
+      from (
+  select amsq.quanzong_id,
+       amsq.quanzong_number,
+       amsq.quanzong_name,
+       acb.box_id,
+       acb.box_anual,
+       acb.box_sericalnumber,
+       acb.box_number,
+       acb.box_thickness,
+       aca.primaryclassification_id,
+       amss.sc_id,
+       amss.sc_name,
+       amsr.retentionperiod_id,
+       amsr.retentionperiod_name,
+       amsp.pc_id,
+       amsp.pc_name,
+       aws.storage_id,
+       aws.storage_racknumber
+  from am_co_box acb
+  left join am_co_archivefile aca
+    on aca.box_id = acb.box_id
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on aca.primaryclassification_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+ where acb.box_status = '2'
+ group by amsq.quanzong_id,
+          amsq.quanzong_number,
+          amsq.quanzong_name,
+          acb.box_id,
+          acb.box_anual,
+          acb.box_sericalnumber,
+          acb.box_number,
+          acb.box_thickness,
+          aca.primaryclassification_id,
+          amss.sc_id,
+          amss.sc_name,
+          amsr.retentionperiod_id,
+          amsr.retentionperiod_name,
+          amsp.pc_id,
+          amsp.pc_name,
+          aws.storage_id,
+          aws.storage_racknumber
+ order by amsq.quanzong_number, acb.box_anual, acb.box_number
+   ) ac                                                                                                                              
+   	) a
+	where a.row_num between #{begin} and #{end}
+	</select>
+	
+	<!-- 统计档案入库页面展示的全部的档案盒信息的数目 -->
+	<select id="countBoxInfoListShow" resultType="int">
+	select count(acb.box_id) from am_co_box acb
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on acb.pc_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+ where acb.box_status = '2'
+	</select>
+	
+	<!-- 档案入库页面档案盒中全部文件的数目 -->
+	<select id="countArchiveFileInBox" resultType="int">
+	select count(aca.archivefile_id)
+  from am_co_archivefile aca
+  left join am_co_box acb
+    on aca.box_id = acb.box_id
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on acb.pc_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+ where acb.box_status = '2'
+	</select>
+	
+	<!-- 多条件查询档案入库页面档案盒信息 -->
+	<select id="queryBoxInfoByConditions" resultMap="boxingMap" parameterType="filemanage.warehouse.vo.ArchiveInWareHouseAssist">
+	select a.* 
+		from (
+		  select ac.*, rownum row_num
+             from (
+			           select amsq.quanzong_id,
+                          amsq.quanzong_number,
+                          amsq.quanzong_name,
+                          acb.box_id,
+                          acb.box_anual,
+                          aca.primaryclassification_id,
+                          amss.sc_id,
+                          amss.sc_name,
+                          amsr.retentionperiod_id,
+                          amsr.retentionperiod_name,
+                          amsp.pc_id,
+                          amsp.pc_name,
+                          acb.box_number,
+                          acb.box_thickness,
+                          aws.storage_racknumber
+                     from am_co_box acb
+                      left join am_co_archivefile aca on aca.box_id=acb.box_id
+                     left join am_ma_sm_quanzong amsq
+                       on acb.quanzong_id = amsq.quanzong_id
+                     left join am_ma_sm_retentionperiod amsr
+                       on acb.retentionperiod_id = amsr.retentionperiod_id
+                     left join am_ma_sm_primaryclassification amsp
+                       on aca.primaryclassification_id  = amsp.pc_id
+                     left join am_ma_sm_sclassification amss
+                       on acb.sc_id = amss.sc_id
+                     left join am_warehouse_storage aws
+                       on acb.storage_id = aws.storage_id
+                     left join am_warehouse_warehousebuild aww
+                       on aws.warehousebuild_id = aww.warehousebuild_id
+       <where>
+   <if test="quanzongNumber != null and quanzongNumber != ''">
+   and amsq.QUANZONG_NUMBER=#{quanzongNumber,jdbcType=VARCHAR}
+   </if>
+   <if test="quanzongName != null and quanzongName != ''">
+    and amsq.QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+    </if>
+     <if test="pcName != null and pcName != ''">
+    and amsp.PC_NAME=#{pcName,jdbcType=VARCHAR}
+    </if>
+     <if test="scName != null and scName != ''">
+    and amss.SC_NAME=#{scName,jdbcType=VARCHAR}
+    </if>
+    <if test="boxAnual != null and boxAnual != ''">
+    and acb.BOX_ANUAL=#{boxAnual,jdbcType=VARCHAR}
+    </if>
+    <if test="retentionperiodName != null and retentionperiodName != ''">
+    and amsr.RETENTIONPERIOD_NAME=#{retentionperiodName,jdbcType=VARCHAR}
+    </if>
+    <if test="boxNumber != null and boxNumber != ''">
+    and acb.BOX_NUMBER=#{boxNumber,jdbcType=VARCHAR}
+    </if>
+   </where>
+   and acb.box_status = '2'
+   group by amsq.quanzong_id,
+           amsq.quanzong_number,
+           amsq.quanzong_name,
+           acb.box_id,
+           acb.box_anual,
+           acb.box_sericalnumber,
+           acb.box_number,
+           acb.box_thickness,
+           aca.primaryclassification_id,
+           amss.sc_id,
+           amss.sc_name,
+           amsr.retentionperiod_id,
+           amsr.retentionperiod_name,
+           amsp.pc_id,
+           amsp.pc_name,
+           aws.storage_id,
+           aws.storage_racknumber
+   ) ac
+   	) a  
+	where a.row_num between #{begin} and #{end}
+	</select>
+	
+	<!-- 统计多条件查询档案入库的数目 -->
+	<select id="countBoxInfoByConditions" resultType="int">
+	select count(acb.box_id) from am_co_box acb
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on acb.pc_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+   <where>
+   <if test="quanzongNumber != null and quanzongNumber != ''">
+   and amsq.QUANZONG_NUMBER=#{quanzongNumber,jdbcType=VARCHAR}
+   </if>
+   <if test="quanzongName != null and quanzongName != ''">
+    and amsq.QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+    </if>
+     <if test="pcName != null and pcName != ''">
+    and amsp.PC_NAME=#{pcName,jdbcType=VARCHAR}
+    </if>
+     <if test="scName != null and scName != ''">
+    and amss.SC_NAME=#{scName,jdbcType=VARCHAR}
+    </if>
+    <if test="boxAnual != null and boxAnual != ''">
+    and acb.BOX_ANUAL=#{boxAnual,jdbcType=VARCHAR}
+    </if>
+    <if test="retentionperiodName != null and retentionperiodName != ''">
+    and amsr.RETENTIONPERIOD_NAME=#{retentionperiodName,jdbcType=VARCHAR}
+    </if>
+    <if test="boxNumber != null and boxNumber != ''">
+    and acb.BOX_NUMBER=#{boxNumber,jdbcType=VARCHAR}
+    </if>
+   </where>
+   and acb.box_status = '2'
+	</select>
+	
+	<!-- 编辑入库信息 -->
+	<update id="updateOneInStorageInfo" parameterType="filemanage.warehouse.vo.ArchiveInWareHouseAssist">
+	UPDATE
+	AM_CO_BOX
+	SET
+	WAREHOUSEBUILD_NAME=#{wareHouseBuildName,jdbcType=VARCHAR},
+	WAREHOUSEBUILD_NUMBER=#{wareHouseBuildNumber,jdbcType=VARCHAR},
+	WAREHOUSEBUILD_SHELFNUMBER=#{wareHouseBuildShelfNumber,jdbcType=VARCHAR},
+	WAREHOUSEBUILD_GROUPNUMBER=#{wareHouseBuildGroupNumber,jdbcType=VARCHAR},
+	WAREHOUSEBUILD_LATTICENUMBER=#{wareHouseBuildLatticeNumber,jdbcType=VARCHAR}
+	where
+	BOX_ID = #{boxId,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 根据主键查询入库信息 -->
+	<select id="queryOneInStorageInfoById" resultMap="boxingMap" parameterType="filemanage.warehouse.vo.ArchiveInWareHouseAssist">
+	select acb.box_id,
+       acb.BOX_SERICALNUMBER,
+       aww.warehousebuild_id,
+       aww.warehousebuild_name,
+       aww.warehousebuild_number,
+       aww.warehousebuild_shelfnumber,
+       aww.warehousebuild_groupnumber,
+       aww.warehousebuild_latticenumber,
+       aws.STORAGE_RACKNUMBER
+  from am_co_box acb
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on acb.pc_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+ where acb.box_status = '2'
+ and acb.box_id = #{boxId,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 要编辑的档案盒是否在库房中 -->
+	<select id="isExitBoxInfoUnderWareHouse" parameterType="filemanage.warehouse.vo.ArchiveInWareHouseAssist" resultType="int">
+	select count(aww.warehousebuild_id)
+  from am_co_box acb
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on acb.pc_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+ where acb.box_status = '2'
+   and acb.box_id= #{boxId,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 获取已审核通过的档案盒有关的全宗号列表 -->
+	<select id="archiveNumberList" resultMap="boxingMap">
+	select amsq.quanzong_number
+      from am_co_box acb
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on acb.pc_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+ where acb.box_status = '2'
+   and acb.box_auditstart = '1'
+   group by amsq.quanzong_number
+   order by amsq.quanzong_number
+	</select>
+	
+	<!-- 获取已审核通过的档案盒有关的全宗名列表 -->
+	<select id="archiveNameList" resultMap="boxingMap">
+	select amsq.quanzong_id, amsq.quanzong_name
+      from am_co_box acb
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on acb.pc_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+ where acb.box_status = '2'
+   group by amsq.quanzong_id,amsq.quanzong_name
+	</select>
+	
+	<!-- 获取已审核通过的档案盒有关的一级分类列表 -->
+	<select id="pcNameList" resultMap="boxingMap">
+	select amsp.pc_id, amsp.pc_name
+  from am_co_box acb
+  left join am_co_archivefile aca on aca.box_id=acb.box_id
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on aca.primaryclassification_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+ where acb.box_status = '2'
+   group by amsp.pc_id,amsp.pc_name
+	</select>
+	
+	<!-- 获取已审核通过的档案盒有关的二级分类列表 -->
+	<select id="scNameList" resultMap="boxingMap">
+	select amss.sc_id, amss.sc_name
+  from am_co_box acb
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on acb.pc_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+ where acb.box_status = '2'
+ group by amss.sc_id, amss.sc_name
+	</select>
+	
+	<!-- 获取已审核通过的档案盒年度列表 -->
+	<select id="boxAnualList" resultMap="boxingMap">
+	select acb.box_anual
+  from am_co_box acb
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on acb.pc_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+ where acb.box_status = '2'
+ group by acb.box_anual
+ order by acb.box_anual
+	</select>
+	
+	<!-- 获取已审核通过的档案盒有关的保管期限列表列表 -->
+	<select id="retentionperiodNameList" resultMap="boxingMap">
+	select amsr.retentionperiod_id, amsr.retentionperiod_name
+  from am_co_box acb
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on acb.pc_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+ where acb.box_status = '2'
+ group by amsr.retentionperiod_id, amsr.retentionperiod_name
+	</select>
+	
+	<!-- 获取已审核通过的档案盒号列表 -->
+	<select id="boxNumberList" resultMap="boxingMap">
+	select acb.box_number
+  from am_co_box acb
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on acb.pc_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aws.warehousebuild_id = aww.warehousebuild_id
+ where acb.box_status = '2'
+ group by acb.box_number
+ order by acb.box_number
+	</select>
+	
+	<!-- 入库弹框_库房信息下拉列表 -->
+	<select id="listWareHouseNumber" resultMap="wareHouseMap">
+	select
+	aww.warehousebuild_id,aww.warehousebuild_number,aww.warehousebuild_name
+    from
+    am_warehouse_warehousebuild aww
+    group by
+    aww.warehousebuild_id,aww.warehousebuild_number,aww.warehousebuild_name
+    order by
+    aww.warehousebuild_number
+	</select>
+	
+	<!-- 入库弹框_根据库房编号获取密集架号 -->
+	<select id="listWareHouseShelfNumber" resultMap="wareHouseMap">
+	select
+	aww.warehousebuild_id,
+	aww.warehousebuild_shelfnumber,
+	aww.warehousebuild_groupnumber,
+	aww.warehousebuild_latticenumber
+    from
+    am_warehouse_warehousebuild aww
+    where
+    aww.warehousebuild_id=#{wareHouseBuildId,jdbcType = VARCHAR}
+	</select>
+	
+	<!-- 入库弹框_库房编号和密集架编号获取组编号 -->
+	<select id="listWareHouseGroupNumber" resultMap="wareHouseMap" parameterType="String">
+	select aww.warehousebuild_id,aww.warehousebuild_groupnumber
+	from
+	am_warehouse_warehousebuild aww
+	where
+	aww.warehousebuild_id=#{wareHouseBuildId,jdbcType = VARCHAR}
+	</select>
+	
+	<!-- 入库弹框_根据库房编号、密集架号和租号获取格子号 -->
+	<select id="listWareHouseLatticeNumber" resultMap="wareHouseMap" parameterType="String">
+	select aww.warehousebuild_id,aww.warehousebuild_latticenumber
+	from
+	am_warehouse_warehousebuild aww
+	where
+	aww.warehousebuild_id=#{wareHouseBuildId,jdbcType = VARCHAR}
+	</select>
+	
+	<!-- 入库 -->
+	<update id="updateInWareHouse" parameterType="filemanage.warehouse.vo.ArchiveInWareHouseAssist">
+	update
+	am_co_box
+	set
+	STORAGE_ID = #{uuid,jdbcType = VARCHAR}
+	where
+	box_id=#{str,jdbcType = VARCHAR}
+	</update>
+	
+	<update id="editInWareHouse" parameterType="filemanage.warehouse.vo.ArchiveInWareHouseAssist">
+	update
+	am_co_box
+	set
+	STORAGE_ID = #{ids,jdbcType = VARCHAR}
+	where
+	box_id=#{boxId,jdbcType = VARCHAR}
+	</update>
+	
+	<!-- 入库表添加信息 -->
+	<insert id="addInWareHouse" parameterType="filemanage.warehouse.vo.ArchiveInWareHouseAssist">
+	insert into AM_WAREHOUSE_STORAGE
+	(STORAGE_ID,STORAGE_RACKNUMBER,WAREHOUSEBUILD_ID)
+	values(
+	#{storageId,jdbcType = VARCHAR},
+	#{storageRackNumber,jdbcType = VARCHAR},
+	#{wareHouseBuildId,jdbcType = VARCHAR}
+	)
+	</insert>
+	
+	<!-- 判断入库表中是否存在架位号 -->
+	<select id="isExitSstorageRacknumber" parameterType="filemanage.warehouse.vo.ArchiveInWareHouseAssist" resultType="int">
+	select count(*) from am_warehouse_storage
+	where
+	storage_racknumber = #{storageRackNumber,jdbcType = VARCHAR}
+	</select>
+	
+	<!-- 档案入库编辑_获取密集架编号列表 -->
+	<select id="listWareHouseShelfNumbers" resultMap="wareHouseMap">
+	select aww.warehousebuild_shelfnumber
+	from am_warehouse_warehousebuild aww
+	group by aww.warehousebuild_shelfnumber
+	order by aww.warehousebuild_shelfnumber
+	</select>
+	
+	<!-- 档案入库编辑_获取组编号列表 -->
+	<select id="listWareHouseGroupNumbers" resultMap="wareHouseMap">
+	select aww.warehousebuild_groupnumber
+	from am_warehouse_warehousebuild aww
+	group by aww.warehousebuild_groupnumber
+	order by aww.warehousebuild_groupnumber
+	</select>
+	
+	<!-- 档案入库编辑_获取格子编号列表 -->
+	<select id="listWareHouseLatticeNumbers" resultMap="wareHouseMap">
+	select aww.warehousebuild_latticenumber
+    from am_warehouse_warehousebuild aww
+    group by aww.warehousebuild_latticenumber
+    order by aww.warehousebuild_latticenumber
+	</select>
+	
+	<select id="storageIdShow" resultType="String" parameterType="String">
+	select aws.storage_id
+	from am_warehouse_storage aws
+	where
+	aws.storage_racknumber =#{storageRackNumber,jdbcType = VARCHAR}
+	</select>
+	
+</mapper>

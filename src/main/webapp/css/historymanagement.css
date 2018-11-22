@@ -1,0 +1,64 @@
+@charset "utf-8"; 
+/*.layui-body{overflow-y: scroll;} 滚动条问题*/
+			
+			table tr th div,
+			table tr td {
+				text-align: center;
+			}
+			
+			body .add_label_bg>.layui-layer-title,
+			.btn_color {
+				background: #EA5519;
+				color: #FFFFFF;
+			}
+			
+			.gong_color {
+				color: red;
+				font-weight: bold;
+			}
+			.Scanning_Images {
+				width: 100%;
+				min-height: 400px;
+				background: #FFFFFF;
+			}
+			
+			.Scanning_Images li {
+				float: left;
+				width: 100px;
+				height: 150px;
+				background: #FFFFFF;
+				margin-left: 28px;
+				margin-top: 15px;
+				text-align: right;
+				box-shadow: 0.5px 1px 3px #000;
+			}
+			
+			.Scanning_Images li img {
+				width: 100%;
+				height: 80%;
+			}
+			
+			.Scanning_Images li button {
+				border: none;
+				outline: none;
+				background: none;
+				cursor: pointer;
+			}
+			
+			.Scanning_Images li p {
+				text-align: center;
+			}
+			
+			.viewer-container,
+			.viewer-fixed,
+			.viewer-fade,
+			.viewer-transition,
+			.viewer-in {
+				z-index: 99999999999!important;
+				/*弹出层与图片预览层级*/
+			}
+			
+			/*弹出层*/
+			#one,#two,#three,#four{
+				display: none;
+			}

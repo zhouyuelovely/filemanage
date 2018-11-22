@@ -1,0 +1,214 @@
+@charset "utf-8";
+
+table tr th div, table tr td {
+	text-align: center;
+}
+
+body .add_label_bg>.layui-layer-title, .btn_color {
+	background: #EA5519;
+	color: #FFFFFF;
+}
+
+.Scanning_Images {
+	width: 100%;
+	min-height: 400px;
+	background: #FFFFFF;
+}
+
+.Scanning_Images li {
+	float: left;
+	width: 100px;
+	height: 150px;
+	background: #FFFFFF;
+	margin-left: 28px;
+	margin-top: 15px;
+	text-align: right;
+	box-shadow: 0.5px 1px 3px #000;
+}
+
+.Scanning_Images li img {
+	width: 100%;
+	height: 80%;
+}
+
+.Scanning_Images li button {
+	border: none;
+	outline: none;
+	background: none;
+	cursor: pointer;
+}
+
+.Scanning_Images li p {
+	text-align: center;
+}
+
+.viewer-container, .viewer-fixed, .viewer-fade, .viewer-transition,
+	.viewer-in {
+	z-index: 99999999999 !important;
+	/*弹出层查看图片优先级提升*/
+}
+
+.btn-a {
+	text-align: center;
+	background: none;
+	border: 1px solid #000;
+	display: inline-block;
+	padding: 2px;
+	border-radius: 5px;
+	margin: 3px;
+}
+
+/* .btn-a:hover {
+				color: #EA5519;
+				border: 1px solid #EA5519;
+			} */
+.btn-b {
+	text-align: center;
+	background: none;
+	border: 1px solid #000;
+	display: inline-block;
+	padding: 2px;
+	border-radius: 5px;
+	margin: 3px;
+}
+
+.btn-a {
+	color: #EA5519;
+	border: 1px solid #EA5519;
+}
+
+.lab {
+	padding-left: 20px;
+}
+
+.nav_imgs li {
+	float: left;
+	width: 17%;
+	padding:15px 30px;
+	text-align: center;
+}
+
+.nav_imgs li img {
+	width: 130px;
+    height: 180px;
+}
+/*翻书箭头*/
+#look_books {
+	background: #FFFFFF;
+	margin-left: 15px;
+	margin-right: 15px;
+	margin-top: 10px;
+}
+
+.book {
+	width: 600px;
+	position: relative;
+	margin: 0 auto;
+}
+
+#mybook div {
+	box-shadow: -1px 2px 1px 1px #C3C3C3;
+}
+
+.zuo {
+	position: absolute;
+	width: 50px;
+	left: 0;
+	top: 50%;
+	cursor: pointer;
+	border: none;
+	background: none;
+	outline: none;
+}
+
+.you {
+	position: absolute;
+	width: 50px;
+	right: 0;
+	top: 50%;
+	cursor: pointer;
+	border: none;
+	background: none;
+	outline: none;
+}
+/*侧边栏展开样式*/
+.yb_conct {
+	position: fixed;
+	z-index: 9999999;
+	top: 200px;
+	right: -125px;
+	cursor: pointer;
+	transition: all .3s ease;
+	text-align: center;
+}
+
+.div_sc {
+	width: 140px;
+	float: right;
+	text-align: center;
+	background: #eeeff1;
+	height: 100%;
+}
+
+.div_sc a img {
+	padding-top: 15px;
+}
+
+.yb_bar ul li {
+	width: 180px;
+	height: 140px;
+	color: #fff;
+	border-radius: 3px;
+	transition: all .5s ease;
+	overflow: hidden;
+}
+
+.yb_bar .yb_phone {
+	background: url(/filemanage/imgs/zhan.png) no-repeat;
+	background-size: 50px 50px;
+}
+
+.hd_qr {
+	padding: 0 29px 25px 29px;
+}
+
+/*所属分类密级样式*/
+.list_nav {
+	margin: 15px;
+	background: #FFFFFF;
+	min-height: 40px;
+	line-height: 40px;
+}
+
+.list_nav input {
+	margin-left: 15px;
+}
+
+.miji {
+	margin-left: 50px;
+}
+
+.b_list {
+	display: inline-block;
+	background: #000000;
+	width: 100px;
+	color: #FFFFFF;
+	text-align: center;
+}
+
+.bor-r {
+	height: 18px;
+	width: 18px;
+	display: inline-block;
+	line-height: 18px;
+	padding: 5px;
+	border-radius: 50%;
+	background: #EA5519;
+	color: #FFFFFF;
+	text-align: center;
+	padding: 2px;
+	margin-left: 40px;
+}
+#bar>span{
+	display:none;
+}

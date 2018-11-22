@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.collectandorganize.dao.KnowledgeBaseMapper">
+  <resultMap type="filemanage.collectandorganize.pojo.KnowledgeBase" id="knowledgeMap">
+    <id column="KNOWLEDGEBASE_ID" property="knowledgeId" jdbcType="VARCHAR"/>
+    <result column="KNOWLEDGEBASE_DOUCMENTNUMBER" property="knowledgeDocumentNum" jdbcType="VARCHAR"/>
+    <result column="KNOWLEDGEBASE_TYPE" property="KnowledgeType" jdbcType="VARCHAR"/>
+    <result column="KNOWLEDGEBASE_RELEASEDATE" property="knowledgeReleaDate" jdbcType="VARCHAR"/>
+    <result column="KNOWLEDGEBASE_TITLE" property="knowledgeTitle" jdbcType="VARCHAR"/>
+    <result column="KNOWLEDGEBASE_CONTENT" property="knowledgeContent" jdbcType="CLOB"/>
+    <result column="KNOWLEDGEBASE_PUBLASTER" property="knowledgePublaster" jdbcType="VARCHAR"/>
+     <result column="conditions"  property="conditions" jdbcType="VARCHAR"/>
+  </resultMap>
+  
+  <!-- 查询所有的知识库 -->
+   <select id="queryAllKnowledgeBase" resultMap="knowledgeMap" >
+       select su.* from(
+       select kn.*,rownum rown
+      from  am_co_knowledgebase kn 
+      where rownum&lt;=${(before+after)} 
+      order by
+      to_date(KNOWLEDGEBASE_RELEASEDATE,'yyyy-mm-dd hh24:mi:ss') desc) su where rown &gt;#{before}
+  </select>
+ 
+  <!-- 根据知识库类型查询知识库 -->
+  <select id="queryKnowledgeByType" parameterType="java.lang.String" resultMap="knowledgeMap">
+    select * from  am_co_knowledgebase where KNOWLEDGEBASE_TYPE=#{KnowledgeType,jdbcType=VARCHAR} 
+    order by to_date(KNOWLEDGEBASE_RELEASEDATE,'yyyy-mm-dd hh24:mi:ss') desc
+  </select>
+  
+  <!-- 根据知识库主键查询知识库 -->
+  <select id="queryKnowledgeById" parameterType="java.lang.String" resultMap="knowledgeMap">
+   select * from  am_co_knowledgebase where KNOWLEDGEBASE_ID=#{knowledgeId,jdbcType=VARCHAR}
+  </select>
+
+  <!-- 添加知识库 -->
+  <insert id="addKnowledgeBase" parameterType="filemanage.collectandorganize.pojo.KnowledgeBase">
+    insert into am_co_knowledgebase(KNOWLEDGEBASE_ID,KNOWLEDGEBASE_DOUCMENTNUMBER,KNOWLEDGEBASE_TYPE,KNOWLEDGEBASE_RELEASEDATE,
+    KNOWLEDGEBASE_TITLE,KNOWLEDGEBASE_CONTENT,KNOWLEDGEBASE_PUBLASTER) values(sys_guid(),#{knowledgeDocumentNum,jdbcType=VARCHAR},
+    #{KnowledgeType,jdbcType=VARCHAR},#{knowledgeReleaDate,jdbcType=VARCHAR},#{knowledgeTitle,jdbcType=VARCHAR},#{knowledgeContent,jdbcType=CLOB},#{knowledgePublaster,jdbcType=VARCHAR})
+  </insert>
+  
+  <!-- 根据文号查询知识库文号是否存在 -->
+  <select id="isExitKnowledgeDocumentNum" parameterType="filemanage.collectandorganize.pojo.KnowledgeBase" resultType="int">
+    select count(1) from am_co_knowledgebase where KNOWLEDGEBASE_DOUCMENTNUMBER=#{knowledgeDocumentNum,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询总条数 -->
+  <select id="countAllKnowledgeBase" resultType="int">
+   select count(*) from am_co_knowledgebase
+  </select>
+  
+  <!-- 知识库关键词查询 -->
+  <select id="queryKnowledgeByConditions" parameterType="java.lang.String" resultMap="knowledgeMap">
+    select * from  am_co_knowledgebase where KNOWLEDGEBASE_DOUCMENTNUMBER || KNOWLEDGEBASE_TITLE || KNOWLEDGEBASE_CONTENT
+    like CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')
+  </select>
+  
+  <!-- 知识库关键词查询条数 -->
+  <select id="countKnowledgeBaseByConditions" parameterType="java.lang.String" resultType="int">
+   select count(*) from am_co_knowledgebase where KNOWLEDGEBASE_DOUCMENTNUMBER || KNOWLEDGEBASE_TITLE || KNOWLEDGEBASE_CONTENT
+    like CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')
+  </select>
+  
+  <!-- 根据不同标准显示不同条数 -->
+  <select id="countKnowledgeByType" parameterType="java.lang.String" resultType="int">
+     select count(*) from am_co_knowledgebase where KNOWLEDGEBASE_TYPE=#{KnowledgeType,jdbcType=VARCHAR} 
+  </select>
+  
+  
+</mapper>

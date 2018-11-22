@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.collectandorganize.dao.FileScanningMapper">
+	<resultMap type="filemanage.collectandorganize.pojo.TemporaryFile" id="temporaryFileMap">
+		<id column="TEMPORARYACCESSARY_ID" property="temporaryAccessaryId"
+			jdbcType="VARCHAR" />
+		<result column="TEMPORARYACCESSARYUSERIDNUMBER" property="temporaryAccessaryUserIdNumber"
+			jdbcType="VARCHAR" />
+		<result column="QUANZONG_ID" property="quanzongId" jdbcType="VARCHAR" />
+		<result column="TEMPORARYACCESSARY_CREATETIME" property="temporaryAccessaryCreateTime"
+			jdbcType="DATE" />
+		<result column="TEMPORARYACCESSARY_PAGENUMBER" property="temporaryAccessaryPageNumber"
+			jdbcType="VARCHAR" />
+		<result column="TEMPORARYACCESSARY_SIGN" property="temporaryAccessarySign"
+			jdbcType="VARCHAR" />
+		<result column="TEMPORARYACCESSARY_NAME" property="temporaryAccessaryName"
+			jdbcType="VARCHAR" />
+		<result column="TEMPORARYACCESSARY_PATH" property="temporaryAccessaryPath"
+			jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<!--获取页码大于删除页码文件附件的集合  -->
+	<select id="getPageNumberList" resultMap="temporaryFileMap">
+		SELECT TEMPORARYACCESSARY_ID,TEMPORARYACCESSARY_PAGENUMBER 
+		FROM AM_CO_TEMPORARYACCESSARY 
+		WHERE 
+		QUANZONG_ID=#{quanzongId,jdbcType=VARCHAR} 
+		AND TEMPORARYACCESSARY_PAGENUMBER&gt;#{temporaryAccessaryPageNumber,jdbcType=VARCHAR} 
+	</select>
+	
+	<!-- 更新临时文件的页码 -->
+	<update id="updateTemporaryFilePageNumber">
+		UPDATE AM_CO_TEMPORARYACCESSARY 
+		SET TEMPORARYACCESSARY_PAGENUMBER=#{temporaryAccessaryPageNumber,jdbcType=VARCHAR} 
+		WHERE TEMPORARYACCESSARY_ID=#{temporaryAccessaryId,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 根据全宗主键删除临时表信息 -->
+	<delete id="deleteTemporaryByquanzongId">
+	DELETE FROM AM_CO_TEMPORARYACCESSARY
+	WHERE QUANZONG_ID=#{quanzongId,jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- 根据用户身份证号查询临时附件表信息 -->
+	<select id="queryTemporaryFileInfoByUserIdNumber" resultMap="temporaryFileMap">
+		SELECT 
+		TEMPORARYACCESSARYUSERIDNUMBER,
+		TEMPORARYACCESSARY_PAGENUMBER,
+		TEMPORARYACCESSARY_SIGN,
+		TEMPORARYACCESSARY_NAME,
+		QUANZONG_ID 
+		FROM AM_CO_TEMPORARYACCESSARY
+		WHERE TEMPORARYACCESSARYUSERIDNUMBER=#{temporaryAccessaryUserIdNumber,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 保存扫描图片信息到文件临时表中 -->
+	<insert id="saveImageInfo" parameterType="java.util.List">
+		INSERT INTO /*+append_values */
+		AM_CO_TEMPORARYACCESSARY
+		(
+		TEMPORARYACCESSARY_ID,
+		TEMPORARYACCESSARYUSERIDNUMBER,
+		QUANZONG_ID,
+		TEMPORARYACCESSARY_CREATETIME,
+		TEMPORARYACCESSARY_PAGENUMBER,
+		TEMPORARYACCESSARY_NAME,
+		TEMPORARYACCESSARY_PATH,
+		TEMPORARYACCESSARY_SIGN
+		)
+		<foreach collection="list" item="temporaryFile" index="index" separator="union all">
+			SELECT 
+			SYS_GUID(),
+			#{temporaryFile.temporaryAccessaryUserIdNumber,jdbcType = VARCHAR},
+			#{temporaryFile.quanzongId,jdbcType = VARCHAR},
+			SYSDATE,
+			#{temporaryFile.temporaryAccessaryPageNumber,jdbcType = VARCHAR},
+			#{temporaryFile.temporaryAccessaryName,jdbcType = VARCHAR},
+			#{temporaryFile.temporaryAccessaryPath,jdbcType = VARCHAR},
+			'0'
+			FROM DUAL  
+		</foreach> 
+	</insert>
+	
+	<!-- 根据扫描人身份证号统计图片数量 -->
+	<select id="countImgPath" resultType="int" parameterType="String">
+		SELECT COUNT(*) FROM AM_CO_TEMPORARYACCESSARY
+		WHERE TEMPORARYACCESSARYUSERIDNUMBER=#{temporaryAccessaryUserIdNumber,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 根据扫描人身份证号统计页数 -->
+	<select id="countPage" resultType="int" parameterType="String">
+		SELECT COUNT(*) FROM AM_CO_TEMPORARYACCESSARY
+		WHERE TEMPORARYACCESSARYUSERIDNUMBER=#{temporaryAccessaryUserIdNumber,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 分页返回图片路径集合 resultType=java.lang.String-->
+	<select id="listImgPath" parameterType="Map" resultMap="temporaryFileMap">
+		SELECT ACT.*
+		FROM
+		(SELECT AC.*,ROWNUM RN FROM
+		(SELECT A.TEMPORARYACCESSARY_PATH,
+		A.TEMPORARYACCESSARY_CREATETIME,
+		A.TEMPORARYACCESSARY_PAGENUMBER
+     	FROM AM_CO_TEMPORARYACCESSARY A
+     	WHERE A.TEMPORARYACCESSARYUSERIDNUMBER =#{temporaryAccessaryUserIdNumber,jdbcType=VARCHAR}
+     	ORDER BY TO_NUMBER(TEMPORARYACCESSARY_PAGENUMBER))AC 
+    	WHERE ROWNUM&lt;=${(size+start)})ACT
+		WHERE RN&gt;#{start} 
+	</select>
+	
+	<!-- 根据图片路径删除图片信息 -->
+	<delete id="deleteImgByPath" parameterType="String">
+		DELETE FROM AM_CO_TEMPORARYACCESSARY
+		WHERE TEMPORARYACCESSARY_PATH=#{temporaryAccessaryPath,jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- 根据图片路径标记首页 -->
+	<update id="tagPageByImgPath">
+		UPDATE AM_CO_TEMPORARYACCESSARY SET TEMPORARYACCESSARY_SIGN ='1'
+		WHERE TEMPORARYACCESSARY_PATH=#{temporaryAccessaryPath,jdbcType=VARCHAR}
+	</update>
+	
+	<resultMap type="filemanage.collectandorganize.pojo.ArchiveFile" id="archiveFileMap">
+		<id column="ARCHIVEFILE_ID" property="archiveFileId"
+			jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_RESPONSIBLE" property="archiveFileResponsible"
+			jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_CREATETIME" property="archiveFileCreatetime" jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_ANUAL" property="archiveFileAnual"
+			jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_TITLE" property="archiveFileTitle"
+			jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_SCANPOPLE" property="archiveFileScanpople"
+			jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_PAGES" property="archiveFilePages"
+			jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_SCANDATE" property="archiveFileScanDate"
+		jdbcType="DATE" />
+		<result column="ARCHIVEFILE_REFERENCENUMBER" property="archiveFileReferenceNumber"
+		jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<!-- 添加封面信息 -->
+	<insert id="addCoverInfo" parameterType="filemanage.collectandorganize.pojo.ArchiveFile">
+		INSERT INTO AM_CO_ARCHIVEFILE
+		  (ARCHIVEFILE_ID,ARCHIVEFILE_RESPONSIBLE,ARCHIVEFILE_CREATETIME,
+		   ARCHIVEFILE_ANUAL,ARCHIVEFILE_TITLE,ARCHIVEFILE_SCANPOPLE,
+		   QUANZONG_ID,ARCHIVEFILE_PAGES,ARCHIVEFILE_SCANDATE,
+		   ARCHIVEFILE_FINISHINGSTATUS,ARCHIVEFILE_REFERENCENUMBER,ARCHIVEFILE_ISDELETE,ARCHIVEFILE_AUTHENTICATESTATUS)
+		VALUES
+		  (SYS_GUID(),
+		   #{archiveFileResponsible,jdbcType = VARCHAR},
+		   #{archiveFileCreatetime,jdbcType = VARCHAR},
+		   #{archiveFileAnual,jdbcType = VARCHAR},
+		   #{archiveFileTitle,jdbcType = VARCHAR},
+		   #{archiveFileScanpople,jdbcType = VARCHAR},
+		   #{archive.quanzongId,jdbcType = VARCHAR},
+		   #{archiveFilePages,jdbcType = VARCHAR},
+		   SYSDATE,'1',
+		   #{archiveFileReferenceNumber,jdbcType = VARCHAR},'1','1')
+	</insert>
+	
+	<!-- 文号及题名重名校验 -->
+	<select id="queryByCondition" parameterType="filemanage.collectandorganize.pojo.ArchiveFile"
+		resultType="int">
+		SELECT COUNT(*)
+  		FROM AM_CO_ARCHIVEFILE AM
+ 		WHERE 
+ 			AM.ARCHIVEFILE_TITLE =
+		       (SELECT ACA.ARCHIVEFILE_TITLE
+		          FROM AM_CO_ARCHIVEFILE ACA
+		         WHERE ACA.ARCHIVEFILE_TITLE =#{archiveFileTitle,jdbcType=VARCHAR}
+		         GROUP BY ARCHIVEFILE_TITLE
+		        )
+    	OR 
+    		AM.ARCHIVEFILE_REFERENCENUMBER =
+		       (SELECT ACAR.ARCHIVEFILE_REFERENCENUMBER
+		         FROM AM_CO_ARCHIVEFILE ACAR
+		         WHERE ACAR.ARCHIVEFILE_REFERENCENUMBER = #{archiveFileReferenceNumber,jdbcType=VARCHAR}
+		         GROUP BY ACAR.ARCHIVEFILE_REFERENCENUMBER
+		         )
+	</select>
+	
+	<!-- 根据题名查询文件列表的信息 -->
+	<select id="queryArchiveFileIdByArchiveFileTitle" resultMap="archiveFileMap">
+		SELECT ARCHIVEFILE_ID,ARCHIVEFILE_ANUAL 
+		FROM AM_CO_ARCHIVEFILE
+		WHERE ARCHIVEFILE_TITLE=#{archiveFileTitle,jdbcType = VARCHAR}
+	</select>
+	
+	<resultMap type="filemanage.collectandorganize.pojo.FileAttachment" id="fileAttachmentMap">
+		<id column="FILE_ATTACHMENT_ID" property="fileAttachmentId" jdbcType="VARCHAR" />
+		<result column="FILE_ATTACHMENT_PATH" property="fileAttachmentPath" jdbcType="VARCHAR" />
+		<result column="FILE_ATTACHMENT_NAME" property="fileAttachmentName" jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_ID" property="archiveFileId" jdbcType="VARCHAR" />
+		<result column="FILE_ATTACHMENT_PAGENUMBER" property="fileAttachmentPageNumber" jdbcType="VARCHAR" />
+		<result column="FILE_ATTACHMENT_MARK" property="fileAttachmentMark" jdbcType="VARCHAR" />
+		<result column="QUANZONG_ID" property="quanzongId" jdbcType="VARCHAR" />
+		<result column="FILE_ATTACHMENT_ANUAL" property="fileAttachmentAnual" jdbcType="VARCHAR" />
+		<result column="FILE_CREATETIME" property="fileCreatetime" jdbcType="DATE" />
+		<result column="FILE_CREATOR" property="fileCreator" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<!-- 添加信息到文件附件表中 -->
+	<insert id="addFileAttachmentInfo" parameterType="java.util.List">
+		INSERT INTO /*+append_values */
+		AM_CO_FILE_ATTACHMENT
+		(
+		FILE_ATTACHMENT_ID,
+		FILE_ATTACHMENT_PATH,
+		FILE_ATTACHMENT_NAME,
+		ARCHIVEFILE_ID,
+		FILE_ATTACHMENT_PAGENUMBER,
+		FILE_ATTACHMENT_MARK,
+		QUANZONG_ID,
+		FILE_ATTACHMENT_ANUAL,
+		FILE_CREATETIME,
+		FILE_CREATOR
+		)
+		<foreach collection="list" item="fileAttachment" index="index" separator="union all">
+			SELECT 
+			SYS_GUID(),
+		    #{fileAttachment.fileAttachmentPath,jdbcType = VARCHAR},
+		    #{fileAttachment.fileAttachmentName,jdbcType = VARCHAR},
+		    #{fileAttachment.archiveFileId,jdbcType = VARCHAR},
+		    #{fileAttachment.fileAttachmentPageNumber,jdbcType = VARCHAR},
+		    #{fileAttachment.fileAttachmentMark,jdbcType = VARCHAR},
+		    #{fileAttachment.quanzongId,jdbcType = VARCHAR},
+		    #{fileAttachment.fileAttachmentAnual,jdbcType = VARCHAR},
+		    SYSDATE,
+		    #{fileAttachment.fileCreator,jdbcType = VARCHAR}
+			FROM DUAL  
+		</foreach> 
+	</insert>
+	
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.systemmanage.dao.FileCustomizationFileBoxMapper">
+
+	
+	
+	<resultMap type="filemanage.systemmanage.pojo.AmCoBoxProperty" id="AmCoBoxProperty">
+		<id property="boxpropertyid" column="BOXPROPERTY_ID" jdbcType="VARCHAR"/>
+		<result property="boxpropertythickness" column="BOXPROPERTY_THICKNESS" jdbcType="VARCHAR"/>
+		<result property="boxpropertypag" column="BOXPROPERTY_PAG" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<!-- 添加盒属性 -->
+	<insert id="saveBoxProperties" parameterType="filemanage.systemmanage.pojo.AmCoBoxProperty">
+		insert into am_co_boxProperty(BOXPROPERTY_ID,BOXPROPERTY_THICKNESS,BOXPROPERTY_PAG) 
+			values(
+				sys_guid(),
+				#{boxpropertythickness,jdbcType=VARCHAR },
+				#{boxpropertypag,jdbcType=VARCHAR }
+				)
+	</insert>
+	
+	<!-- 更新盒属性 -->
+	<update id="updateBoxProperties" parameterType="filemanage.systemmanage.pojo.AmCoBoxProperty">
+		update am_co_boxProperty 
+			set 
+				BOXPROPERTY_THICKNESS = #{boxpropertythickness,jdbcType=VARCHAR },
+				BOXPROPERTY_PAG = #{boxpropertypag,jdbcType=VARCHAR }
+				where 
+					BOXPROPERTY_ID = #{boxpropertyid,jdbcType=VARCHAR }
+	</update>
+
+	<!-- 删除盒属性 -->
+	<delete id="deleteBoxProperties" parameterType="filemanage.systemmanage.pojo.AmCoBoxProperty">
+		delete from am_co_boxProperty where BOXPROPERTY_ID = #{boxpropertyid,jdbcType=VARCHAR }
+	</delete>
+	<!-- 页面展示查询盒属性 -->
+	<select id="queryBoxProperties" resultMap="AmCoBoxProperty" parameterType="filemanage.systemmanage.pojo.AmCoBoxProperty">
+	select acbo.* from (
+		select rownum rn, BOXPROPERTY_ID,BOXPROPERTY_THICKNESS,BOXPROPERTY_PAG from am_co_boxProperty
+			<where>
+				<if test="null != boxpropertythickness and  '' != boxpropertythickness ">
+					rownum &lt;=#{boxpropertythickness}
+				</if>
+				<if test="null != boxpropertyid and  '' != boxpropertyid ">
+					BOXPROPERTY_ID = #{boxpropertyid,jdbcType=VARCHAR }
+				</if>
+			</where> 
+	 )acbo 
+    <where>
+    	<if test="null != boxpropertypag and  '' != boxpropertypag ">
+			acbo.rn &gt;#{boxpropertypag}
+		</if>
+    </where> 
+	</select>
+	<!-- 页面展示盒总数 -->
+	<select id="queryCountBoxProperties" resultType="int" >
+		select count(BOXPROPERTY_ID) from am_co_boxProperty
+	</select>
+	<!-- （删除前）查询该盒下是否有文件存在 -->
+	<select id="countBoxPropertiesFileExist" resultType="int" parameterType="filemanage.systemmanage.pojo.AmCoBoxProperty">
+		select count(aca.ARCHIVEFILE_ID) from am_co_archivefile aca
+		inner join am_co_box acb on acb.box_id = aca.box_id
+		where aca.box_id in (
+		    select BOX_ID from am_co_box
+		    where 
+		          BOX_THICKNESS = (
+		               select BOXPROPERTY_THICKNESS from am_co_boxProperty 
+		               where BOXPROPERTY_THICKNESS = #{boxpropertythickness,jdbcType=VARCHAR } 
+		               group by BOXPROPERTY_THICKNESS
+		          )
+		    and 
+		          BOX_PAGE = (
+		               select BOXPROPERTY_PAG from am_co_boxProperty
+		               where BOXPROPERTY_PAG = #{boxpropertypag,jdbcType=VARCHAR }
+		               group by BOXPROPERTY_PAG
+		          )
+		    )
+	</select>
+</mapper>

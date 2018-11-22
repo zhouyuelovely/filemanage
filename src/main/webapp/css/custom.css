@@ -1,0 +1,114 @@
+.tabboxs{
+	text-align: center;
+	padding-top: 10px;
+}
+.tabboxs .layui-tab {
+    margin: 10px 0;
+    text-align: center!important;
+}
+.tabboxs .layui-tab-title li {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 14px;
+    transition: all .2s;
+    -webkit-transition: all .2s;
+    position: relative;
+    line-height: 30px;
+    min-width: 65px;
+    padding: 0 15px;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    border:1px solid transparent;
+}
+.tabboxs .layui-tab-title{
+	border-bottom: 0;
+}
+.tabboxs .layui-tab-brief>.layui-tab-title .layui-this {
+    color: #FF5722;
+    border:1px solid #FF5722;
+}
+.tabboxs .layui-tab-brief>.layui-tab-more li.layui-this:after, .layui-tab-brief>.layui-tab-title .layui-this:after {
+    border: none;
+    border-radius: 0;
+    border-bottom: 0;
+}
+.taba{
+	width:100%;
+	background:#fff!important;
+	box-shadow:  0 0 3px #ede3e5;
+	-webkit-box-shadow:   0 0 3px #ede3e5;  
+	 -moz-box-shadow: 0 0 3px #ede3e5; 
+	-ms-box-shadow
+}
+.layui-table tbody tr:hover, .layui-table thead tr, .layui-table-click, .layui-table-header, .layui-table-hover, .layui-table-mend, .layui-table-patch, .layui-table-tool, .layui-table[lay-even] tr:nth-child(even){
+	background:#fff!important;
+}
+.taba th{
+	text-align: center;
+}
+.taba i{
+	margin-right: 5px;
+	color:#34b28a;
+}
+.taba .onetype{
+	border: 0;
+	background: transparent;
+}
+.taba tr td:nth-child(3),
+.taba tr td:nth-child(4){
+	padding: 0;
+	margin: 0;
+}
+.tds{
+	margin: 0;
+}
+.tableinit.layui-table, .layui-table-view {
+    margin:0px 0;
+    border-collapse: collapse;
+    border-width:0px; 
+    border-style:hidden;
+}
+.addbut{
+	text-align: left;
+}
+.layui-laypage .layui-laypage-count{
+	padding: 0 15px;
+}
+.yabhe{
+	width:100%;
+}
+.labers{
+	width:90px;
+}
+.layui-input-block {
+    margin-left: 122px;
+}
+.table-all {
+     display: table; 
+    width: 100%;
+    border-collapse: collapse;
+    border: 0;
+}
+.table-tr {
+    display: table-row;
+}
+.table-all .table-tr:last-child .table-td {
+    border-bottom: 0;
+}
+.systm-manage-center.css:399
+.table-tr .table-td:nth-child(1) {
+    box-sizing: border-box;
+    border-right: 1px solid rgb(53, 53, 53);
+    border-bottom: 1px solid rgb(53, 53, 53);
+}
+.systm-manage-center.css:389
+.table-td {
+    display: table-cell;
+    width: 50%;
+    padding: 10px;
+    height: 100%;
+    text-align: center;
+    vertical-align: middle;
+    box-sizing: border-box;
+}

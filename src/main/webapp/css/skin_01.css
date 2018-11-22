@@ -1,0 +1,12 @@
+.nav_bg1{ 
+	background:#20222A url(../imgs/start/bg_01.jpg) center 0 no-repeat;
+}
+.nav_bg1>p{
+	color: #FFFFFF;
+}
+.nav_bg1>span{
+	color: #FFFFFF;
+}
+.nav_bg1 .layui-nav-item a{
+	color: #FFFFFF;
+}

@@ -1,0 +1,28 @@
+@charset "utf-8";
+		table tr th div,
+		table tr td {
+			text-align: center;
+		}
+		.gong_color {
+			color: red;
+			font-weight: bold;
+		}
+		
+		body .add_label_bg>.layui-layer-title,
+		.btn_color {
+			background: #EA5519;
+			color: #FFFFFF;
+		}
+		/**/
+		.username label {
+			display: inline-block;
+			width: 100px;
+			padding-left: 20px;
+		}
+		.username div{
+			margin-top: 20px;
+		}
+		.align {
+			text-align: center;
+		}
+	

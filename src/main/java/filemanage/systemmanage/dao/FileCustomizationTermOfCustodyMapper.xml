@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.systemmanage.dao.FileCustomizationTermOfCustodyMapper">
+
+	<resultMap type="filemanage.systemmanage.pojo.AmMaSmRetentionperiod" id="AmMaSmRetentionperiod">
+		<id property="retentionperiodid" column="RETENTIONPERIOD_ID" jdbcType="VARCHAR"/>
+		<result property="retentionperiodcode" column="RETENTIONPERIOD_CODE" jdbcType="VARCHAR"/>
+		<result property="retentionperiodname" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR"/>
+		<result property="retentionperiodstatus" column="RETENTIONPERIOD_STATUS" jdbcType="VARCHAR"/>
+		<result property="retentionperioddescription" column="RETENTIONPERIOD_DESCRIPTION" jdbcType="VARCHAR"/>
+		<result property="retentionperiodcreatetime" column="RETENTIONPERIOD_CREATETIME" jdbcType="DATE"/>
+		<result property="retentionperiodcreator" column="RETENTIONPERIOD_CREATOR" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<!-- 添加保管期限 -->
+	<insert id="saveTermOfCustody" parameterType="filemanage.systemmanage.pojo.AmMaSmRetentionperiod">
+		insert into am_ma_sm_retentionperiod
+		  (RETENTIONPERIOD_ID,
+		   RETENTIONPERIOD_CODE,
+		   RETENTIONPERIOD_NAME,
+		   RETENTIONPERIOD_STATUS,
+		   RETENTIONPERIOD_CREATETIME,
+		   RETENTIONPERIOD_CREATOR)
+		values
+		  (
+		   szda_rp_seq.nextval,
+		   #{retentionperiodcode,jdbcType=VARCHAR},
+		   #{retentionperiodname,jdbcType=VARCHAR},
+		   '1',sysdate,
+		   #{retentionperiodcreator,jdbcType=VARCHAR}
+		   )
+	</insert>
+	
+	<!-- 删除保管期限 -->
+	<update id="deleteTermOfCustody" parameterType="filemanage.systemmanage.pojo.AmMaSmRetentionperiod">
+		delete from am_ma_sm_retentionperiod where RETENTIONPERIOD_ID = #{retentionperiodid,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 删除时查询该保管期限的状态是否为自定义 -->
+	<select id="termOfCustodyType" resultType="int" parameterType="filemanage.systemmanage.pojo.AmMaSmRetentionperiod">
+		select RETENTIONPERIOD_STATUS from am_ma_sm_retentionperiod
+    		where RETENTIONPERIOD_ID = #{retentionperiodid,jdbcType=VARCHAR}
+	</select>
+	<!-- 页面展示查询保管期限属性 -->
+	<select id="queryTermOfCustody" resultMap="AmMaSmRetentionperiod" parameterType="filemanage.systemmanage.pojo.AmMaSmRetentionperiod">
+	select amsr.* from (	
+		select 
+			rownum as rn,
+			RETENTIONPERIOD_ID,
+			RETENTIONPERIOD_CODE,
+			RETENTIONPERIOD_STATUS,
+			RETENTIONPERIOD_CREATETIME,
+			RETENTIONPERIOD_NAME,
+			RETENTIONPERIOD_CREATOR 
+		from am_ma_sm_retentionperiod
+		<where>
+			<if test="null != retentionperiodname and  '' != retentionperiodname ">
+				and rownum &lt;=#{retentionperiodname,jdbcType=VARCHAR}
+			</if>
+			<if test="null != retentionperiodid and  '' != retentionperiodid ">
+				and RETENTIONPERIOD_ID = #{retentionperiodid,jdbcType=VARCHAR}
+			</if>
+		</where>
+	 )amsr 
+    <where>
+    	<if test="null != retentionperiodcreator and  '' != retentionperiodcreator ">
+			and amsr.rn &gt;#{retentionperiodcreator,jdbcType=VARCHAR}
+		</if>
+    </where>
+	</select>
+	
+	<!-- 页面展示查询总数量 -->
+	<select id="countQueryTermOfCustody" resultType="int" >
+		select count(RETENTIONPERIOD_ID) from am_ma_sm_retentionperiod
+	</select>
+	<!-- （删除前）查询该保管期限下是否有文件存在 -->
+	<select id="countTermOfCustody" resultType="int" parameterType="filemanage.systemmanage.pojo.AmMaSmRetentionperiod">
+		select count(ARCHIVEFILE_ID) from am_co_archivefile 
+	       where RETENTIONPERIOD_ID = (
+	             select RETENTIONPERIOD_ID from am_ma_sm_retentionperiod
+	                where RETENTIONPERIOD_ID = #{retentionperiodid,jdbcType=VARCHAR}
+	       )
+	</select>
+	
+</mapper>

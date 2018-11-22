@@ -1,0 +1,10 @@
+$(function(){
+	$.ajax({
+		url:'../messageNotification/havingMessageNum',
+		type:'post',
+		dataType:'json',
+		success:function(res){
+			$("#messNum").text(res)
+		}
+	})
+})

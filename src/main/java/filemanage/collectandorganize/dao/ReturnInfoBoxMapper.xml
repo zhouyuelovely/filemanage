@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.collectandorganize.dao.ReturnInfoBoxMapper">
+	<resultMap type="filemanage.collectandorganize.pojo.ReturnInfoBox" id="retMap">
+		<id property="returnInfoId" column="RETURNINFO_ID" jdbcType="VARCHAR"/>
+		<result property="boxId" column="BOX_ID" jdbcType="VARCHAR" />
+		<result property="returnInfoReason" column="RETURNINFO_REASON" jdbcType="VARCHAR"/>
+		<result property="returnInfoTime" column="RETURNINFO_TIME" jdbcType="DATE"/>
+		<result property="returnInfoPreson" column="RETURNINFO_PERSON" jdbcType="VARCHAR"/>
+		<result property="boxId" column="BOX_ID" jdbcType="VARCHAR" />
+		<result property="boxsericalnumber" column="BOX_SERICALNUMBER" jdbcType="VARCHAR"/>
+		<association property="amCoBox" javaType="filemanage.systemmanage.pojo.AmCoBox">
+			<result property="boxid" column="BOX_ID" jdbcType="VARCHAR"/>
+			<result property="boxnumber" column="BOX_NUMBER" jdbcType="VARCHAR"/>
+			<result property="boxsericalnumber" column="BOX_SERICALNUMBER" jdbcType="VARCHAR"/>
+			<result property="boxanual" column="BOX_ANUAL" jdbcType="VARCHAR"/>
+			<result property="boxAuditstart" column="BOX_AUDITSTART" jdbcType="VARCHAR"/>
+		<association property="boxVo" javaType="filemanage.collectandorganize.vo.BoxVo">
+			<result property="boxId" column="BOX_ID" jdbcType="VARCHAR" />
+			<result property="boxNumber" column="BOX_NUMBER" jdbcType="VARCHAR" />
+			<result property="boxsericalnumber" column="BOX_SERICALNUMBER" jdbcType="VARCHAR" />
+			<result property="boxAnual" column="BOX_ANUAL" jdbcType="VARCHAR" />
+			<result property="boxAuditstart" column="BOX_AUDITSTART" jdbcType="VARCHAR" />
+		</association>
+		</association>
+	</resultMap>
+	
+	<sql id="returnSql">
+		select 
+		acr.returninfo_id,
+		acr.returninfo_reason,
+		acr.returninfo_time,
+		acr.returninfo_person,
+		acb.box_id,
+		acb.box_situation,
+		acb.box_sericalnumber,
+		acb.box_thickness,
+		acb.box_page,
+		acb.box_status,
+		acb.box_casesnumber,
+		acb.box_anual,
+		acb.box_startnumber,
+		acb.box_endnumber,
+		acb.box_number,
+		acb.box_createtime,
+		acb.box_auditstart 
+		from 
+		am_co_returninfo acr 
+		left join am_co_box acb 
+		on acr.box_id=acb.box_id
+	</sql>
+	<!--  根据年度和全宗主键查询驳回情况--> 
+	<select id="findReturnInfoBoxByAnualAndArchiveId" resultMap="retMap">
+		select a.* 
+		from(
+			select ac.*,rownum row_num from 
+			(
+				<include refid="returnSql"/>
+				where 
+				acb.quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+				and acb.box_anual=#{anual,jdbcType=VARCHAR}
+			) ac
+		) a 
+		where a.row_num between #{begin} and #{end}
+	</select>
+	<!-- 统计数量根据年度和全宗主键 -->
+	<select id="countReturnInfoBoxByAnualAndArchiveId" resultType="int">
+		select count(acr.RETURNINFO_ID) 
+		from am_co_returninfo acr 
+		left join am_co_box acb 
+		on acr.box_id=acb.box_id 
+		where 
+		acb.quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+		and acb.box_anual=#{anual,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteReturnInfoBoxByAnualAndArchiveId">
+		delete from am_co_returninfo acr 
+		where acr.box_id in (
+		select acb.box_id from am_co_box acb 
+		where 
+		acb.quanzong_id=#{archiveId,jdbcType=VARCHAR}   
+		and acb.box_anual=#{anual,jdbcType=VARCHAR} 
+		and acb.retentionperiod_id in(${custody}) 
+		)
+	</delete>
+	
+	<!-- 驳回重整_查询 -->
+	<select id="selectAllRejectInfo" resultMap="retMap">
+	select acr.*,acb.* 
+		from am_co_returninfo acr
+		left join am_co_box acb 
+		on acr.box_id=acb.box_id 
+		where acb.BOX_SERICALNUMBER=#{boxsericalnumber,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="countSelectAllRejectInfo" resultType="int">
+	select count(*) from am_co_returninfo acr
+		left join am_co_box acb 
+		on acr.box_id=acb.box_id
+		where acb.BOX_SERICALNUMBER=#{boxsericalnumber,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 驳回重整_保存 -->
+	<insert id="addReject">
+	INSERT INTO
+		AM_MA_SM_QUANZONG
+		(RETURNINFO_ID,BOX_SERICALNUMBER,RETURNINFO_REASON,RETURNINFO_PERSON,RETURNINFO_TIME)
+		VALUES
+		(sys_guid(),
+		#{boxsericalnumber,jdbcType=VARCHAR},
+		#{returnInfoReason,jdbcType=VARCHAR},
+		#{returnInfoPreson,jdbcType=VARCHAR},
+		#{returnInfoTime,jdbcType=VARCHAR})
+	</insert>
+</mapper>

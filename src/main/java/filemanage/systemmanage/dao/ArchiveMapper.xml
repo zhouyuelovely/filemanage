@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.systemmanage.dao.ArchiveMapper">
+	<resultMap type="filemanage.systemmanage.pojo.Archive" id="archiveMap">
+		<id column="QUANZONG_ID" property="quanzongId" jdbcType="VARCHAR" />
+		<result column="QUANZONG_NUMBER" property="quanzongNumber" jdbcType="VARCHAR" />
+		<result column="QUANZONG_NAME" property="quanzongName" jdbcType="VARCHAR" />
+		<result column="QUANZONG_PHONE" property="quanzongPhone" jdbcType="VARCHAR" />
+		<result column="QUANZONG_CREATETIME" property="quanzongCreatetime" jdbcType="VARCHAR" />
+		<result column="QUANZONG_CREATOR" property="quanzongCreator" jdbcType="VARCHAR" />
+		<result column="QUANZONG_DESCRIPTION" property="quanzongDescription" jdbcType="VARCHAR" />
+		<result column="QUANZONG_REMARK" property="quanzongRemark" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 添加全宗信息 -->
+	<insert id="addOneArchive" parameterType="filemanage.systemmanage.pojo.Archive">
+		INSERT INTO
+		AM_MA_SM_QUANZONG
+		(QUANZONG_ID,QUANZONG_NUMBER,QUANZONG_NAME,QUANZONG_PHONE,QUANZONG_CREATETIME)
+		VALUES
+		(sys_guid(),
+		#{quanzongNumber,jdbcType=VARCHAR},
+		#{quanzongName,jdbcType=VARCHAR},
+		#{quanzongPhone,jdbcType=VARCHAR},
+		#{quanzongCreatetime,jdbcType=VARCHAR})
+	</insert>
+	<!-- 判断全宗号是否存在 -->
+	<select id="isExitArchiveNumber" parameterType="filemanage.systemmanage.pojo.Archive"
+		resultType="int">
+		select count(1) from AM_MA_SM_QUANZONG
+		where
+		QUANZONG_NUMBER=#{quanzongNumber,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 判断全宗名是否存在 -->
+	<select id="isExitArchiveName" parameterType="filemanage.systemmanage.pojo.Archive"
+		resultType="int">
+		select count(1) from AM_MA_SM_QUANZONG
+		where
+		QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 判断单位电话是否存在 -->
+	<select id="isExitArchivePhone" parameterType="filemanage.systemmanage.pojo.Archive"
+		resultType="int">
+		select count(1) from AM_MA_SM_QUANZONG
+		where
+		QUANZONG_PHONE=#{quanzongPhone,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 删除全宗 -->
+	<delete id="deleteOneArchive" parameterType="java.lang.String">
+		delete from
+		AM_MA_SM_QUANZONG
+		where
+		QUANZONG_ID=#{quanzongId,jdbcType=VARCHAR}
+	</delete>
+	<!-- 删除前查询 -->
+	<select id="countArchiveLinkInfo" parameterType="java.lang.String"
+		resultType="int">
+		select count(amso.organization_id) from
+		AM_MA_SM_ORGANIZATION amso
+		where amso.quanzong_id = (
+		select amsq.quanzong_id from AM_MA_SM_QUANZONG amsq
+		where amsq.quanzong_id = #{quanzongId,jdbcType=VARCHAR}
+		)
+	</select>
+
+	<!-- 修改并保存编辑后的全宗信息 -->
+	<update id="updateOneArchive" parameterType="filemanage.systemmanage.pojo.Archive">
+		UPDATE
+		AM_MA_SM_QUANZONG
+		SET
+		QUANZONG_NUMBER=#{quanzongNumber,jdbcType=VARCHAR},
+		QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR},
+		QUANZONG_PHONE=#{quanzongPhone,jdbcType=VARCHAR},
+		QUANZONG_CREATETIME=#{quanzongCreatetime,jdbcType=VARCHAR}
+		where
+		QUANZONG_ID=#{quanzongId,jdbcType=VARCHAR}
+	</update>
+	<!-- 根据全宗主键查询全宗信息 -->
+	<select id="queryArchiveById" resultMap="archiveMap"
+		parameterType="java.lang.String">
+		select * from AM_MA_SM_QUANZONG
+		where
+		QUANZONG_ID=#{quanzongId,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 列表展示全宗信息 -->
+	<select id="selectAllArchive" resultMap="archiveMap">
+		select * from
+		AM_MA_SM_QUANZONG
+		order by
+		QUANZONG_NUMBER
+	</select>
+
+	<!-- 导入时去重判断,如果Count(*)为0,则成功导入,如果Count(*)大于0,则有重复的数据,导入失败 -->
+	<select id="countAllByImportArchive" resultType="int"
+		parameterType="filemanage.systemmanage.pojo.Archive">
+		select count(*) from AM_MA_SM_QUANZONG
+		where
+		QUANZONG_NUMBER=#{quanzongNumber,jdbcType=VARCHAR}
+		or
+		QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 统计全宗的总数 -->
+	<select id="countAllArchive" resultType="int">
+		select count(*) from
+		AM_MA_SM_QUANZONG
+	</select>
+
+	<!-- 全宗管理_关键词查询 -->
+	<select id="queryArchiveByArchiveQueryCondition" resultMap="archiveMap"
+		parameterType="filemanage.systemmanage.pojo.Archive">
+		select * from
+		AM_MA_SM_QUANZONG
+		where
+		QUANZONG_NUMBER || QUANZONG_NAME || QUANZONG_PHONE || QUANZONG_CREATETIME
+		like
+		CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')
+	</select>
+	
+	<!-- 查询的关键词的个数 -->
+	<select id="countArchiveByConditions" resultType="int"
+		parameterType="java.lang.String">
+		select count(*) from AM_MA_SM_QUANZONG
+		where
+		QUANZONG_NUMBER || QUANZONG_NAME || QUANZONG_PHONE || QUANZONG_CREATETIME like
+		CONCAT(CONCAT('%',#{conditions,jdbcType = VARCHAR}),'%')
+	</select>
+
+</mapper>

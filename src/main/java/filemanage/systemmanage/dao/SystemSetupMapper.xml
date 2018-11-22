@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.systemmanage.dao.SystemSetupMapper">
+	<resultMap type="filemanage.login.pojo.User" id="userMap">
+	  <id column="USER_ID" property="userId" jdbcType="VARCHAR"/>
+      <result column="USER_NAME"  property="userName" jdbcType="VARCHAR"/>
+      <result column="USER_PASSWORD"  property="userPassword" jdbcType="VARCHAR"/>
+	</resultMap>
+	 
+	<select id="comparingThePassword" parameterType="filemanage.login.pojo.User" resultType="int">
+		SELECT COUNT(USER_NAME) 
+		FROM AM_MA_SM_USER AM
+		WHERE 
+			AM.USER_NAME=
+				(SELECT AMU.USER_NAME 
+				  FROM AM_MA_SM_USER AMU
+				  WHERE AMU.USER_NAME=#{userName,jdbcType=VARCHAR}
+				  GROUP BY USER_NAME
+				 )
+		AND
+			AM.USER_PASSWORD=
+				(SELECT ASU.USER_PASSWORD
+				 FROM AM_MA_SM_USER ASU
+				 WHERE ASU.USER_PASSWORD=#{userPassword,jdbcType=VARCHAR}
+				 GROUP BY USER_PASSWORD
+				 )
+	</select>
+	
+	<update id="updateUserPasswordByUserName" parameterType="filemanage.login.pojo.User">
+		UPDATE 
+		AM_MA_SM_USER 
+		SET USER_PASSWORD=#{userPassword}
+		WHERE USER_NAME=#{userName}
+	</update>
+</mapper>

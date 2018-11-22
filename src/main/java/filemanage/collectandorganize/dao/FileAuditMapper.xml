@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.collectandorganize.dao.FileAuditMapper">
+
+	<resultMap type="filemanage.systemmanage.pojo.AmCoBox" id="boxMap">
+		<id property="boxid" column="BOX_ID" jdbcType="VARCHAR"/>
+		<result property="boxsituation" column="BOX_SITUATION" jdbcType="VARCHAR"/>
+		<result property="boxsericalnumber" column="BOX_SERICALNUMBER" jdbcType="VARCHAR"/>
+		<result property="boxthickness" column="BOX_THICKNESS" jdbcType="VARCHAR"/>
+		<result property="boxpage" column="BOX_PAGE" jdbcType="VARCHAR"/>
+		<result property="boxstatus" column="BOX_STATUS" jdbcType="VARCHAR"/>
+		<result property="boxcasesnumber" column="BOX_CASESNUMBER" jdbcType="VARCHAR"/>
+		<result property="boxanual" column="BOX_ANUAL" jdbcType="VARCHAR"/>
+		<result property="boxstartnumber" column="BOX_STARTNUMBER" jdbcType="VARCHAR"/>
+		<result property="boxendnumber" column="BOX_ENDNUMBER" jdbcType="VARCHAR"/>
+		<result property="boxnumber" column="BOX_NUMBER" jdbcType="VARCHAR"/>
+		<result property="boxcreatetime" column="BOX_CREATETIME" jdbcType="DATE"/>
+		<result property="boxAuditstart" column="BOX_AUDITSTART" jdbcType="VARCHAR"/>
+		<!-- 全宗表 -->
+		<association property="archive" javaType="filemanage.systemmanage.pojo.Archive">
+			<id property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+			<result property="quanzongNumber" column="QUANZONG_NUMBER" jdbcType="VARCHAR"/>
+			<result property="quanzongName" column="QUANZONG_NAME" jdbcType="VARCHAR"/>
+		</association>
+		<!-- 保管期限表 -->
+		<association property="retentionperiod" javaType="filemanage.systemmanage.pojo.AmMaSmRetentionperiod">
+			<id property="retentionperiodid" column="RETENTIONPERIOD_ID" jdbcType="VARCHAR"/>
+			<result property="retentionperiodcode" column="RETENTIONPERIOD_CODE" jdbcType="VARCHAR"/>
+			<result property="retentionperiodname" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR"/>
+		</association>
+		<association property="secondryClassFication" javaType="filemanage.systemmanage.pojo.SecondryClassFication">
+			<id property="scId" column="SC_ID" jdbcType="VARCHAR"/>
+			<result property="scCode" column="SC_CODE" jdbcType="VARCHAR"/>
+			<result property="scName" column="SC_NAME" jdbcType="VARCHAR"/>
+		</association>
+	</resultMap>
+	
+	
+	<resultMap type="filemanage.collectandorganize.vo.BoxAuditHelp" id="helpMap">
+		<result property="quanzongId" column="archiveId" jdbcType="VARCHAR"/>
+		<result property="quangzongName" column="archiveName" jdbcType="VARCHAR"/>
+		<result property="anual" column="anual" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	
+	<resultMap type="filemanage.collectandorganize.vo.BoxVo" id="boxVoMap">
+	    <id property="boxId" column="BOX_ID" jdbcType="VARCHAR"/>
+		<result property="quanzongNumber" column="quanzong_number" jdbcType="VARCHAR"/>
+		<result property="quanzongName" column="quanzong_name" jdbcType="VARCHAR"/>
+		<result property="boxAnual" column="box_anual" jdbcType="VARCHAR"/>
+		<result property="scName" column="sc_name" jdbcType="VARCHAR"/>
+		<result property="retentionperiodName" column="retentionperiod_name" jdbcType="VARCHAR"/>
+		<result property="boxStartnumber" column="box_startnumber" jdbcType="VARCHAR"/>
+		<result property="boxEndnumber" column="box_endnumber" jdbcType="VARCHAR"/>
+		<result property="boxNumber" column="box_number" jdbcType="VARCHAR"/>
+		<result property="boxsericalnumber" column="BOX_SERICALNUMBER" jdbcType="VARCHAR"/>
+		<result property="boxThickness" column="box_thickness" jdbcType="VARCHAR"/>
+		<result property="boxAuditstart" column="box_auditstart" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<resultMap type="filemanage.collectandorganize.pojo.ReturnInfoBox" id="retsMap">
+		<id property="returnInfoId" column="RETURNINFO_ID" jdbcType="VARCHAR" />
+		<result property="returnInfoReason" column="RETURNINFO_REASON" jdbcType="VARCHAR" />
+		<result property="returnInfoTime" column="RETURNINFO_TIME" jdbcType="DATE" />
+		<result property="returnInfoPreson" column="RETURNINFO_PERSON" jdbcType="VARCHAR" />
+		<result property="boxId" column="BOX_ID" jdbcType="VARCHAR" />
+		<result property="boxsericalnumber" column="BOX_SERICALNUMBER" jdbcType="VARCHAR" />
+		<association property="boxVo" javaType="filemanage.collectandorganize.vo.BoxVo">
+			<result property="boxId" column="BOX_ID" jdbcType="VARCHAR" />
+			<result property="boxNumber" column="BOX_NUMBER" jdbcType="VARCHAR" />
+			<result property="boxsericalnumber" column="BOX_SERICALNUMBER" jdbcType="VARCHAR" />
+			<result property="boxAnual" column="BOX_ANUAL" jdbcType="VARCHAR" />
+			<result property="boxAuditstart" column="BOX_AUDITSTART" jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+	
+	
+	
+	
+	<!--盒子相关  -->
+	<sql id="boxsql">
+	select 
+	   acb.box_id,
+	   amsq.quanzong_number as quanzong_number,
+       amsq.quanzong_name as quanzong_name,
+       acb.box_anual as box_anual,
+       amss.sc_name as sc_name,
+       amsr.retentionperiod_name as retentionperiod_name,
+       acb.box_startnumber as box_startnumber,
+       acb.box_endnumber as box_endnumber,
+       acb.box_number as box_number,
+       acb.box_thickness as box_thickness,
+       acb.box_auditstart as box_auditstart
+  from am_co_box acb
+  left join am_ma_sm_quanzong amsq
+    on acb.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_organization amso
+    on acb.organization_id = amso.organization_id
+  left join am_ma_sm_retentionperiod amsr
+    on acb.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_sclassification amss
+    on acb.sc_id = amss.sc_id
+	</sql>
+	
+	<!--获取首页渲染数据  -->
+	<select id="findAmcBox" resultMap="boxVoMap" parameterType="map">
+	select a.* 
+		from (
+			select ac.*,rownum row_num
+			from (
+				<include refid="boxsql"/>
+				where acb.box_status='1'
+    	and acb.box_auditstart='0'
+   		order by acb.box_createtime desc
+   		) ac
+   	) a  
+	where a.row_num between #{begin} and #{end}
+	</select>
+	
+	<!-- 统计全部档案盒的数目 -->
+	<select id="countBoxNum" resultType="int">
+		select count(acb.box_id) from am_co_box acb
+		where acb.box_status='1'
+    	and acb.box_auditstart='0' 
+	</select>
+	
+	<select id="countArchiveFileNum" resultType="int">
+		select sum(box_casesnumber) from am_co_box acb
+		where acb.box_status='1' 
+    	and acb.box_auditstart='0' 
+	</select>
+	<select id="listArchiveInfo" resultMap="helpMap">
+		select amsq.quanzong_id archiveId,amsq.quanzong_name archiveName 
+	    from am_co_box acb 
+	    left join am_ma_sm_quanzong amsq
+	    on acb.quanzong_id=amsq.quanzong_id 
+	    left join am_ma_sm_organization amso
+	    on acb.organization_id=amso.organization_id 
+	    left join am_ma_sm_retentionperiod amsr 
+	    on acb.retentionperiod_id=amsr.retentionperiod_id 
+	    left join am_ma_sm_sclassification amss 
+	    on acb.sc_id=amss.sc_id 
+	    where acb.box_status='1' 
+	    and acb.box_auditstart='0' 
+	    group by amsq.quanzong_id,amsq.quanzong_name 
+	</select>
+	
+	<select id="listAnualByArchiveId" resultMap="helpMap">
+		select acb.box_anual anual 
+	    from am_co_box acb 
+	    left join am_ma_sm_quanzong amsq
+	    on acb.quanzong_id=amsq.quanzong_id 
+	    left join am_ma_sm_organization amso
+	    on acb.organization_id=amso.organization_id 
+	    left join am_ma_sm_retentionperiod amsr 
+	    on acb.retentionperiod_id=amsr.retentionperiod_id 
+	    left join am_ma_sm_sclassification amss 
+	    on acb.sc_id=amss.sc_id 
+	    where acb.box_status='1' 
+	    and acb.box_auditstart='0' 
+	    and acb.quanzong_id =#{archiveId,jdbcType=VARCHAR} 
+	    group by acb.box_anual 
+	</select>
+	
+	
+	
+	<!--全宗和年度进行筛选  -->
+	<select id="findAmcBoxAnualAndArchiveId" resultMap="boxVoMap" parameterType="map">
+	
+	select a.* 
+		from (
+			select ac.*,rownum row_num 
+			from (
+				<include refid="boxsql"/>
+		where acb.box_status='1' 
+	    and acb.box_auditstart='0' 
+		and acb.quanzong_id=#{archiveId,jdbcType=VARCHAR}
+		and acb.box_anual =#{anual,jdbcType=VARCHAR} 
+		order by acb.box_createtime desc
+			) ac
+		) a
+		where a.row_num between #{begin} and #{end}
+	
+	</select>
+	
+	<select id="countBoxNumAnualAndArchiveId" resultType="int">
+		select count(acb.box_id) from am_co_box acb
+		where acb.box_status='1' 
+    	and acb.box_auditstart='0' 
+    	and acb.quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+		and acb.box_anual =#{anual,jdbcType=VARCHAR} 
+	</select>
+	
+	<select id="countArchiveFileNumAnualAndArchiveId" resultType="int">
+		select sum(box_casesnumber) from am_co_box acb
+		where acb.box_status='1' 
+    	and acb.box_auditstart='0' 
+    	and acb.quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+		and acb.box_anual =#{anual,jdbcType=VARCHAR}
+	</select>
+	
+	<!--条件查询  -->
+	<select id="findAmcBoxCondition" resultMap="boxVoMap" parameterType="map">
+	select a.* 
+		from (
+			select ac.*,rownum row_num 
+			from (
+		<include refid="boxsql"/> 
+		where acb.box_status='1' 
+	    and acb.box_auditstart='0' 
+	    and acb.quanzong_id=#{archiveId,jdbcType=VARCHAR}
+		<if test="anual!='' and anual !=null">
+			and acb.box_anual =#{anual,jdbcType=VARCHAR} 
+		</if>
+		<if test="codition!='' and codition!=null">
+			and amsq.quanzong_number||amsq.quanzong_name||amss.sc_name||amsr.retentionperiod_name||acb.box_number||acb.box_thickness like 
+			concat(concat('%',#{codition,jdbcType=VARCHAR}),'%') 
+		</if>
+		order by acb.box_createtime
+		)ac
+		)a
+		where a.row_num between #{begin} and #{end}
+	</select>
+	<select id="countBoxNumCondition" resultType="int">
+		select count(acb.box_id)
+		from am_co_box acb
+		left join am_ma_sm_quanzong amsq
+		on acb.quanzong_id=amsq.quanzong_id 
+		left join am_ma_sm_organization amso
+		on acb.organization_id=amso.organization_id 
+		left join am_ma_sm_retentionperiod amsr 
+		on acb.retentionperiod_id=amsr.retentionperiod_id 
+		left join am_ma_sm_sclassification amss 
+		on acb.sc_id=amss.sc_id 
+		where acb.box_status='1' 
+	    and acb.box_auditstart='0' 
+	    and acb.quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+	    <if test="anual!='' and anual !=null">
+			and acb.box_anual =#{anual,jdbcType=VARCHAR} 
+		</if>
+		<if test="codition!='' and codition!=null">
+			and amsq.quanzong_number||amsq.quanzong_name||amss.sc_name||amsr.retentionperiod_name||acb.box_number||acb.box_thickness like 
+			concat(concat('%',#{codition,jdbcType=VARCHAR}),'%') 
+		</if>
+	</select>
+	<select id="countArchiveFileNumCondition" resultType="int">
+		select sum(acb.box_casesnumber) 
+		from am_co_box acb 
+		left join am_ma_sm_quanzong amsq
+		on acb.quanzong_id=amsq.quanzong_id 
+		left join am_ma_sm_organization amso
+		on acb.organization_id=amso.organization_id 
+		left join am_ma_sm_retentionperiod amsr 
+		on acb.retentionperiod_id=amsr.retentionperiod_id 
+		left join am_ma_sm_sclassification amss 
+		on acb.sc_id=amss.sc_id 
+		where acb.box_status='1' 
+	    and acb.box_auditstart='0' 
+	    and acb.quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+	    <if test="anual!='' and anual !=null">
+			and acb.box_anual =#{anual,jdbcType=VARCHAR} 
+		</if>
+		<if test="codition!='' and codition!=null">
+			and amsq.quanzong_number||amsq.quanzong_name||amss.sc_name||amsr.retentionperiod_name||acb.box_number||acb.box_thickness like 
+			concat(concat('%',#{codition,jdbcType=VARCHAR}),'%') 
+		</if>
+	</select>
+	
+	
+	<!--功能  -->
+	<update id="updateGood">
+		update am_co_box acb 
+		set 
+		acb.box_status='2',acb.box_auditstart='1' 
+		where 
+		acb.box_anual=#{anual,jdbcType=VARCHAR} 
+		and acb.quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+		and acb.box_status='1' 
+		and acb.box_auditstart='0' 
+	</update>
+	<update id="updateBad">
+		update am_co_box acb 
+		set 
+		acb.box_status='3',acb.box_auditstart='2'
+		where 
+		acb.box_anual=#{anual,jdbcType=VARCHAR} 
+		and acb.quanzong_id=#{archiveId,jdbcType=VARCHAR}
+		<!-- and acb.retentionperiod_id between 1 and 3 -->
+		and acb.box_status='1' 
+		and acb.box_auditstart='0'
+	</update>
+	<insert id="addReturnFor" parameterType="filemanage.collectandorganize.pojo.ReturnInfoBox">
+		insert into 
+		am_co_returninfo
+		(
+		RETURNINFO_ID,
+		RETURNINFO_TIME,
+		RETURNINFO_PERSON,
+		BOX_ID
+		) 
+		values(
+		#{returnInfoId,jdbcType=VARCHAR},
+		#{returnInfoTime,jdbcType=VARCHAR},
+		#{returnInfoPreson,jdbcType=VARCHAR},
+		#{boxId,jdbcType=VARCHAR}
+		)
+	</insert>
+	<select id="queryReturnFor" parameterType="filemanage.collectandorganize.pojo.ReturnInfoBox"
+		resultType="int">
+		SELECT COUNT(BOX_ID) FROM am_co_returninfo where
+		BOX_ID=#{boxId,jdbcType=VARCHAR}
+	</select>
+	
+	<update id="updateReturnFor">
+		update am_co_returninfo 
+		set RETURNINFO_REASON=#{returnInfoReson,jdbcType=VARCHAR} 
+		where RETURNINFO_ID=#{returnInfoId,jdbcType=VARCHAR} 
+	</update>
+	
+</mapper>

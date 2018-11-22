@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.danganmanage.dao.ManagerdetailsMapper">
+
+<resultMap type="filemanage.danganmanage.pojo.Managerdetails" id="managerdetailsMap">
+   <id column="MANAGERDETAILS_ID" property="managerDetailsId" jdbcType="VARCHAR"/>
+   <result column="MANAGERDETAILS_APPLICATION" property="managerDetailsApplication" jdbcType="VARCHAR"/>
+   <result column="MANAGERDETAILS_BEFORECHANGE" property="managerDetailsBeforeChange" jdbcType="VARCHAR"/>
+   <result column="MANAGERDETAILS_AFTERCHANGE" property="managerDetailsAfterChange" jdbcType="VARCHAR"/>
+   <result column="MANAGERDETAILS_REASON" property="managerDetailsReason" jdbcType="VARCHAR"/>
+   <result column="MANAGERDETAILS_PERSON" property="managerDetailsPerson" jdbcType="VARCHAR"/>
+   <result column="MANAGERDETAILS_TIME" property="managerDetailsTime" jdbcType="VARCHAR"/>
+   <result column="MANAGERDETAILS_REVIEWER" property="managerDetailsReviewer" jdbcType="VARCHAR"/>
+   <result column="MANAGERDETAILS_AUDITTIME" property="managerDetailsAudittime" jdbcType="VARCHAR"/>
+   <result column="MANAGERDETAILS_STATUS" property="managerDetailsStatus" jdbcType="VARCHAR"/>
+   <result column="ID" property="id" jdbcType="VARCHAR"/>
+   <result column="ID_STATUS" property="idStatus" jdbcType="VARCHAR"/>
+   <result property="pcName" column="PC_NAME" jdbcType="VARCHAR"/>
+   <result property="boxsericalnumber" column="BOX_SERICALNUMBER" jdbcType="VARCHAR"/>
+   <result property="archivefilefilenumber" column="ARCHIVEFILE_FILENUMBER" jdbcType="VARCHAR"/>
+    <result column="BOX_ANUAL" property="boxanual" jdbcType="VARCHAR"/>
+   <result column="RETENTIONPERIOD_ID" property="retentionperiodid" jdbcType="VARCHAR"/>
+   <result column="MANAGERDETAILS_BOHUIREASON" property="managerDetailsBohuiReason" jdbcType="VARCHAR"/>
+   <result column="IS_DELETE" property="isDelete" jdbcType="VARCHAR"/>
+    <result column="FLAG" property="flag" jdbcType="VARCHAR"/>
+     <!-- 文件表 -->
+     <association property="amCoArchivefile" javaType="filemanage.collectandorganize.vo.AmCoArchivefile">
+       <id property="archivefileid" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+       <result property="archivefileresponsible" column="ARCHIVEFILE_RESPONSIBLE" jdbcType="VARCHAR"/>
+		<result property="archivefilecreatetime" column="ARCHIVEFILE_CREATETIME" jdbcType="VARCHAR"/>
+		<result property="archivefileanual" column="ARCHIVEFILE_ANUAL" jdbcType="VARCHAR"/>
+		<result property="archivefiletitle" column="ARCHIVEFILE_TITLE" jdbcType="VARCHAR"/>
+		<result property="archivefilescanpople" column="ARCHIVEFILE_SCANPOPLE" jdbcType="VARCHAR"/>
+		<result property="quanzongid" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+		<result property="archivefilepages" column="ARCHIVEFILE_PAGES" jdbcType="VARCHAR"/>
+		<result property="archivefilescandate" column="ARCHIVEFILE_SCANDATE" jdbcType="DATE"/>
+		<result property="archivefilefinishingstatus" column="ARCHIVEFILE_FINISHINGSTATUS" jdbcType="VARCHAR"/>
+		<result property="organizationid" column="ORGANIZATION_ID" jdbcType="VARCHAR"/>
+		<result property="primaryclassificationid" column="PRIMARYCLASSIFICATION_ID" jdbcType="VARCHAR"/>
+		<result property="pcname" column="PC_NAME" jdbcType="VARCHAR"/>
+		<result property="secondaryclassificationid" column="SECONDARYCLASSIFICATION_ID" jdbcType="VARCHAR"/>
+		<result property="scname" column="SC_NAME" jdbcType="VARCHAR"/>
+		<result property="retentionperiodid" column="RETENTIONPERIOD_ID" jdbcType="VARCHAR"/>
+		<result property="retentionperiodname" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR"/>
+		<result property="afsecurityclassrification" column="AF_SECURITYCLASSRIFICATION" jdbcType="VARCHAR"/>
+		<result property="archivefileauthenticatestatus" column="ARCHIVEFILE_AUTHENTICATESTATUS" jdbcType="VARCHAR"/>
+		<result property="archivefilefilenumber" column="ARCHIVEFILE_FILENUMBER" jdbcType="VARCHAR"/>
+		<result property="archivefilereferencenumber" column="ARCHIVEFILE_REFERENCENUMBER" jdbcType="VARCHAR"/>
+		<result property="archivefileremark" column="ARCHIVEFILE_REMARK" jdbcType="VARCHAR"/>
+		<result property="boxid" column="BOX_ID" jdbcType="VARCHAR"/>
+		<result property="collator" column="COLLATOR" jdbcType="VARCHAR"/>
+		<result property="finishingTime" column="FINISHINGTIME" jdbcType="DATE"/>
+		<result property="boxnumber" column="BOX_NUMBER" jdbcType="VARCHAR"/>
+     </association> 
+</resultMap>
+
+<!-- 管理明细表添加数据 -->
+ <insert id="addManagerDetails" parameterType="filemanage.danganmanage.pojo.Managerdetails">
+   insert into am_fm_details(MANAGERDETAILS_ID,MANAGERDETAILS_APPLICATION,MANAGERDETAILS_BEFORECHANGE,
+   MANAGERDETAILS_AFTERCHANGE,MANAGERDETAILS_REASON,MANAGERDETAILS_PERSON,MANAGERDETAILS_TIME,MANAGERDETAILS_REVIEWER,
+   MANAGERDETAILS_AUDITTIME,MANAGERDETAILS_STATUS,ID,ID_STATUS,IS_DELETE,FLAG) values
+   (sys_guid(),#{managerDetailsApplication,jdbcType=VARCHAR},#{managerDetailsBeforeChange,jdbcType=VARCHAR},
+   #{managerDetailsAfterChange,jdbcType=VARCHAR},#{managerDetailsReason,jdbcType=VARCHAR},
+   #{managerDetailsPerson,jdbcType=VARCHAR},
+   #{managerDetailsTime,jdbcType=VARCHAR},
+   #{managerDetailsReviewer,jdbcType=VARCHAR},
+   #{managerDetailsAudittime,jdbcType=VARCHAR},
+   #{managerDetailsStatus,jdbcType=VARCHAR},#{id,jdbcType=VARCHAR},
+   #{idStatus,jdbcType=VARCHAR},
+   #{isDelete,jdbcType=VARCHAR},
+   #{flag,jdbcType=VARCHAR})
+ 
+ </insert>
+ 
+ <!--  以盒管理查看所有的管理明细-->
+ <select id="queryAllManagerdetails" resultMap="managerdetailsMap">
+ select su.* from(
+ select detail.*,box.box_id,box.box_sericalnumber,box.box_anual,rp.retentionperiod_id,pc.pc_name,rownum rownu from am_fm_details detail 
+  inner join am_co_box box on box.box_id=detail.id 
+  inner join am_ma_sm_sclassification sc on sc.sc_id=box.sc_id 
+  inner join am_ma_sm_primaryclassification pc
+  on pc.pc_id=sc.pc_id inner join  am_ma_sm_retentionperiod rp on
+  rp.retentionperiod_id=box.retentionperiod_id 
+  where 
+  	detail.IS_DELETE='1'
+  and 
+  	ID = #{id,jdbcType=VARCHAR}
+  and rownum &lt;=${(before+after)} ) su where rownu &gt;#{before}
+ </select>
+ 
+ <!-- 以盒管理统计所有的管理明细 -->
+ <select id="countAllManagerdetails" resultType="int">
+   select count(*) from am_fm_details detail 
+  inner join am_co_box box on box.box_id=detail.id 
+  inner join am_ma_sm_sclassification sc on sc.sc_id=box.sc_id 
+  inner join am_ma_sm_primaryclassification pc
+  on pc.pc_id=sc.pc_id inner join  am_ma_sm_retentionperiod rp on
+  rp.retentionperiod_id=box.retentionperiod_id where detail.IS_DELETE='1'
+ </select>
+ 
+ <!-- 档案以盒管理管理明细多条件查询 -->
+  <select id="queryManagerdetailsByConditions" parameterType="filemanage.danganmanage.vo.DanganmanageCondition" resultMap="managerdetailsMap">
+      select su.* from(
+     select detail.*,box.box_id,box.box_sericalnumber,pc.pc_name,rownum rownu
+    from am_fm_details detail 
+  inner join am_co_box box on box.box_id=detail.id 
+  inner join am_ma_sm_sclassification sc on sc.sc_id=box.sc_id 
+  inner join am_ma_sm_primaryclassification pc
+  on pc.pc_id=sc.pc_id 
+     <where>
+     detail.id_status='2' and
+     rownum &lt;=${(before+after)}  
+     <if test="managerDetailsApplication !=null and managerDetailsApplication !=''">
+        and detail.MANAGERDETAILS_APPLICATION=#{managerDetailsApplication,jdbcType=VARCHAR}
+      </if>
+      <if test="managerDetailsPerson !=null and managerDetailsPerson !=''">
+        and detail.MANAGERDETAILS_PERSON=#{managerDetailsPerson,jdbcType=VARCHAR}
+      </if>
+      <if test="startTime !='' and endTime ==''">
+		and detail.MANAGERDETAILS_TIME&gt;#{startTime,jdbcType=VARCHAR}
+	 </if>
+	<if test="endTime !='' and startTime ==''">
+		and detail.MANAGERDETAILS_TIME&lt;#{endTime,jdbcType=VARCHAR}
+	</if>
+	<if test="endTime !='' and startTime !=''">
+	    and detail.MANAGERDETAILS_TIME between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+	</if>
+  </where>
+   )su where rownu &gt;#{before}
+  </select>
+  
+  <!-- 统计档案管理明以盒管理明细 多条件查询条数 -->
+  <select id="countManagerdetailsByConditions" parameterType="filemanage.danganmanage.vo.DanganmanageCondition" resultType="int">
+    select count(*) from am_fm_details detail 
+  inner join am_co_box box on box.box_id=detail.id 
+  inner join am_ma_sm_sclassification sc on sc.sc_id=box.sc_id 
+  inner join am_ma_sm_primaryclassification pc
+  on pc.pc_id=sc.pc_id
+    <where>
+     detail.id_status='2'
+     <if test="managerDetailsApplication !=null and managerDetailsApplication !=''">
+        and detail.MANAGERDETAILS_APPLICATION=#{managerDetailsApplication,jdbcType=VARCHAR}
+      </if>
+      <if test="managerDetailsPerson !=null and managerDetailsPerson !=''">
+        and detail.MANAGERDETAILS_PERSON=#{managerDetailsPerson,jdbcType=VARCHAR}
+      </if>
+      <if test="startTime !='' and endTime ==''">
+		and detail.MANAGERDETAILS_TIME&gt;#{startTime,jdbcType=VARCHAR}
+	 </if>
+	<if test="endTime !='' and startTime ==''">
+		and detail.MANAGERDETAILS_TIME&lt;#{endTime,jdbcType=VARCHAR}
+	</if>
+	<if test="endTime !='' and startTime !=''">
+	    and detail.MANAGERDETAILS_TIME between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+	</if>
+    </where>
+  
+  </select>
+  
+  <!-- 档案审核修改 -->
+  <update id="updateManagerdetailsById" parameterType="filemanage.danganmanage.pojo.Managerdetails">
+     update am_fm_details set MANAGERDETAILS_REVIEWER= #{managerDetailsReviewer,jdbcType=VARCHAR},
+      MANAGERDETAILS_AUDITTIME= #{managerDetailsAudittime,jdbcType=VARCHAR},
+      MANAGERDETAILS_STATUS= #{managerDetailsStatus,jdbcType=VARCHAR},
+      MANAGERDETAILS_BOHUIREASON=#{managerDetailsBohuiReason,jdbcType=VARCHAR}
+      where MANAGERDETAILS_ID=#{managerDetailsId,jdbcType=VARCHAR}
+  </update>
+  
+  <!-- 以件管理查看所有的管理明细 -->
+  <select id="queryManagerdetailsByFile" resultMap="managerdetailsMap">
+       select su.* from(
+  select detail.*,aca.archivefile_id,aca.archivefile_filenumber,aca.archivefile_anual,rp.retentionperiod_id,rownum rownu from am_fm_details detail 
+      inner join am_co_archivefile aca on aca.archivefile_id=detail.id
+      inner join  am_ma_sm_retentionperiod rp on
+     rp.retentionperiod_id=aca.retentionperiod_id where detail.IS_DELETE='1'
+     and rownum  &lt;=${(before+after)} )su where rownu &gt;#{before}
+  </select>
+  
+  <!-- 以件管理统计所有的管理明细 -->
+  <select id="countManagerdetailsByFile" resultType="int">
+     select count(*) from am_fm_details detail 
+      inner join am_co_archivefile aca on aca.archivefile_id=detail.id
+      inner join  am_ma_sm_retentionperiod rp on
+     rp.retentionperiod_id=aca.retentionperiod_id where detail.IS_DELETE='1'
+  </select>
+  
+  <!-- 档案管理以件管理明细多条件查询 -->
+  <select id="queryManagerdetailsByFileConditions" parameterType="filemanage.danganmanage.vo.DanganmanageCondition" resultMap="managerdetailsMap">
+      select su.* from(
+     select detail.*,aca.archivefile_id,aca.archivefile_filenumber,aca.archivefile_anual,
+     rp.retentionperiod_id,rownum rownu from am_fm_details detail 
+      inner join am_co_archivefile aca on aca.archivefile_id=detail.id
+      inner join  am_ma_sm_retentionperiod rp on
+     rp.retentionperiod_id=aca.retentionperiod_id
+     <where>
+       rownum &lt;=${(before+after)}
+      <if test="managerDetailsApplication !=null and managerDetailsApplication !=''">
+        and detail.MANAGERDETAILS_APPLICATION=#{managerDetailsApplication,jdbcType=VARCHAR}
+      </if>
+      <if test="managerDetailsPerson !=null and managerDetailsPerson !=''">
+        and detail.MANAGERDETAILS_PERSON=#{managerDetailsPerson,jdbcType=VARCHAR}
+      </if>
+      <if test="startTime !='' and endTime ==''">
+		and detail.MANAGERDETAILS_TIME&gt;#{startTime,jdbcType=VARCHAR}
+	 </if>
+	<if test="endTime !='' and startTime ==''">
+		and detail.MANAGERDETAILS_TIME&lt;#{endTime,jdbcType=VARCHAR}
+	</if>
+	<if test="endTime !='' and startTime !=''">
+	    and detail.MANAGERDETAILS_TIME between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+	</if>
+    </where> ) su where rownu &gt;#{before}
+  </select>
+  
+  <!--档案管理以件管理明细多条件查询 条数 -->
+  <select id="countManagerdetailsByFileConditions" parameterType="filemanage.danganmanage.vo.DanganmanageCondition" resultType="int">
+     select count(*) from am_fm_details detail 
+      inner join am_co_archivefile aca on aca.archivefile_id=detail.id
+      inner join  am_ma_sm_retentionperiod rp on
+     rp.retentionperiod_id=aca.retentionperiod_id
+     <where>
+      <if test="managerDetailsApplication !=null and managerDetailsApplication !=''">
+        and MANAGERDETAILS_APPLICATION=#{managerDetailsApplication,jdbcType=VARCHAR}
+      </if>
+      <if test="managerDetailsPerson !=null and managerDetailsPerson !=''">
+        and MANAGERDETAILS_PERSON=#{managerDetailsPerson,jdbcType=VARCHAR}
+      </if>
+      <if test="startTime !='' and endTime ==''">
+		and detail.MANAGERDETAILS_TIME&gt;#{startTime,jdbcType=VARCHAR}
+	 </if>
+	<if test="endTime !='' and startTime ==''">
+		and detail.MANAGERDETAILS_TIME&lt;#{endTime,jdbcType=VARCHAR}
+	</if>
+	<if test="endTime !='' and startTime !=''">
+	    and detail.MANAGERDETAILS_TIME between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+	</if>
+    </where>
+  </select>
+  
+  <!-- 历史数据管理明细 -->
+  <select id="queryManagerdetailsByHistoryData" resultMap="managerdetailsMap">
+      select su.* from(
+    select detail.*,history.*,rownum rownu from am_fm_details detail inner join 
+    am_fd_historydata  history on history.historydata_id=detail.id
+    where detail.IS_DELETE='1' and rownum &lt;=${(before+after)}) su where rownu &gt;#{before}
+  </select>
+  
+  <!-- 统计历史数据管理明细条数 -->
+  <select id="countManagerdetailsByHistoryData" resultType="int">
+    select count(*) from am_fm_details detail inner join 
+    am_fd_historydata  history on history.historydata_id=detail.id
+    where detail.IS_DELETE='1'
+  </select>
+  
+  <!-- 审核件时查看所有的管理明细 -->
+  <select id="queryManagerdetailsByFileShenghe" resultMap="managerdetailsMap">
+  
+     select su.* from(
+         select detail.*,aca.archivefile_id,aca.archivefile_filenumber,aca.archivefile_anual,
+     history.historydata_id,history.historydata_number,history.historydata_archivalyear,
+     rownum rownu  from am_fm_details detail 
+      left join am_co_archivefile aca on aca.archivefile_id=detail.id
+    left join am_fd_historydata history on history.historydata_id=detail.id  where detail.id_status='1'
+         and rownum  &lt;=${(before+after)} )su where rownu &gt;#{before}
+  </select>
+  
+  <!-- 审核件时统计所有的管理明细 -->
+  <select id="countManagerdetailsByFileShenghe" resultType="int">
+      select count(*) from am_fm_details detail  left join am_co_archivefile aca on aca.archivefile_id=detail.id
+    left join am_fd_historydata history on history.historydata_id=detail.id  where detail.id_status='1'
+  </select>
+  
+  <!-- 档案审核-审核件多条件查询 -->
+  <select id="queryManagerdetailsByFileShenheConditions" parameterType="filemanage.danganmanage.vo.DanganmanageCondition" resultMap="managerdetailsMap">
+     select su.* from(
+   select detail.*,aca.archivefile_id,aca.archivefile_filenumber,aca.archivefile_anual,
+  history.historydata_id,history.historydata_number,history.historydata_archivalyear,
+  rp.retentionperiod_id,rownum rownu from am_fm_details detail 
+      left join am_co_archivefile aca on aca.archivefile_id=detail.id
+      left join  am_ma_sm_retentionperiod rp on
+     rp.retentionperiod_id=aca.retentionperiod_id 
+    left join am_fd_historydata history on history.historydata_id=detail.id
+     <where>
+     detail.id_status='1' and 
+       rownum  &lt;=${(before+after)}
+             <if test="managerDetailsApplication !=null and managerDetailsApplication !=''">
+         and detail.MANAGERDETAILS_APPLICATION=#{managerDetailsApplication,jdbcType=VARCHAR}
+       </if>
+      <if test="managerDetailsPerson !=null and managerDetailsPerson !=''">
+        and detail.MANAGERDETAILS_PERSON=#{managerDetailsPerson,jdbcType=VARCHAR}
+      </if>
+       <if test="startTime !='' and endTime ==''">
+		and detail.MANAGERDETAILS_TIME&gt;#{startTime,jdbcType=VARCHAR}
+	 </if>
+	<if test="endTime !='' and startTime ==''">
+		and detail.MANAGERDETAILS_TIME&lt;#{endTime,jdbcType=VARCHAR}
+	</if>
+	<if test="endTime !='' and startTime !=''">
+	    and detail.MANAGERDETAILS_TIME between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+	</if> 
+         
+    </where> ) su where rownu &gt;#{before}  
+  </select>
+  
+  <!-- 档案审核-统计审核件多条件查询条数 -->
+  <select id="countManagerdetailsByFileShenheConditions" parameterType="filemanage.danganmanage.vo.DanganmanageCondition" resultType="int">
+    select count(*) from am_fm_details detail 
+      left join am_co_archivefile aca on aca.archivefile_id=detail.id
+      left join  am_ma_sm_retentionperiod rp on
+     rp.retentionperiod_id=aca.retentionperiod_id 
+    left join am_fd_historydata history on history.historydata_id=detail.id
+     <where>
+        detail.id_status='1'
+          <if test="managerDetailsApplication !=null and managerDetailsApplication !=''">
+        and detail.MANAGERDETAILS_APPLICATION=#{managerDetailsApplication,jdbcType=VARCHAR}
+      </if>
+      <if test="managerDetailsPerson !=null and managerDetailsPerson !=''">
+        and detail.MANAGERDETAILS_PERSON=#{managerDetailsPerson,jdbcType=VARCHAR}
+      </if>
+       <if test="startTime !='' and endTime ==''">
+		and detail.MANAGERDETAILS_TIME&gt;#{startTime,jdbcType=VARCHAR}
+	 </if>
+	<if test="endTime !='' and startTime ==''">
+		and detail.MANAGERDETAILS_TIME&lt;#{endTime,jdbcType=VARCHAR}
+	</if>
+	<if test="endTime !='' and startTime !=''">
+	    and detail.MANAGERDETAILS_TIME between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+	</if>
+   </where>
+  </select>
+  
+  <!-- 历史数据管理明细多条件查询 -->
+  <select id="queryManagerdetailsByHistoryDataConditions" parameterType="filemanage.danganmanage.vo.DanganmanageCondition" resultMap="managerdetailsMap">
+       select su.* from(
+      select detail.*, history.historydata_id,history.historydata_number,history.historydata_archivalyear,
+     rp.retentionperiod_id,rownum rownu from am_fm_details detail 
+    inner join am_fd_historydata history on history.historydata_id=detail.id
+    inner join am_ma_sm_retentionperiod rp on rp.retentionperiod_id=history.retentionperiod_id
+    <where>
+     detail.id_status='1' and rownum  &lt;=${(before+after)}
+      <if test="managerDetailsApplication !=null and  managerDetailsApplication !=''">
+        and detail.MANAGERDETAILS_APPLICATION=#{managerDetailsApplication,jdbcType=VARCHAR}
+      </if>
+      <if test="managerDetailsPerson !=null and managerDetailsPerson !=''">
+        and detail.MANAGERDETAILS_PERSON=#{managerDetailsPerson,jdbcType=VARCHAR}
+      </if>
+      <if test="startTime !='' and endTime ==''">
+		and detail.MANAGERDETAILS_TIME&gt;#{startTime,jdbcType=VARCHAR}
+	 </if>
+	<if test="endTime !='' and startTime ==''">
+		and detail.MANAGERDETAILS_TIME&lt;#{endTime,jdbcType=VARCHAR}
+	</if>
+	<if test="endTime !='' and startTime !=''">
+	    and detail.MANAGERDETAILS_TIME between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+	</if>
+    </where> ) su where rownu &gt;#{before}
+  </select>
+  
+  <!-- 统计历史数据管理明细多条件查询条数 -->
+  <select id="countManagerdetailsByHistoryDataConditions" parameterType="filemanage.danganmanage.vo.DanganmanageCondition" resultType="int">
+     select count(*) from am_fm_details detail 
+    inner join am_fd_historydata history on history.historydata_id=detail.id
+    inner join am_ma_sm_retentionperiod rp on rp.retentionperiod_id=history.retentionperiod_id
+    <where>
+     detail.id_status='1'
+      <if test="managerDetailsApplication !=null and managerDetailsApplication !=''">
+        and detail.MANAGERDETAILS_APPLICATION=#{managerDetailsApplication,jdbcType=VARCHAR}
+      </if>
+      <if test="managerDetailsPerson !=null and managerDetailsPerson !=''">
+        and detail.MANAGERDETAILS_PERSON=#{managerDetailsPerson,jdbcType=VARCHAR}
+      </if>
+      <if test="startTime !='' and endTime ==''">
+		and detail.MANAGERDETAILS_TIME&gt;#{startTime,jdbcType=VARCHAR}
+	 </if>
+	<if test="endTime !='' and startTime ==''">
+		and detail.MANAGERDETAILS_TIME&lt;#{endTime,jdbcType=VARCHAR}
+	</if>
+	<if test="endTime !='' and startTime !=''">
+	    and detail.MANAGERDETAILS_TIME between #{startTime,jdbcType=VARCHAR} and #{endTime,jdbcType=VARCHAR}
+	</if>
+    </where>
+  </select>
+  
+  <!-- 鉴定销毁假删除 -->
+  <update id="updateManagerdetailsByIsDelete" parameterType="filemanage.danganmanage.pojo.Managerdetails">
+    update am_fm_details set IS_DELETE='2' where MANAGERDETAILS_ID=#{managerDetailsId,jdbcType=VARCHAR}
+  </update>
+  
+  <!-- 档案审核-审核盒查看所有的管理明细 -->
+  <select id="queryManagerdetailsByBoxShenhe" resultMap="managerdetailsMap">
+     select sus.*
+  from (
+   select su.*,rownum rownu from
+  (select detail.*,
+               box.box_id,
+               box.box_sericalnumber,
+               box.box_anual,
+               rp.retentionperiod_id,
+               pc.pc_name
+          from am_fm_details detail
+         left join am_co_box box
+            on box.box_id = detail.id
+         left join am_ma_sm_sclassification sc
+            on sc.sc_id = box.sc_id
+         left join am_ma_sm_primaryclassification pc
+            on pc.pc_id = sc.pc_id
+         left join am_ma_sm_retentionperiod rp
+            on rp.retentionperiod_id = box.retentionperiod_id where detail.id_status='2')su
+         where rownum &lt;=${(before+after)}) sus
+ where sus.rownu &gt;#{before}
+  
+  </select>
+  
+  <!-- 档案审核-审核盒统计所有的管理明细 -->
+  <select id="countManagerdetailsByBoxShenhe" resultType="int">
+    select count(*) from am_fm_details detail
+         left join am_co_box box
+            on box.box_id = detail.id
+         left join am_ma_sm_sclassification sc
+            on sc.sc_id = box.sc_id
+         left join am_ma_sm_primaryclassification pc
+            on pc.pc_id = sc.pc_id
+         left join am_ma_sm_retentionperiod rp
+            on rp.retentionperiod_id = box.retentionperiod_id where detail.id_status='2'
+  </select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</mapper>

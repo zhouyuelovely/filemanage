@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.systemmanage.dao.MessageNotificationMapper">
+	<resultMap type="filemanage.systemmanage.pojo.MessageNotification" id="messageMap">
+		<id property="messageId" column="MESSAGE_ID" jdbcType="VARCHAR"/>
+		<result property="messageTime" column="MESSAGE_DATE" jdbcType="DATE"/>
+		<result property="messageType" column="MESSAGE_TYPE" jdbcType="VARCHAR"/>
+		<result property="messageContent" column="MESSAGE_CONTENT" jdbcType="VARCHAR"/>
+		<result property="messageCreator" column="MESSAGE_CREATOR" jdbcType="VARCHAR"/>
+		<result property="messageStart" column="MESSAGE_STATUS" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<sql id="messageSql">
+		select 
+		amsm.message_id,
+		amsm.message_date,
+		amsm.message_type,
+		amsm.message_content,
+		amsm.message_creator,
+		amsm.message_status 
+		from 
+		am_ma_sm_message amsm
+	</sql>
+	
+	<!--添加消息  -->
+	<insert id="addMessageNotification" parameterType="filemanage.systemmanage.pojo.MessageNotification">
+		insert into 
+		am_ma_sm_message
+		(
+			message_id,
+			message_date,
+			message_type,
+			message_content,
+			message_creator,
+			message_status
+		) 
+		values
+		(
+			sys_guid(),
+			sysdate,
+			#{messageType},
+			#{messageContent},
+			#{messageCreator},
+			'1'
+		)
+	</insert>
+	
+	<!--消息查询  -->
+	<select id="findMessageNotification" resultMap="messageMap" parameterType="map">
+		select am.* from (
+			select ams.*,rownum row_num from 
+			(
+				<include refid="messageSql"/> 
+				order by amsm.message_date desc
+			) ams
+		) am 
+		where am.row_num 
+		between #{begin} and #{end}
+	</select>
+	<select id="countMessageNotification" resultType="int">
+		select count(message_id) from am_ma_sm_message
+	</select>
+	
+	<!-- 功能 -->
+	<select id="queryMessageNotification">
+		<include refid="messageSql"/> 
+		where amsm.message_id=#{messageId}
+	</select>
+	<update id="updateMessageNotificationStart" parameterType="java.util.List">
+		<foreach collection="list" index="index" item="m" open="begin" close=";end;" separator=";">
+			update am_ma_sm_message 
+			<set>
+				message_status='2'
+			</set>
+			where message_id=#{m}
+		</foreach>
+	</update>
+	<select id="countMessageNotificationStart" resultType="int">
+		select count(message_id) from am_ma_sm_message where message_status='1'
+	</select>
+	
+	
+</mapper>

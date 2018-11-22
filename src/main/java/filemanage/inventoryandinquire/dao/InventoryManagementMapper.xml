@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.inventoryandinquire.dao.InventoryManagementMapper">
+	<resultMap type="filemanage.inventoryandinquire.vo.InventoryPlanningVo" id="inventoryMap">
+			<id property="boxId" column="BOX_ID" jdbcType="VARCHAR"/>
+			<result property="boxSericalNumber" column="BOX_SERICALNUMBER" jdbcType="VARCHAR"/>
+			<result property="boxStartNumber" column="BOX_STARTNUMBER" jdbcType="VARCHAR"/>
+			<result property="boxEndNumber" column="BOX_ENDNUMBER" jdbcType="VARCHAR"/>
+			<result property="pcName" column="PC_NAME" jdbcType="VARCHAR"/>
+			<result property="storageRacknumber" column="STORAGE_RACKNUMBER" jdbcType="VARCHAR"/>
+			<result property="joinPlan" column="JOIN_PLAN" jdbcType="VARCHAR"/>
+			<result property="juider" column="JUIDER" jdbcType="VARCHAR"/>
+			
+	</resultMap>
+	
+	<resultMap type="filemanage.inventoryandinquire.vo.InventoryConditionVo" id="inventoryConditionVoMap">
+			<id property="boxId" column="BOX_ID" jdbcType="VARCHAR"/>
+			<result property="quanzongName" column="QUANZONG_NAME" jdbcType="VARCHAR"/>
+			<result property="boxAnual" column="BOX_ANUAL" jdbcType="VARCHAR"/>
+			<result property="pcName" column="PC_NAME" jdbcType="VARCHAR"/>
+			<result property="retentionperiodname" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR"/>
+	</resultMap>
+		<sql id="inventoryManageSQL">
+			SELECT
+			ACB.BOX_ID,
+			ACB.BOX_SERICALNUMBER,
+			ACB.BOX_STARTNUMBER,
+			ACB.BOX_ENDNUMBER,
+			ACB.BOX_ANUAL,
+			ACB.JOIN_PLAN,
+			ACB.PLAN_ID,
+			AMP.PC_ID,
+			AMP.PC_NAME,
+			AWS.STORAGE_RACKNUMBER,
+			AMQ.QUANZONG_ID,
+			AMQ.QUANZONG_NAME,
+			AMR.RETENTIONPERIOD_ID,
+			AMR.RETENTIONPERIOD_NAME
+			FROM AM_CO_BOX ACB
+			INNER JOIN AM_MA_SM_SCLASSIFICATION AMS ON ACB.SC_ID=AMS.SC_ID
+		    INNER JOIN AM_MA_SM_PRIMARYCLASSIFICATION AMP ON AMS.PC_ID=AMP.PC_ID
+			INNER JOIN AM_WAREHOUSE_STORAGE AWS ON ACB.STORAGE_ID=AWS.STORAGE_ID 
+			INNER JOIN AM_MA_SM_QUANZONG AMQ ON ACB.QUANZONG_ID=AMQ.QUANZONG_ID
+			INNER JOIN AM_MA_SM_RETENTIONPERIOD AMR ON ACB.RETENTIONPERIOD_ID=AMR.RETENTIONPERIOD_ID
+		</sql>
+		<!-- 查询所有全宗名称 -->
+		<select id="queryQuanzongName" resultMap="inventoryConditionVoMap">
+			SELECT 
+			DISTINCT QUANZONG_NAME 
+			FROM(<include refid="inventoryManageSQL"/>)
+		</select>
+		<!-- 根据全宗名称查询该全宗下的所有年度 -->
+		<select id="queryBoxAnualByQuanzongName" resultMap="inventoryConditionVoMap" parameterType="filemanage.inventoryandinquire.vo.InventoryConditionVo">
+			SELECT 
+			DISTINCT BOX_ANUAL 
+			FROM(<include refid="inventoryManageSQL"/>)
+			WHERE QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+		</select>
+		<!-- 根据全宗名称和年度查询该全宗该年度下的所有档案类型 -->	
+		<select id="queryPcNameByQuanzongNameAndBoxAnual" resultMap="inventoryConditionVoMap" parameterType="filemanage.inventoryandinquire.vo.InventoryConditionVo">
+			SELECT
+			DISTINCT PC_NAME
+			FROM(<include refid="inventoryManageSQL"/>)
+			WHERE 
+			QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+			AND BOX_ANUAL=#{boxAnual,jdbcType=VARCHAR}
+		</select>
+		<!-- 根据全宗名称、年度、档案类型查询该全宗该年度该档案类型下的所有保管期限 -->
+		<select id="queryRetentionperiodName" resultMap="inventoryConditionVoMap" parameterType="filemanage.inventoryandinquire.vo.InventoryConditionVo">
+			SELECT
+			DISTINCT RETENTIONPERIOD_NAME
+			FROM(<include refid="inventoryManageSQL"/>)
+			WHERE 
+			QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+			AND BOX_ANUAL=#{boxAnual,jdbcType=VARCHAR}
+			AND PC_NAME=#{pcName,jdbcType=VARCHAR}
+		</select>
+		
+		
+		<!-- 根据全宗名称、盒年度、档案类型、保管期限渲染盒信息 -->
+		<select id="queryBoxInfoByCondition" resultMap="inventoryMap" parameterType="map">
+			SELECT A.* FROM(
+			SELECT AC.*,ROWNUM ROW_NUM
+			FROM(
+				<include refid="inventoryManageSQL"/>
+				WHERE 
+				QUANZONG_NAME=#{inventoryConditionVo.quanzongName}
+				AND BOX_ANUAL=#{inventoryConditionVo.boxAnual}
+				AND PC_NAME=#{inventoryConditionVo.pcName}
+				AND RETENTIONPERIOD_NAME=#{inventoryConditionVo.retentionperiodname}
+				AND JOIN_PLAN='2'
+				)AC
+			)A
+			WHERE A.ROW_NUM BETWEEN #{begin} AND #{end}
+		</select>
+		<!-- 计算未加入计划的盒子信息数量 -->
+		<select id="countBoxInfo" resultType="int" parameterType="filemanage.inventoryandinquire.vo.InventoryConditionVo">
+			SELECT 
+			COUNT(BOX_ID) 
+			FROM(
+				SELECT * FROM
+				(<include refid="inventoryManageSQL"/>)
+				WHERE 
+				QUANZONG_NAME=#{quanzongName}
+				AND BOX_ANUAL=#{boxAnual}
+				AND PC_NAME=#{pcName}
+				AND RETENTIONPERIOD_NAME=#{retentionperiodname}
+				AND JOIN_PLAN='2'
+				)
+		</select>
+		<!-- 加入计划改变盒信息的是否加入计划状态位为'1:是' -->
+		<update id="updateJoinPlanByBoxIdList" parameterType = "java.util.List">
+       	   UPDATE AM_CO_BOX 
+       	   SET JOIN_PLAN = '1' 
+       	   WHERE BOX_ID IN
+          <foreach item = "item" index = "index" collection = "boxIdList" open = "(" separator = "," close = ")">
+              #{item}
+          </foreach>
+		</update>
+		
+		<!-- 查询加入计划(1:是)的盒信息 -->
+		<select id="queryBoxInfo" resultMap="inventoryMap" parameterType="map">
+			SELECT A.* FROM(
+			SELECT AC.*,ROWNUM ROW_NUM
+			FROM(
+				<include refid="inventoryManageSQL"/>
+				WHERE JOIN_PLAN='1'
+				)AC
+			)A
+			WHERE A.ROW_NUM BETWEEN #{begin} AND #{end}
+		</select>
+		
+		<!-- 计算加入计划的盒子数量 -->
+		<select id="countByJoinPlan" resultType="int">
+			SELECT COUNT(BOX_ID)
+			FROM(<include refid="inventoryManageSQL"/>)
+			WHERE JOIN_PLAN='1'
+		</select>
+		
+		<!-- 删除已加入的盘点计划 -->
+		<update id="updateJoinPlanByBoxId" parameterType="String">
+			UPDATE AM_CO_BOX SET JOIN_PLAN='2' WHERE BOX_ID=#{boxId,jdbcType=VARCHAR}
+		</update>
+		
+		<!-- 提交计划 -->	
+		<insert id="submitInventoryPlan" parameterType="filemanage.inventoryandinquire.pojo.InventoryPlan">
+			INSERT INTO 
+			AM_INVENTORY_PLAN 
+			(PLAN_ID,
+			 PLAN_PERSON,
+			 PLAN_STARTDATE,
+			 PLAN_ENDDATE,
+			 PLAN_MAKINGDATE,
+			 PLAN_MAKINGPERSON,
+			 PLAN_STATUS,
+			 PLAN_BOXNUMBER
+			)VALUES(
+			 #{planId},
+			 #{planPerson},
+			 #{planStartdate},
+			 #{planEnddate},
+			 #{planMakingDate},
+			 #{planMakingPerson},
+			 '1',
+			 #{planBoxNumber}
+			)  
+		</insert>
+		
+		<!-- 将提交计划的数据是都加入计划的状态位设置成'2' -->
+		<update id="updateJoinPlanStatusByBoxIdList" parameterType = "java.util.List">
+       	   UPDATE AM_CO_BOX 
+       	   SET JOIN_PLAN = '2' 
+       	   WHERE BOX_ID IN
+          <foreach item = "item" index = "index" collection = "boxIdList" open = "(" separator = "," close = ")">
+              #{item}
+          </foreach>
+		</update>
+		
+		<select id="queryJoinPlanStatusByOne" resultType="java.lang.String">
+			SELECT BOX_ID,JOIN_PLAN FROM (<include refid="inventoryManageSQL"/>)
+			WHERE JOIN_PLAN='1'
+		</select>
+		
+		<!-- 根据计划主键查询盒表信息 -->
+		<select id="queryBoxInfoByPlanId" resultMap="inventoryMap" parameterType="map">
+			select A.* FROM(
+			     SELECT
+			       AC.JUIDER, 
+			       AC.PLAN_ID,
+			       AC.BOX_SERICALNUMBER,
+           		   AMP.Pc_Name,
+		           AC.BOX_STARTNUMBER,
+		           AC.BOX_ENDNUMBER,
+		           AWS.STORAGE_RACKNUMBER,
+			       ROWNUM ROW_NUM
+			     FROM AM_CO_BOX AC
+			        INNER JOIN AM_MA_SM_SCLASSIFICATION AMS ON AC.SC_ID=AMS.SC_ID
+			        INNER JOIN AM_MA_SM_PRIMARYCLASSIFICATION AMP ON AMS.PC_ID=AMP.PC_ID
+			        INNER JOIN AM_WAREHOUSE_STORAGE AWS ON AC.STORAGE_ID=AWS.STORAGE_ID 
+			     WHERE AC.PLAN_ID =#{planId,jdbcType=VARCHAR}
+			   
+			)A
+			WHERE A.ROW_NUM BETWEEN #{begin} AND #{end}
+		</select>
+		
+		<!-- 根据计划主键统计盒表信息 -->
+		<select id="countBoxInfoByPlanId" resultType="int">
+		    SELECT COUNT(*) 
+		    FROM AM_CO_BOX AC
+		    INNER JOIN AM_MA_SM_SCLASSIFICATION AMS ON AC.SC_ID=AMS.SC_ID
+		    INNER JOIN AM_MA_SM_PRIMARYCLASSIFICATION AMP ON AMS.PC_ID=AMP.PC_ID
+			INNER JOIN AM_WAREHOUSE_STORAGE AWS ON AC.STORAGE_ID=AWS.STORAGE_ID 
+		    WHERE AC.PLAN_ID =#{planId,jdbcType=VARCHAR}
+		</select>
+		
+		<!-- 根据计划表主键查询信息 -->
+		<select id="queryBoxListByPlanId" resultMap="inventoryMap">
+			SELECT 
+				   AC.JUIDER, 
+			       AC.PLAN_ID,
+			       AC.BOX_SERICALNUMBER,
+           		   AMP.Pc_Name,
+		           AC.BOX_STARTNUMBER,
+		           AC.BOX_ENDNUMBER,
+		           AWS.STORAGE_RACKNUMBER,
+			       ROWNUM JOIN_PLAN
+			     FROM AM_CO_BOX AC
+			        INNER JOIN AM_MA_SM_SCLASSIFICATION AMS ON AC.SC_ID=AMS.SC_ID
+			        INNER JOIN AM_MA_SM_PRIMARYCLASSIFICATION AMP ON AMS.PC_ID=AMP.PC_ID
+			        INNER JOIN AM_WAREHOUSE_STORAGE AWS ON AC.STORAGE_ID=AWS.STORAGE_ID 
+			     WHERE AC.PLAN_ID =#{planId,jdbcType=VARCHAR}
+		</select>
+		
+		<resultMap type="filemanage.inventoryandinquire.pojo.InventoryPlan" id="inventoryPlanMap">
+			<id property="planId" column="PLAN_ID" jdbcType="VARCHAR"/>
+			<result property="planPerson" column="PLAN_PERSON" jdbcType="VARCHAR"/>
+			<result property="planStartdate" column="PLAN_STARTDATE" jdbcType="VARCHAR"/>
+			<result property="planEnddate" column="PLAN_ENDDATE" jdbcType="VARCHAR"/>
+			<result property="planMakingDate" column="PLAN_MAKINGDATE" jdbcType="VARCHAR"/>
+			<result property="planMakingPerson" column="PLAN_MAKINGPERSON" jdbcType="VARCHAR"/>
+			<result property="planStatus" column="PLAN_STATUS" jdbcType="VARCHAR"/>
+			<result property="planBoxNumber" column="PLAN_BOXNUMBER" jdbcType="NUMERIC"/>
+			<result property="planUploadaddress" column="PLAN_UPLOADADDRESS" jdbcType="VARCHAR"/>
+			<result property="sjsstime" column="SJSSTIME" jdbcType="VARCHAR"/>
+			<result property="sjwctime" column="PLANSJWCTIME_UPLOADADDRESS" jdbcType="VARCHAR"/>
+			<result property="pdjg" column="PDJG" jdbcType="VARCHAR"/>
+		</resultMap>
+		<update id="updateDownload" parameterType="filemanage.inventoryandinquire.pojo.InventoryPlan">
+			update 
+				AM_INVENTORY_PLAN 
+			set 
+				SJSSTIME = #{sjsstime,jdbcType=VARCHAR},
+				SJWCTIME=#{sjwctime,jdbcType=VARCHAR},
+				PDJG=#{pdjg,jdbcType=VARCHAR} 
+			where PLAN_ID = #{planId,jdbcType=VARCHAR}
+		</update>
+		
+		
+		<!-- 查询所有盘点人名称 -->
+		<select id="queryPlanPerson" resultMap="inventoryPlanMap">
+			SELECT PLAN_ID,PLAN_PERSON FROM AM_INVENTORY_PLAN
+		</select>
+		<!-- 查询所有盘点状态 -->
+		<select id="queryPlanStatus" resultMap="inventoryPlanMap">
+			SELECT A.PLAN_ID,DECODE(A.PLAN_STATUS,1,'待盘点',2,'盘点中',3,'已盘点')AS PLAN_STATUS FROM AM_INVENTORY_PLAN A
+		</select>
+		
+		<!-- 查询盘点计划表所有信息并分页 -->
+		<select id="queryInventoryPlanInfo" resultMap="inventoryPlanMap" parameterType="map">
+		 	SELECT A.* 
+		 		FROM(
+					SELECT 
+					AI.PLAN_ID,AI.PLAN_PERSON,
+					AI.PLAN_STARTDATE,AI.PLAN_ENDDATE,
+					AI.PLAN_MAKINGDATE,AI.PLAN_MAKINGPERSON,
+					DECODE(AI.PLAN_STATUS,1,'待盘点',2,'盘点中',3,'已盘点')AS PLAN_STATUS,
+					AI.PLAN_BOXNUMBER,ROWNUM ROW_NUM
+					FROM AM_INVENTORY_PLAN AI
+					)A
+			WHERE A.ROW_NUM BETWEEN #{begin} AND #{end}
+		</select>
+		
+		<select id="countInventoryPlanInfo" resultType="int">
+			SELECT COUNT(PLAN_ID) FROM AM_INVENTORY_PLAN
+		</select>
+		
+		<select id="queryInventoryPlanInfoByCondition" resultMap="inventoryPlanMap" parameterType="map">
+			SELECT A.* 
+		 		FROM(
+					SELECT 
+					AI.PLAN_ID,AI.PLAN_PERSON,
+					AI.PLAN_STARTDATE,AI.PLAN_ENDDATE,
+					AI.PLAN_MAKINGDATE,AI.PLAN_MAKINGPERSON,
+					DECODE(AI.PLAN_STATUS,1,'待盘点',2,'盘点中',3,'已盘点')AS PLAN_STATUS,
+					AI.PLAN_BOXNUMBER,ROWNUM ROW_NUM
+					FROM AM_INVENTORY_PLAN AI
+					<where>
+						<if test="inventoryPlanQueryVo.planPerson!='' and inventoryPlanQueryVo.planPerson!=null">
+							AND PLAN_PERSON=#{inventoryPlanQueryVo.planPerson,jdbcType=VARCHAR}
+						</if>
+						<if test="inventoryPlanQueryVo.planStatus!='' and inventoryPlanQueryVo.planStatus!=null">
+							AND PLAN_STATUS=#{inventoryPlanQueryVo.planStatus,jdbcType=VARCHAR}
+						</if>
+						<if test="inventoryPlanQueryVo.condition!='' and inventoryPlanQueryVo.condition!=null">
+							AND PLAN_BOXNUMBER
+							||PLAN_STARTDATE
+							||PLAN_ENDDATE
+							||PLAN_MAKINGPERSON
+							||PLAN_PERSON
+							||PLAN_STATUS like 
+							CONCAT(CONCAT('%',#{inventoryPlanQueryVo.condition,jdbcType=VARCHAR}),'%')
+						</if>
+					</where>
+					)A
+			WHERE A.ROW_NUM BETWEEN #{begin} AND #{end}
+		</select>
+		
+		<select id="countInventoryPlanInfoByCondition" resultType="int" parameterType="filemanage.inventoryandinquire.vo.InventoryPlanQueryVo">
+			SELECT COUNT(PLAN_ID)
+			FROM AM_INVENTORY_PLAN
+			<where>
+				<if test="planPerson!='' and planPerson!=null">
+					AND PLAN_PERSON=#{planPerson,jdbcType=VARCHAR}
+				</if>
+				<if test="planStatus!='' and planStatus!=null">
+					AND PLAN_STATUS=#{planStatus,jdbcType=VARCHAR}
+				</if>
+				<if test="condition!='' and condition!=null">
+					AND PLAN_BOXNUMBER
+					||PLAN_STARTDATE
+					||PLAN_ENDDATE
+					||PLAN_MAKINGPERSON
+					||PLAN_PERSON like 
+					CONCAT(CONCAT('%',#{condition,jdbcType=VARCHAR}),'%')
+				</if>
+			</where>
+		</select>
+		
+		<update id="addPlanIdInToAmCoBox">
+		   UPDATE AM_CO_BOX 
+       	   SET PLAN_ID =#{planId,jdbcType=VARCHAR}  
+       	   WHERE JOIN_PLAN='1'
+		</update>
+		
+		<!-- 将盘点计划的盘点状态设置为盘点中 -->
+		<update id="updatePlanStatusByPlanId">
+			UPDATE AM_INVENTORY_PLAN 
+			SET PLAN_STATUS='2'
+			WHERE PLAN_ID =#{planId,jdbcType=VARCHAR}
+		</update>
+		
+		<!-- 将计划表的信息盘点状态设置为已盘点 -->
+		<update id="updatePlanStatusByPlanIdThree">
+			UPDATE AM_INVENTORY_PLAN 
+			SET PLAN_STATUS='3',
+			PLAN_UPLOADADDRESS = #{planUploadaddress,jdbcType=VARCHAR}
+			WHERE 
+				PLAN_ID =#{planId,jdbcType=VARCHAR}
+		</update>
+		<!-- 查询计划信息 -->
+		<select id="queryPlanInfoByPlanId" resultMap="inventoryPlanMap">
+			SELECT * FROM AM_INVENTORY_PLAN
+			WHERE PLAN_ID =#{planId,jdbcType=VARCHAR}
+		</select>
+		
+		<!-- 查询盘点人 -->
+		<select id="queryPDJG" resultType="java.lang.String">
+			SELECT PDJG FROM AM_INVENTORY_PLAN
+			WHERE PLAN_ID =#{planId,jdbcType=VARCHAR}
+		</select>
+		
+		<!-- 下载盘点结果 -->
+		<select id="downloadPanDian" resultType="String">
+			SELECT PLAN_UPLOADADDRESS from AM_INVENTORY_PLAN 
+			where PLAN_ID = #{planId,jdbcType=VARCHAR}
+		</select>
+		
+		<!-- BOX_SERICALNUMBER -->
+		<update id="UpdataMapper" parameterType="map">
+		UPDATE AM_CO_BOX SET JUIDER = #{juider,jdbcType=VARCHAR} where BOX_SERICALNUMBER = #{je,jdbcType=VARCHAR}
+	</update>
+		
+</mapper>

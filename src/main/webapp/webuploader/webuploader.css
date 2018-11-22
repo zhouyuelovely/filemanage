@@ -1,0 +1,44 @@
+.webuploader-container {
+	display: inline-block;
+	position: relative;
+	height: 38px;
+    line-height: 38px;
+    padding: 0 18px;
+}
+.webuploader-element-invisible {
+	position: absolute !important;
+	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+    clip: rect(1px,1px,1px,1px);
+}
+.webuploader-pick {
+	display: inline-block;
+    height: 38px;
+    line-height: 38px;
+    padding: 0 18px;
+    background-color: #FF5722;
+    color: #fff;
+    white-space: nowrap;
+    text-align: center;
+    font-size: 14px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+}
+.webuploader-pick-hover {
+	background: #00a2d4;
+}
+
+.webuploader-pick-disable {
+	opacity: 0.6;
+	pointer-events:none;
+}
+.btns .btn{
+	font-family: inherit;
+    font-size: inherit;
+    font-style: inherit;
+    font-weight: inherit;
+    outline: 0;
+    background-color: #FF5722;
+    width: 80px;
+    height: 40px;
+}

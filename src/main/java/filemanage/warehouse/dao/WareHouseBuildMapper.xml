@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.warehouse.dao.WareHouseBuildMapper">
+    <resultMap type="filemanage.warehouse.pojo.WareHouseBuild" id="wareMap">
+	    <id property="wareHouseBuildId" column="WAREHOUSEBUILD_ID" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildNumber" column="WAREHOUSEBUILD_NUMBER" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildName" column="WAREHOUSEBUILD_NAME" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildLong" column="WAREHOUSEBUILD_LONG" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildWidth" column="WAREHOUSEBUILD_WIDTH" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildHigh" column="WAREHOUSEBUILD_HIGH" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildArea" column="WAREHOUSEBUILD_AREA" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildVolume" column="WAREHOUSEBUILD_VOLUME" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildDoor" column="WAREHOUSEBUILD_DOOR" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildWindow" column="WAREHOUSEBUILD_WINDOW" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildTemperature" column="WAREHOUSEBUILD_TEMPERATURE" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildHumidity" column="WAREHOUSEBUILD_HUMIDITY" jdbcType="DATE" />
+		<result property="wareHouseBuildShelvesNum" column="WAREHOUSEBUILD_SHELVESNUM" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildDirection" column="WAREHOUSEBUILD_DIRECTION" jdbcType="DATE" />
+		<result property="wareHouseBuildNamingDirection" column="WAREHOUSEBUILD_NAMINGDIRECTION" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildShelfNumber" column="WAREHOUSEBUILD_SHELFNUMBER" jdbcType="DATE" />
+		<result property="wareHouseBuildGroupsNum" column="WAREHOUSEBUILD_GROUPSNUM" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildGroupNameDirect" column="WAREHOUSEBUILD_GROUPNAMEDIRECT" jdbcType="DATE" />
+		<result property="wareHouseBuildGroupNumber" column="WAREHOUSEBUILD_GROUPNUMBER" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildLatticeNum" column="WAREHOUSEBUILD_LATTICENUM" jdbcType="DATE" />
+		<result property="wareHouseBuildLattiNameDirect" column="WAREHOUSEBUILD_LATTINAMEDIRECT" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildLatticeNumber" column="WAREHOUSEBUILD_LATTICENUMBER" jdbcType="DATE" />
+	</resultMap>
+
+	<!-- 窗户朝向表 -->
+	<resultMap type="filemanage.warehouse.pojo.WareHouseWindow" id="whwMap">
+		<id property="windowId" column="WINDOW_ID" jdbcType="VARCHAR" />
+		<result property="windowDirection" column="WINDOW_DIRECTION" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildId" column="WAREHOUSEBUILD_ID" jdbcType="DATE" />
+	</resultMap>
+	
+	<!-- 关键词查询辅助类 -->
+	<resultMap type="filemanage.warehouse.vo.QueryWareHouseBuildConditions" id="queryMap">
+		<id property="wareHouseBuildId" column="WAREHOUSEBUILD_ID" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildNumber" column="WAREHOUSEBUILD_NUMBER" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildName" column="WAREHOUSEBUILD_NAME" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildShelvesNum" column="WAREHOUSEBUILD_SHELVESNUM" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildGroupsNum" column="WAREHOUSEBUILD_GROUPSNUM" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildLatticeNum" column="WAREHOUSEBUILD_LATTICENUM" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildTemperature" column="WAREHOUSEBUILD_TEMPERATURE" jdbcType="VARCHAR" />
+		<result property="wareHouseBuildHumidity" column="WAREHOUSEBUILD_HUMIDITY" jdbcType="VARCHAR" />
+		<result property="condition" column="condition" jdbcType="VARCHAR" />
+	</resultMap>
+	
+
+	<!-- 页面展示所有库房信息 -->
+	<select id="wareHouseInfoListShow" parameterType="filemanage.warehouse.pojo.WareHouseBuild"
+		resultMap="wareMap">
+		select a.* 
+		from (
+			select ac.*,rownum row_num 
+			from (
+		select * from am_warehouse_warehousebuild
+		order by WAREHOUSEBUILD_NUMBER
+		) ac
+		) a
+		where a.row_num between #{begin} and #{end}
+	</select>
+
+	<!-- 统计所有库房数 -->
+	<select id="countWareHouseInfoListShow" resultType="int">
+		select count(*) from am_warehouse_warehousebuild
+	</select>
+	
+	<!-- 展示全部密集架数量 -->
+	<select id="listWareHouseBuildShelvesNum" resultMap="wareMap">
+	select
+	warehousebuild_shelvesnum
+	from
+	am_warehouse_warehousebuild
+	group by warehousebuild_shelvesnum
+	order by warehousebuild_shelvesnum
+	</select>
+	
+	<!-- 根据密集架数量获取组数 -->
+	<select id="listWareHouseBuildGroupsNum" resultMap="wareMap">
+	select
+	warehousebuild_groupsnum
+	from
+	am_warehouse_warehousebuild
+	where
+	warehousebuild_shelvesnum = #{wareHouseBuildShelvesNum,jdbcType = VARCHAR}
+	group by warehousebuild_groupsnum
+	order by warehousebuild_groupsnum
+	</select>
+	
+	<!-- 根据密集架数和组数进行筛选 -->
+	<select id="selectWareHouseInfoByShelvesNumAndGroupsNum" resultMap="wareMap" parameterType="map">
+	select a.* 
+		from (
+			select ac.*,rownum row_num 
+			from (
+	select * from am_warehouse_warehousebuild
+	where
+	WAREHOUSEBUILD_SHELVESNUM = #{wareHouseBuildShelvesNum,jdbcType = VARCHAR}
+	and
+	WAREHOUSEBUILD_GROUPSNUM = #{wareHouseBuildGroupsNum,jdbcType = VARCHAR}
+	order by WAREHOUSEBUILD_SHELVESNUM
+	) ac
+		) a
+		where a.row_num between #{begin} and #{end}
+	</select>
+	
+	<!-- 统计筛选后的全部库房数 -->
+	<select id="countWareHouseInfoByShelvesNumAndGroupsNum" resultType="int">
+	select count(*) from am_warehouse_warehousebuild
+	where
+	WAREHOUSEBUILD_SHELVESNUM = #{wareHouseBuildShelvesNum,jdbcType = VARCHAR}
+	and
+	WAREHOUSEBUILD_GROUPSNUM = #{wareHouseBuildGroupsNum,jdbcType = VARCHAR}
+	</select>
+	
+	<!-- 关键词查询全部库房信息 -->
+	<select id="selectWareHouseInfoByConditions" resultMap="queryMap" parameterType="map">
+	select a.* 
+		from (
+			select ac.*,rownum row_num
+			from (
+	select * from am_warehouse_warehousebuild
+	where
+	WAREHOUSEBUILD_NUMBER || WAREHOUSEBUILD_NAME || WAREHOUSEBUILD_SHELVESNUM || WAREHOUSEBUILD_GROUPSNUM || WAREHOUSEBUILD_LATTICENUM || WAREHOUSEBUILD_TEMPERATURE || WAREHOUSEBUILD_HUMIDITY like
+	CONCAT(CONCAT('%',#{condition,jdbcType=VARCHAR}),'%')	
+	)ac
+	)a
+		where a.row_num between #{begin} and #{end}
+	</select>
+	
+	<!-- 统计筛选后所有库房数 -->
+	<select id="countWareHouseInfoByConditions" resultType="int">
+	select count(WAREHOUSEBUILD_ID) from am_warehouse_warehousebuild
+	where
+	WAREHOUSEBUILD_NUMBER || WAREHOUSEBUILD_NAME || WAREHOUSEBUILD_SHELVESNUM || WAREHOUSEBUILD_GROUPSNUM || WAREHOUSEBUILD_LATTICENUM || WAREHOUSEBUILD_TEMPERATURE || WAREHOUSEBUILD_HUMIDITY like
+	CONCAT(CONCAT('%',#{condition,jdbcType=VARCHAR}),'%')	
+	</select>
+	
+	<!-- 删除库房信息 -->
+	<delete id="deleteOneWareHouseInfo" parameterType="java.lang.String">
+	delete from
+	am_warehouse_warehousebuild
+	where
+	WAREHOUSEBUILD_ID=#{wareHouseBuildId,jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- 判断要删除的库房下有无数据 -->
+	<select id="countWareHouseUnderHaveInfo" parameterType="java.lang.String" resultType="int">
+	select count(*) from am_co_box acb
+  left join am_warehouse_storage aws
+    on acb.storage_id = aws.storage_id
+  left join am_warehouse_warehousebuild aww
+    on aww.warehousebuild_id = aws.warehousebuild_id
+ where aws.warehousebuild_id = (select aww.warehousebuild_id
+          from am_warehouse_warehousebuild aww
+         where aww.warehousebuild_id = #{wareHouseBuildId,jdbcType = VARCHAR})
+	</select>
+	<!-- 库房建设_编辑 -->
+	<update id="updateOneWareHouseInfo" parameterType="filemanage.warehouse.pojo.WareHouseBuild">
+	    UPDATE
+		AM_WAREHOUSE_WAREHOUSEBUILD
+		SET
+		WAREHOUSEBUILD_NAME=#{wareHouseBuildName,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_NUMBER=#{wareHouseBuildNumber,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_LONG=#{wareHouseBuildLong,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_WIDTH=#{wareHouseBuildWidth,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_HIGH=#{wareHouseBuildHigh,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_AREA=#{wareHouseBuildArea,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_VOLUME=#{wareHouseBuildVolume,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_DOOR=#{wareHouseBuildDoor,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_WINDOW=#{wareHouseBuildWindow,jdbcType=VARCHAR},	
+		WAREHOUSEBUILD_TEMPERATURE=#{wareHouseBuildTemperature,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_HUMIDITY=#{wareHouseBuildHumidity,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_SHELVESNUM=#{wareHouseBuildShelvesNum,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_DIRECTION=#{wareHouseBuildDirection,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_NAMINGDIRECTION=#{wareHouseBuildNamingDirection,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_SHELFNUMBER=#{wareHouseBuildShelfNumber,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_GROUPSNUM=#{wareHouseBuildGroupsNum,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_GROUPNAMEDIRECT=#{wareHouseBuildGroupNameDirect,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_GROUPNUMBER=#{wareHouseBuildGroupNumber,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_LATTICENUM=#{wareHouseBuildLatticeNum,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_LATTINAMEDIRECT=#{wareHouseBuildLattiNameDirect,jdbcType=VARCHAR},
+		WAREHOUSEBUILD_LATTICENUMBER=#{wareHouseBuildLatticeNumber,jdbcType=VARCHAR}
+		where
+		warehousebuild_id = #{wareHouseBuildId,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 根据主键查询库房信息 -->
+	<select id="queryWareHouseInfo" resultMap="wareMap" parameterType="java.lang.String">
+	select * from am_warehouse_warehousebuild
+    where warehousebuild_id = #{wareHouseBuildId,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 添加库房信息 -->
+	<insert id="addWareHouseInfo" parameterType="filemanage.warehouse.pojo.WareHouseBuild">
+	insert into am_warehouse_warehousebuild
+	(WAREHOUSEBUILD_ID,WAREHOUSEBUILD_NAME,WAREHOUSEBUILD_NUMBER,WAREHOUSEBUILD_LONG,WAREHOUSEBUILD_WIDTH,
+	WAREHOUSEBUILD_HIGH,WAREHOUSEBUILD_AREA,WAREHOUSEBUILD_VOLUME,WAREHOUSEBUILD_DOOR,WAREHOUSEBUILD_TEMPERATURE,
+	WAREHOUSEBUILD_HUMIDITY,WAREHOUSEBUILD_SHELVESNUM,WAREHOUSEBUILD_DIRECTION,WAREHOUSEBUILD_NAMINGDIRECTION,
+	WAREHOUSEBUILD_SHELFNUMBER,WAREHOUSEBUILD_GROUPSNUM,WAREHOUSEBUILD_GROUPNAMEDIRECT,
+	WAREHOUSEBUILD_GROUPNUMBER,WAREHOUSEBUILD_LATTICENUM,WAREHOUSEBUILD_LATTINAMEDIRECT,
+	WAREHOUSEBUILD_LATTICENUMBER,WAREHOUSEBUILD_WINDOW)
+	values
+	(sys_guid(),
+	#{wareHouseBuildName,jdbcType=VARCHAR},#{wareHouseBuildNumber,jdbcType=VARCHAR},#{wareHouseBuildLong,jdbcType=VARCHAR},
+	#{wareHouseBuildWidth,jdbcType=VARCHAR},#{wareHouseBuildHigh,jdbcType=VARCHAR},#{wareHouseBuildArea,jdbcType=VARCHAR},
+	#{wareHouseBuildVolume,jdbcType=VARCHAR},#{wareHouseBuildDoor,jdbcType=VARCHAR},#{wareHouseBuildTemperature,jdbcType=VARCHAR},
+	#{wareHouseBuildHumidity,jdbcType=VARCHAR},#{wareHouseBuildShelvesNum,jdbcType=VARCHAR},#{wareHouseBuildDirection,jdbcType=VARCHAR},
+	#{wareHouseBuildNamingDirection,jdbcType=VARCHAR},#{wareHouseBuildShelfNumber,jdbcType=VARCHAR},#{wareHouseBuildGroupsNum,jdbcType=VARCHAR},
+	#{wareHouseBuildGroupNameDirect,jdbcType=VARCHAR},#{wareHouseBuildGroupNumber,jdbcType=VARCHAR},#{wareHouseBuildLatticeNum,jdbcType=VARCHAR},
+	#{wareHouseBuildLattiNameDirect,jdbcType=VARCHAR},#{wareHouseBuildLatticeNumber,jdbcType=VARCHAR},#{wareHouseBuildWindow,jdbcType=VARCHAR}
+	)
+	</insert>
+	
+	<!-- 判断库房号是否存在 -->
+	<select id="isExitWareHouseBuildNumber" parameterType="filemanage.warehouse.pojo.WareHouseBuild" resultType="int">
+	select count(1) from am_warehouse_warehousebuild
+	where
+	WAREHOUSEBUILD_NUMBER=#{wareHouseBuildNumber,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 判断库房名称是否存在 -->
+	<select id="isExitWareHouseBuildName" parameterType="filemanage.warehouse.pojo.WareHouseBuild" resultType="int">
+	select count(1) from am_warehouse_warehousebuild
+	where
+	WAREHOUSEBUILD_NAME=#{wareHouseBuildName,jdbcType=VARCHAR}
+	</select>
+
+</mapper>

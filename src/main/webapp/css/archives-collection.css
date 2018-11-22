@@ -1,0 +1,82 @@
+	@charset "utf-8";
+	body {
+		background: #F0F2F9;
+	}
+	/*版权*/
+	
+	.copy {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 20px;
+		text-align: center;
+		color: #FFFFFF;
+		background: #000000;
+	}
+	
+	.copy a {
+		color: #FFFFFF;
+	}
+	/*logo及标题*/
+	
+	.logo_nav {
+		position: fixed;
+		left: 0;
+		width: 100%;
+		height: 60px;
+		box-sizing: border-box;
+		background-color: #fff;
+	}
+	
+	.logo_img img {
+		float: left;
+		padding: 5px 0;
+	}
+	
+	.logo {
+		text-align: center;
+		line-height: 60px;
+		font-weight: bold;
+		font-size: 20px;
+		color: #EA5519;
+	}
+	
+	#home {
+		display: inline-block;
+		float: right;
+		padding-right: 80px;
+	}
+	/*档案收集整理导航栏*/
+	
+	#top_nav {
+		background: #EA5519;
+		text-align: center;
+		left: 0;
+		top: 0;
+	}
+	
+	.top_bar {
+		position: fixed;
+		top: 60px;
+		left: 0;
+		width: 100%;
+		height: 60px;
+	}
+	.layui-body{
+		top:120px!important;
+	}
+	#index-bg{
+		top:60px!important;
+	}
+	.top_bar li a {
+		display: inline-block;
+		height: 60px;
+		line-height: 60px;
+		font-size: 18px;
+		padding: 0 5px 0 0;
+		color: #fff;
+	}
+	.inline,#for input,#for1 input{
+	  display: inline-block!important;
+	}

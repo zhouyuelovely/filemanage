@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc" 
+	   xmlns:task="http://www.springframework.org/schema/task"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+	   	http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+		http://www.springframework.org/schema/task
+		http://www.springframework.org/schema/task/spring-task-3.0.xsd ">
+	<context:property-placeholder location="classpath:jdbc.properties"/>
+	<!-- 启动自动扫描 -->
+	<context:component-scan base-package=" filemanage.login.controller,
+	                                       filemanage.login.service.**,
+	                                       filemanage.login.util.encryption,
+										   filemanage.collectandorganize.controller,
+	                                       filemanage.collectandorganize.service.**,
+	                                       filemanage.digitalarchives.controller,
+	                                       filemanage.systemmanage.controller,
+	                                       filemanage.systemmanage.service.**,
+	                                       filemanage.digitalarchives.service.**,
+	                                       filemanage.login.util.**,
+	                                       filemanage.fileBorrowing.controller,
+	                                       filemanage.fileBorrowing.service.**,
+	                                       filemanage.inventoryandinquire.controller,
+	                                       filemanage.inventoryandinquire.service.**,
+	                                       filemanage.recorded.controller,
+	                                       filemanage.recorded.service.**,
+	                                       filemanage.statistics.controller,
+	                                       filemanage.statistics.service.**,
+	                                       filemanage.warehouse.controller,
+	                                       filemanage.warehouse.service.**,
+	                                       filemanage.warningandediting.controller,
+	                                       filemanage.warningandediting.service.**,
+	                                       filemanage.danganmanage.controller,
+	                                       filemanage.danganmanage.service.**,
+	                                       filemanage.utils.historyFile,
+	                                       filemanage.login.util.realm"
+		use-default-filters="false">
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+		<context:include-filter type="annotation"
+			expression="org.springframework.web.bind.annotation.ControllerAdvice" />
+	</context:component-scan>
+
+	<!-- 注册MVC注解驱动 -->
+	<mvc:annotation-driven />
+
+	
+
+	<!-- 静态资源可访问的设置方式 -->
+	<mvc:default-servlet-handler />
+
+	<!-- 静态资源 -->
+	<mvc:resources mapping="/imgs/**" location="/imgs/" />
+	<mvc:resources mapping="/js/**" location="/js/" />
+	<mvc:resources mapping="/css/**" location="/css/" />
+	<!-- 配置静态资源，直接映射到对应的文件夹，不被DispatcherServlet处理，3.04新增功能，需要重新设置spring-mvc-3.0.xsd -->
+	<mvc:resources mapping="/cab/**" location="/cab/" />
+	
+	<mvc:resources mapping="/tessdata/**" location="/tessdata/" />
+
+	<!-- 配置视图解析器，可以显式设置，也可以不设置，不设置会依据SpringMVC的默认设置 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	<!--设置定时任务 -->
+	<task:annotation-driven />
+	
+	<!-- 配置文件上传，如果没有使用文件上传可以不用配置，当然如果不配，那么配置文件中也不必引入上传组件包 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 默认编码 -->
+		<property name="defaultEncoding" value="utf-8" />
+		<!-- 文件大小最大值 -->
+		<property name="maxUploadSize" value="3298534883328" />
+		<!-- 内存中的最大值 -->
+		<property name="maxInMemorySize" value="40960" />
+	</bean>
+
+	<!-- 该异常是SpringMVC在检查上传的文件信息时抛出来的，而且此时还没有进入到Controller方法中 -->
+	<bean id="exceptionResolver"
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<!-- 遇到MaxUploadSizeExceededException异常时，自动跳转到/WEB-INF/views/error_fileupload.jsp页面 -->
+				<prop
+					key="org.springframework.web.multipart.MaxUploadSizeExceededException">error_fileupload</prop>
+			</props>
+		</property>
+	</bean>
+	
+	 <!-- 控制器异常处理 -->
+    <bean id="exceptionHandlerExceptionResolver" class="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver">
+    </bean>
+	<bean class="filemanage.login.util.exception.DefaultExceptionHandler"/>
+	
+	<bean id="annotationMethodHandlerAdapter"
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="cacheSeconds" value="0" />
+		<property name="messageConverters">
+			<list>
+				<bean
+					class="org.springframework.http.converter.StringHttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>text/html;charset=UTF-8</value>
+						</list>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+
+	<import resource="spring-mvc-shiro.xml" />
+
+
+</beans>

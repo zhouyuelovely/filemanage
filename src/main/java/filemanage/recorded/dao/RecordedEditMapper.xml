@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.recorded.dao.RecordedEditMapper">
+	<resultMap type="filemanage.systemmanage.pojo.AmCoBox" id="boxMap">
+		<id property="boxid" column="box_id" jdbcType="VARCHAR"/>
+		<result property="boxstartnumber" column="box_startnumber" jdbcType="VARCHAR"/>
+		<result property="boxendnumber" column="box_endnumber" jdbcType="VARCHAR"/>
+		<result property="boxnumber" column="box_number" jdbcType="VARCHAR"/>
+		<result property="boxthickness" column="box_thickness" jdbcType="VARCHAR"/>
+		<result property="boxpage" column="box_page" jdbcType="VARCHAR"/>
+		<result property="boxBoxingStart" column="box_boxingstart" jdbcType="VARCHAR"/>
+		<result property="boxanual" column="box_anual" jdbcType="VARCHAR"/>
+		<association property="archive" javaType="filemanage.systemmanage.pojo.Archive">
+			<id property="quanzongId" column="quanzong_id" jdbcType="VARCHAR"/>
+			<result property="quanzongNumber" column="quanzong_number" jdbcType="VARCHAR"/>
+			<result property="quanzongName" column="quanzong_name" jdbcType="VARCHAR"/>
+		</association>
+		<association property="primaryClassFication" javaType="filemanage.systemmanage.pojo.PrimaryClassFication">
+			<id property="pcId" column="pc_id" jdbcType="VARCHAR"/>
+			<result property="pcName" column="" jdbcType="VARCHAR"/>
+		</association>
+		<association property="secondryClassFication" javaType="filemanage.systemmanage.pojo.SecondryClassFication">
+			<id property="scId" column="sc_id" jdbcType="VARCHAR"/>
+			<result property="scName" column="sc_name" jdbcType="VARCHAR"/>
+		</association>
+		<association property="retentionperiod" javaType="filemanage.systemmanage.pojo.AmMaSmRetentionperiod">
+			<id property="retentionperiodid" column="retentionperiod_id" jdbcType="VARCHAR"/>
+			<result property="retentionperiodname" column="retentionperiod_name" jdbcType="VARCHAR"/>
+		</association>
+	</resultMap>
+	<sql id="boxCon">
+		select 
+		acb.box_id,
+		acb.box_startnumber,
+		acb.box_endnumber,
+		acb.box_number,
+		acb.box_thickness,
+		acb.box_page,
+		acb.box_boxingstart,
+		acb.box_anual,
+		amsq.quanzong_id,
+		amsq.quanzong_number,
+		amsq.quanzong_name,
+		amsp.pc_id,
+		amsp.pc_name,
+		amss.sc_id,
+		amss.sc_name,
+		amsr.retentionperiod_id,
+		amsr.retentionperiod_name 
+		from  
+		am_co_box acb 
+		left join 
+		am_ma_sm_quanzong amsq
+		on amsq.quanzong_id=acb.quanzong_id 
+		left join 
+		am_ma_sm_primaryclassification amsp 
+		on amsp.pc_id=acb.pc_id 
+		left join 
+		am_ma_sm_sclassification amss
+		on amss.sc_id=acb.sc_id 
+		left join 
+		am_ma_sm_retentionperiod amsr 
+		on acb.retentionperiod_id=amsr.retentionperiod_id 
+	</sql>
+	
+	
+	<!--查询盒子信息  -->
+	<select id="findAmCoBoxByBoxId" resultMap="boxMap">
+		<include refid="boxCon"/>
+		where 
+		acb.box_id=#{boxId,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 添加盒子备考表信息 -->
+	<update id="updateAmCoBoxattachment">
+		update 
+		am_co_boxattachment acba 
+		set 
+		acba.boxattachment_form=#{formAddress,jdbcType=VARCHAR} 
+		where 
+		acba.box_id=#{boxId,jdbcType=VARCHAR}
+	</update>
+	<!-- 查询备考表 -->
+	<select id="havingBoxForm" resultType="java.lang.String">
+		select 
+		acba.boxattachment_form 
+		from 
+		am_co_boxattachment acba 
+		where 
+		acba.box_id=#{boxId,jdbcType=VARCHAR}
+	</select>
+	<update id="updateAllAmCoBoxattachment" parameterType="filemanage.recorded.vo.BoxAttachmentHelp">
+		update 
+		am_co_boxattachment amba 
+		set 
+		amba.boxattachment_box=#{boxattachmentBox},
+		amba.boxattachment_file=#{boxattachmentFile},
+		amba.boxattachment_form=#{boxattachmentForm},
+		amba.box_id=#{boxId},
+		amba.box_year=#{boxYear},
+		amba.quanzong_id=#{quanzongId} 
+		where 
+		amba.boxattachment_id=#{boxattachmentId}
+	</update>
+</mapper>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.recorded.dao.HisoryDataMapper">
+	
+	<insert id="addHistoryData" parameterType="java.util.List">
+		INSERT INTO 
+		AM_FD_HISTORYDATA
+		(
+		historydata_id,
+		historydata_title,
+		historydata_number,
+		historydata_typecode,
+		historydata_pages,
+		historydata_filedate,
+		historydata_type,
+		historydata_security_level,
+		quanzong_number,
+		historydata_archivalyear,
+		historydata_partnumber,
+		retentionperiod_name,
+		organization_name,
+		historydata_af_responsible,
+		historydata_referencenumber,
+		historydata_name,
+		historydata_clificationnum,
+		historydata_boxnumber,
+		keywords,
+		historydata_textitem,
+		historydata_carriertype,
+		historydata_carriermorphology,
+		historydata_admissiondate,
+		historydata_notes,
+		quanzong_name,
+		retentionperiod_code,
+		organization_code
+		)
+		<foreach collection="list" item="historyData" index="index" separator="union all">
+			(
+			SELECT 
+			#{historyData.historydataId,jdbcType = VARCHAR},
+			#{historyData.historydataTitle,jdbcType = VARCHAR},
+			#{historyData.historydataNumber,jdbcType = VARCHAR},
+			#{historyData.historydataTypecode,jdbcType = VARCHAR},
+			#{historyData.historydataPages,jdbcType = VARCHAR},
+			#{historyData.historydataFiledate,jdbcType = VARCHAR},
+			#{historyData.historydataType,jdbcType = VARCHAR},
+			#{historyData.historydataSecurityLevel,jdbcType = VARCHAR},
+			#{historyData.quanzongNumber,jdbcType = VARCHAR},
+			#{historyData.historydataArchivalYear,jdbcType = VARCHAR},
+			#{historyData.historydataPartNumber,jdbcType = VARCHAR},
+			#{historyData.retentionperiodName,jdbcType = VARCHAR},
+			#{historyData.organizationName,jdbcType = VARCHAR},
+			#{historyData.historydataAFResponsible,jdbcType = VARCHAR},
+			#{historyData.historydataReferencenumber,jdbcType = VARCHAR},
+			#{historyData.historydataName,jdbcType = VARCHAR},
+			#{historyData.historydataClificationNum,jdbcType = VARCHAR},
+			#{historyData.historydataBoxNumber,jdbcType = VARCHAR},
+			#{historyData.keywords,jdbcType = VARCHAR},
+			#{historyData.historydataTextitem,jdbcType = VARCHAR},
+			#{historyData.historydataCarrierType,jdbcType = VARCHAR},
+			#{historyData.historydataCarriermorphology,jdbcType = VARCHAR},
+			#{historyData.historydataAdmissiondate,jdbcType = VARCHAR},
+			#{historyData.historydataNotes,jdbcType = VARCHAR},
+			#{historyData.quanzongName,jdbcType = VARCHAR},
+			#{historyData.retentionperiodCode,jdbcType = VARCHAR},
+			#{historyData.organizationCode,jdbcType = VARCHAR} 
+			FROM DUAL
+			)
+		</foreach> 
+	</insert>
+	
+	
+	<insert id="addHistoryAnnex" parameterType="java.util.List">
+		insert into /*+append_values */
+		AM_FD_HISTORYANNEX
+		(
+		historyannex_id,
+		historyannex_path,
+		historyannex_name,
+		historydata_id
+		)
+		<foreach collection="list" item="historyAnnex" index="index" separator="union all">
+			(
+			select 
+			#{historyAnnex.historyannexId,jdbcType = VARCHAR},
+			#{historyAnnex.historyannexPath,jdbcType = VARCHAR},
+			#{historyAnnex.historyannexName,jdbcType = VARCHAR},
+			#{historyAnnex.historydataId,jdbcType = VARCHAR} 
+			from dual
+			) 
+		</foreach>
+	</insert>
+	<select id="queryQuanzongName" parameterType="java.lang.String" resultType="java.lang.String">
+		select amsq.quanzong_name from am_ma_sm_quanzong amsq 
+		where amsq.quanzong_number=#{quanzongNumber}
+	</select>
+	<select id="queryRetentionperiodId" parameterType="java.lang.String" resultType="java.lang.String">
+		select amsr.retentionperiod_id from am_ma_sm_retentionperiod amsr 
+		where amsr.retentionperiod_name=#{retentionperiodName}
+	</select>
+	<select id="queryHistorydataType" parameterType="java.lang.String" resultType="java.lang.String">
+		select amsp.pc_id from am_ma_sm_primaryclassification amsp 
+		where amsp.pc_name=#{typeName}
+	</select>
+	<select id="queryOrganizationId" parameterType="java.lang.String" resultType="java.lang.String">
+		select amss.sc_id from am_ma_sm_sclassification amss 
+		where amss.sc_name=#{oraginName}
+	</select>
+</mapper>

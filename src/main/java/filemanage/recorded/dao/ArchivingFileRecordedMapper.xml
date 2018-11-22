@@ -1,0 +1,433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.recorded.dao.ArchivingFileRecordedMapper">
+	<resultMap type="filemanage.recorded.vo.ConditionHelp" id="conditionMap">
+		<result property="condition" column="condition" jdbcType="VARCHAR"/>
+		<result property="id" column="id" jdbcType="VARCHAR"/>
+	</resultMap>
+	<resultMap type="filemanage.collectandorganize.pojo.ArchiveFile" id="fileMap">
+		<id property="archiveFileId" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+		<result property="archiveFileFileNumber" column="ARCHIVEFILE_FILENUMBER" jdbcType="VARCHAR"/>
+		<result property="archiveFileReferenceNumber" column="ARCHIVEFILE_REFERENCENUMBER" jdbcType="VARCHAR"/>
+		<result property="archiveFileResponsible" column="ARCHIVEFILE_RESPONSIBLE" jdbcType="VARCHAR"/>
+		<result property="archiveFileTitle" column="ARCHIVEFILE_TITLE" jdbcType="VARCHAR"/>
+		<result property="archiveFileCreatetime" column="ARCHIVEFILE_CREATETIME" jdbcType="VARCHAR"/>
+		<result property="afSecurityClassrification" column="AF_SECURITYCLASSRIFICATION" jdbcType="VARCHAR"/>
+		<result property="archiveFilePages" column="ARCHIVEFILE_PAGES" jdbcType="VARCHAR"/>
+		<result property="archiveFileRemark" column="ARCHIVEFILE_REMARK" jdbcType="VARCHAR"/>
+		<result property="archiveFileIsUpload" column="ARCHIVEFILE_ISUPLOAD" jdbcType="VARCHAR"/>
+	</resultMap>
+	<!-- 查询全宗主键 -->
+	<select id="queryQuanZongId" parameterType="java.lang.String" resultType="java.lang.String">
+		select 
+		amsq.quanzong_id 
+		from 
+		am_ma_sm_quanzong amsq 
+		where 
+		amsq.quanzong_number =#{quanZongNumber,jdbcType = VARCHAR}
+	</select>
+	<!-- 查询保管期限主键 -->
+	<select id="queryRetentionPeriodId" parameterType="java.lang.String" resultType="java.lang.String">
+		select 
+		amsr.retentionperiod_id 
+		from 
+		am_ma_sm_retentionperiod amsr 
+		where amsr.retentionperiod_code=#{retentionPeriodCode,jdbcType = VARCHAR}
+	</select>
+	<!-- 查询一级分类主键 -->
+	<select id="queryPcId" parameterType="java.lang.String" resultType="java.lang.String">
+		select 
+		amsp.pc_id 
+		from 
+		am_ma_sm_primaryclassification amsp 
+		where amsp.pc_code=#{pcCode}
+	</select>
+	<!-- 查询二级分类主键 -->
+	<select id="queryScId" parameterType="java.lang.String" resultType="java.lang.String">
+		select 
+		amss.sc_id 
+		from 
+		am_ma_sm_sclassification amss 
+		where amss.sc_code=#{scCode,jdbcType = VARCHAR}
+	</select>
+	<!-- 添加盒信息 -->
+	<insert id="addBoxInfor" parameterType="filemanage.recorded.vo.BoxAddHelp">
+		insert into 
+		am_co_box(
+		box_id,
+		box_status,
+		box_casesnumber,
+		quanzong_id,
+		box_anual,
+		retentionperiod_id,
+		box_startnumber,
+		box_endnumber,
+		box_auditstart,
+		sc_id,
+		box_boxingstart,
+		pc_id
+		) 
+		values
+		(
+			#{boxid,jdbcType = VARCHAR},
+			#{boxstatus,jdbcType = VARCHAR},
+			#{boxcasesnumber,jdbcType = VARCHAR},
+			#{quanZongId,jdbcType = VARCHAR},
+			#{anual,jdbcType = VARCHAR},
+			#{retentionperiodid,jdbcType = VARCHAR},
+			#{boxstartnumber,jdbcType = VARCHAR},
+			#{boxendnumber,jdbcType = VARCHAR},
+			#{boxAuditstart,jdbcType = VARCHAR},
+			#{scId,jdbcType = VARCHAR},
+			#{boxBoxingStart,jdbcType = VARCHAR},
+			#{pcId,jdbcType = VARCHAR}
+		)
+	</insert>
+	
+	<select id="selectCount" resultType="int" parameterType="filemanage.recorded.vo.BoxAddHelp">
+		select count(BOX_ID) from am_co_box
+		where BOX_ID = #{boxid,jdbcType = VARCHAR}
+	</select>
+	<!--  添加文件信息-->
+	<insert id="addArchiveFile" parameterType="java.util.List">
+		insert into 
+		am_co_archivefile
+		(
+		archivefile_id,
+		archivefile_responsible,
+		archivefile_createtime,
+		archivefile_anual,
+		archivefile_title,
+		quanzong_id,
+		archivefile_pages,
+		primaryclassification_id,
+		secondaryclassification_id,
+		retentionperiod_id,
+		af_securityclassrification,
+		archivefile_filenumber,
+		archivefile_referencenumber,
+		archivefile_remark,
+		box_id,
+		archivefile_isupload
+		)
+		<foreach collection="list" item="af" index="index" separator="union all">
+			select 
+				#{af.archiveFileId,jdbcType = VARCHAR},
+				#{af.archiveFileResponsible,jdbcType = VARCHAR},
+				#{af.archiveFileCreatetime,jdbcType = VARCHAR},
+				#{af.anual,jdbcType = VARCHAR},
+				#{af.archiveFileTitle,jdbcType = VARCHAR},
+				#{af.quanZongId,jdbcType = VARCHAR},
+				#{af.archiveFilePages,jdbcType = VARCHAR},
+				#{af.pcId,jdbcType = VARCHAR},
+				#{af.scId,jdbcType = VARCHAR},
+				#{af.retentionperiodid,jdbcType = VARCHAR},
+				#{af.afSecurityClassrification,jdbcType = VARCHAR},
+				#{af.archiveFileFileNumber,jdbcType = VARCHAR},
+				#{af.archiveFileReferenceNumbe,jdbcType = VARCHAR},
+				#{af.archiveFileRemark,jdbcType = VARCHAR},
+				#{af.boxid,jdbcType = VARCHAR},
+				#{af.archiveFileIsUpload,jdbcType = VARCHAR} 
+			from dual
+		</foreach>
+	</insert>
+	<!--查询盒子相关信息  -->
+	<select id="findQuanzongNumber" resultMap="conditionMap">
+		select 
+		distinct amsq.quanzong_number condition,amsq.quanzong_id id 
+		from am_ma_sm_quanzong amsq
+	</select>
+	<select id="findQuanzongName" resultMap="conditionMap">
+		select 
+		distinct amsq.quanzong_name condition,amsq.quanzong_id id 
+		from am_ma_sm_quanzong amsq
+	</select>
+	<select id="findPcId" resultMap="conditionMap">
+		select 
+		distinct amsp.pc_name condition,amsp.pc_id id 
+		from am_ma_sm_primaryclassification amsp
+	</select>
+	<select id="findScId" resultMap="conditionMap">
+		select 
+		distinct amss.sc_name condition,amss.sc_id id 
+		from am_ma_sm_sclassification amss
+	</select>
+	<select id="findRetentionperiodName" resultMap="conditionMap">
+		select 
+		amsr.retentionperiod_name condition,amsr.retentionperiod_id id 
+		from am_ma_sm_retentionperiod amsr
+	</select>
+	<select id="findBoxpropertyPag" resultMap="conditionMap">
+		select 
+		distinct acb.boxproperty_pag condition,acb.boxproperty_thickness id 
+		from am_co_boxproperty acb
+	</select>
+	<!-- 判断盒号是否存在 -->
+	<select id="findAmCoBoxByCondition" parameterType="filemanage.recorded.vo.PreparationFormHelp" resultType="filemanage.systemmanage.pojo.AmCoBox">
+		select acb.*
+		from am_co_box acb 
+		where 
+		acb.quanzong_id=#{qzId,jdbcType = VARCHAR} 
+		and acb.box_anual=#{anual,jdbcType = VARCHAR} 
+		and acb.retentionperiod_id=#{rtId,jdbcType = VARCHAR} 
+		and acb.pc_id=#{pcId,jdbcType = VARCHAR} 
+		and acb.sc_id=#{scId,jdbcType = VARCHAR} 
+		and acb.box_number=#{boxNumber,jdbcType = VARCHAR} 
+	</select>
+	<!-- 查询保管期限代码 -->
+	<select id="findRetentionCode" resultType="java.lang.String">
+		select 
+		amsr.retentionperiod_code 
+		from am_ma_sm_retentionperiod amsr 
+		where amsr.retentionperiod_id=#{rtId,jdbcType = VARCHAR}
+	</select>
+	<!-- 更新盒子信息 -->
+	<update id="updataBoxInfor" parameterType="filemanage.recorded.vo.SaveBoxInfor">
+		update 
+		am_co_box acb 
+		set 
+		acb.box_situation=#{boxsituation,jdbcType = VARCHAR},
+		acb.box_sericalnumber=#{boxsericalnumber,jdbcType = VARCHAR},
+		acb.box_thickness=#{boxthickness,jdbcType = VARCHAR},
+		acb.box_page=#{boxpage,jdbcType = VARCHAR},
+		acb.quanzong_id=#{quanzongId,jdbcType = VARCHAR},
+		acb.box_anual=#{boxanual,jdbcType = VARCHAR},
+		acb.retentionperiod_id=#{retentionperiodid,jdbcType = VARCHAR},
+		acb.box_startnumber=#{boxstartnumber,jdbcType = VARCHAR},
+		acb.box_endnumber=#{boxendnumber,jdbcType = VARCHAR},
+		acb.box_number=#{boxnumber,jdbcType = VARCHAR},
+		acb.sc_id=#{scId,jdbcType = VARCHAR},
+		acb.box_status ='4',
+		acb.pc_id=#{pcId,jdbcType = VARCHAR} 
+		where 
+		acb.box_id=#{boxId,jdbcType = VARCHAR}
+	</update>
+	<!--添加盒子附件信息  -->
+	<insert id="addBoxAttechment" parameterType="filemanage.recorded.vo.BoxAttachmentHelp">
+		insert into 
+		am_co_boxattachment
+		(
+		boxattachment_id,
+		boxattachment_box,
+		boxattachment_file,
+		boxattachment_form,
+		box_id,
+		box_year,
+		quanzong_id
+		) 
+		values
+		(
+		#{boxattachmentId,jdbcType = VARCHAR},
+		#{boxattachmentBox,jdbcType = VARCHAR},
+		#{boxattachmentFile,jdbcType = VARCHAR},
+		#{boxattachmentForm,jdbcType = VARCHAR},
+		#{boxId,jdbcType = VARCHAR},
+		#{boxYear,jdbcType = VARCHAR},
+		#{quanzongId,jdbcType = VARCHAR}
+		)
+	</insert>
+	<!--查询盒子下文件信息  -->
+	<sql id="fileSql">
+		select 
+		archivefile_id,
+		ARCHIVEFILE_FILENUMBER,
+		ARCHIVEFILE_REFERENCENUMBER,
+		ARCHIVEFILE_RESPONSIBLE,
+		ARCHIVEFILE_TITLE,
+		ARCHIVEFILE_CREATETIME,
+		AF_SECURITYCLASSRIFICATION,
+		ARCHIVEFILE_PAGES,
+		ARCHIVEFILE_REMARK,
+		ARCHIVEFILE_ISUPLOAD 
+		from am_co_archivefile 
+	</sql>
+	<select id="findArchiveFileByBoxId" resultMap="fileMap" parameterType="map">
+		select 
+		ac.* 
+		from (
+		select 
+		aca.*,rownum row_num 
+		from (
+		<include refid="fileSql"/>
+		where box_id=#{boxId,jdbcType = VARCHAR} 
+		order by to_char(ARCHIVEFILE_CREATETIME)
+		) aca
+		)ac 
+		where 
+		ac.row_num between #{begin} and #{end}
+	</select>
+	<select id="countArchiveFileByBoxId" resultType="int">
+		select count(archivefile_id) 
+		from am_co_archivefile 
+		where box_id=#{boxId,jdbcType = VARCHAR} 
+	</select>
+	<!--查询盒子下所有文件  -->
+	<select id="findAllArchiveFileByBoxId" resultMap="fileMap">
+		<include refid="fileSql"/>
+		where box_id=#{boxId,jdbcType = VARCHAR} 
+	</select>
+	
+	<update id="updataFileInfor">
+		update 
+		am_co_archivefile 
+		set 
+		<if test='content=="archiveFileFileNumber".toString()'>
+			ARCHIVEFILE_FILENUMBER=#{value,jdbcType = VARCHAR} 
+		</if>
+		<if test='content=="archiveFileReferenceNumber".toString()'>
+			ARCHIVEFILE_REFERENCENUMBER=#{value,jdbcType = VARCHAR} 
+		</if>
+		<if test='content=="archiveFileResponsible".toString()'>
+			ARCHIVEFILE_RESPONSIBLE=#{value,jdbcType = VARCHAR} 
+		</if>
+		<if test='content=="archiveFileTitle".toString()'>
+			ARCHIVEFILE_TITLE=#{value,jdbcType = VARCHAR} 
+		</if>
+		<if test='content=="archiveFileCreatetime".toString()'>
+			ARCHIVEFILE_CREATETIME=#{value,jdbcType = VARCHAR} 
+		</if>
+		<if test='content=="afSecurityClassrification".toString()'>
+			AF_SECURITYCLASSRIFICATION=#{value,jdbcType = VARCHAR} 
+		</if>
+		<if test='content=="archiveFilePages".toString()'>
+			ARCHIVEFILE_PAGES=#{value,jdbcType = VARCHAR} 
+		</if>
+		<if test='content=="archiveFileRemark".toString()'>
+			ARCHIVEFILE_REMARK=#{value,jdbcType = VARCHAR} 
+		</if>
+		where archivefile_id=#{fileId,jdbcType = VARCHAR}
+	</update>
+	<!-- 根据全宗主键查询全宗号 -->
+	<select id="findQzongNumber" resultType="String">
+		select 
+		amsq.quanzong_number 
+		from 
+		am_ma_sm_quanzong amsq 
+		where 
+		amsq.quanzong_id=
+		(
+		select 
+		amc.quanzong_id 
+		from am_co_archivefile amc 
+		where 
+		amc.archivefile_id=#{fileId}
+		)
+	</select>
+	<!--查询全宗  -->
+	<select id="findQuanzongId" resultType="String">
+		select 
+		amc.quanzong_id 
+		from am_co_archivefile amc 
+		where 
+		amc.archivefile_id=#{fileId}
+	</select>
+	<!-- 添加文件附件 -->
+	<insert id="addFileAttachment" parameterType="java.util.List">
+		insert into 
+		am_co_file_attachment
+		(
+		file_attachment_id,
+		file_attachment_path,
+		file_attachment_name,
+		archivefile_id,
+		file_attachment_pagenumber,
+		file_attachment_mark,
+		quanzong_id,
+		file_attachment_anual,
+		file_createtime,
+		file_creator
+		) 
+		<foreach collection="list" item="af" index="index" separator="union all">
+			select 
+				#{af.fileAttachmentId,jdbcType = VARCHAR},
+				#{af.fileAttachmentPath,jdbcType = VARCHAR},
+				#{af.fileAttachmentName,jdbcType = VARCHAR},
+				#{af.archiveFileId,jdbcType = VARCHAR},
+				#{af.fileAttachmentPageNumber,jdbcType = VARCHAR},
+				#{af.fileAttachmentMark,jdbcType = VARCHAR},
+				#{af.quanzongId,jdbcType = VARCHAR},
+				#{af.fileAttachmentAnual,jdbcType = VARCHAR},
+				#{af.fileCreatetime,jdbcType = DATE},
+				#{af.fileCreator,jdbcType = VARCHAR} 
+			from dual
+		</foreach>
+	</insert>
+	<!-- 查询附件 -->
+	<select id="havingFileAtta" resultType="java.lang.String">
+		select 
+		file_attachment_path 
+		from am_co_file_attachment 
+		where 
+		archivefile_id=#{archiveFileId} 
+		order by to_char(file_attachment_pagenumber)
+	</select>
+	<!-- 状态查询文件 -->
+	<select id="findArchiveFileByBoxIdAndStart" resultMap="fileMap" parameterType="map">
+		select 
+		ac.* 
+		from (
+		select 
+		aca.*,rownum row_num 
+		from (
+		<include refid="fileSql"/>
+		where box_id=#{boxId} 
+		<if test="start!='' and start!=null ">
+			and archivefile_isupload=#{start}
+		</if>
+		order by to_char(ARCHIVEFILE_CREATETIME)
+		) aca
+		)ac 
+		where 
+		ac.row_num between #{begin} and #{end}
+	</select>
+	<!--  统计文件数量-->
+	<select id="countArchiveFileByBoxIdAndStart" resultType="int">
+		select count(archivefile_id) 
+		from am_co_archivefile 
+		where box_id=#{boxId} 
+		<if test="start!='' and start!=null ">
+			and archivefile_isupload=#{start}
+		</if>
+	</select>
+	<!-- 保存更新盒子状态 -->
+	<update id="updataBoxStart">
+		update 
+		am_co_box 
+		set box_status ='4' 
+		where box_id=#{boxId}
+	</update>
+	<!-- 上传文件更新文件状态 -->
+	<update id="updateFileStart">
+		update 
+		am_co_archivefile aca 
+		set aca.archivefile_isupload='2' 
+		where aca.archivefile_id=#{fileId}
+	</update>
+	<!-- 已上传文件数量 -->
+	<select id="havingFileNum" resultType="int">
+		select 
+		count(aca.archivefile_id) 
+		from 
+		am_co_archivefile aca 
+		where 
+		aca.box_id=#{boxId} 
+		and aca.archivefile_isupload='2'
+	</select>
+	<!-- 盒子中文件数量 -->
+	<select id="havingBoxFileNum" resultType="java.lang.String">
+		select 
+		acb.box_casesnumber 
+		from 
+		am_co_box acb 
+		where 
+		acb.box_id=#{boxId} 
+	</select>
+	<update id="updateBoxingStart">
+		update 
+		am_co_box acb 
+		set 
+		acb.box_boxingstart='2' 
+		where 
+		acb.box_id=#{boxId} 
+	</update>
+</mapper>

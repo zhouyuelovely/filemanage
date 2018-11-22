@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.digitalarchives.dao.InformationPortalMapper">
+ <resultMap type="filemanage.digitalarchives.pojo.InformationPortal" id="informationMap">
+   <id column="IP_ID" property="iPId" jdbcType="VARCHAR"/>
+   <result column="IP_INDEXNUMBER" property="iPIndexNum" jdbcType="VARCHAR"/>
+   <result column="IP_DOCUMENTNUMBER" property="iPDocumentNum" jdbcType="VARCHAR"/>
+   <result column="IP_TYPE" property="iPType" jdbcType="VARCHAR"/>
+   <result column="IP_TIMEALNESS" property="iPTimealness" jdbcType="VARCHAR"/>
+   <result column="IP_FORM" property="iPForm" jdbcType="VARCHAR"/>
+   <result column="IP_CONTENT" property="iPContent" jdbcType="CLOB"/>
+   <result column="IP_STATUS" property="iPStatus" jdbcType="VARCHAR"/>
+   <result column="IP_PERSON" property="iPPerson" jdbcType="VARCHAR"/>
+   <result column="IP_NAME" property="iPName" jdbcType="VARCHAR"/>
+   <result column="SUBJECT_HEADINGS" property="subjectHeadings" jdbcType="VARCHAR"/>
+   <result column="IP_FORMDATE" property="iPFormDate" jdbcType="DATE"/>
+ </resultMap>
+ 
+ <resultMap type="filemanage.digitalarchives.vo.QueryInforByConditions" id="inforConditionMap">
+    <id column="IP_ID" property="iPId" jdbcType="VARCHAR"/>
+   <result column="IP_INDEXNUMBER" property="iPIndexNum" jdbcType="VARCHAR"/>
+   <result column="IP_DOCUMENTNUMBER" property="iPDocumentNum" jdbcType="VARCHAR"/>
+   <result column="IP_TYPE" property="iPType" jdbcType="VARCHAR"/>
+   <result column="IP_TIMEALNESS" property="iPTimealness" jdbcType="VARCHAR"/>
+   <result column="IP_FORM" property="iPForm" jdbcType="VARCHAR"/>
+   <result column="IP_CONTENT" property="iPContent" jdbcType="CLOB"/>
+   <result column="IP_STATUS" property="iPStatus" jdbcType="VARCHAR"/>
+   <result column="IP_PERSON" property="iPPerson" jdbcType="VARCHAR"/>
+   <result column="IP_NAME" property="iPName" jdbcType="VARCHAR"/>
+   <result column="SUBJECT_HEADINGS" property="subjectHeadings" jdbcType="VARCHAR"/>
+   <result column="IP_FORMDATE" property="iPFormDate" jdbcType="DATE"/>
+   <result column="queryConditions" property="queryConditions" jdbcType="VARCHAR"/>
+ </resultMap>
+ 
+ <!-- 查询所有的已发布信息 -->
+  <select id="queryAllInformation" resultMap="informationMap">
+   select su.* from(
+      select info.*,rownum rown from am_da_informationportal info 
+       where rownum&lt;=${(before+after)} 
+      order by info.IP_FORMDATE desc
+   ) su where rown &gt;#{before}
+    
+  </select>
+  
+  <!-- 统计所有已发布信息的数量 -->
+  <select id="countAllInformation" resultType="int">
+   select count(*) from am_da_informationportal
+  </select>
+  
+  <!-- 根据发布日期降序排序查询最新的7条数据 -->
+  <select id="queryInfomationByTime"  resultMap="informationMap">
+     select * from(select * from am_da_informationportal order by  
+    IP_FORMDATE desc) where rownum &lt; 8
+  </select>
+  
+  <!-- 根据主键查询信息 -->
+  <select id="queryInformationById" parameterType="java.lang.String" resultMap="informationMap">
+   select * from am_da_informationportal where IP_ID=#{iPId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 添加信息 -->
+  <insert id="addInformationPortal" parameterType="filemanage.digitalarchives.pojo.InformationPortal">
+   insert into am_da_informationportal(IP_ID,IP_INDEXNUMBER,IP_DOCUMENTNUMBER,IP_TYPE,IP_TIMEALNESS,IP_FORM,
+   IP_CONTENT,IP_STATUS,IP_PERSON,IP_NAME,SUBJECT_HEADINGS,IP_FORMDATE)
+   values(sys_guid(),#{iPIndexNum,jdbcType=VARCHAR},#{iPDocumentNum,jdbcType=VARCHAR},#{iPType,jdbcType=VARCHAR},
+   #{iPTimealness,jdbcType=VARCHAR},#{iPForm,jdbcType=VARCHAR},#{iPContent,jdbcType=CLOB},#{iPStatus,jdbcType=VARCHAR},
+   #{iPPerson,jdbcType=VARCHAR},#{iPName,jdbcType=VARCHAR},#{subjectHeadings,jdbcType=VARCHAR},#{iPFormDate,jdbcType=DATE})
+  </insert>
+  
+  <!-- 定时任务30天过后自动删除信息 -->
+  <delete id="deleteInfomationPortal">
+    delete from am_da_informationportal where IP_TIMEALNESS='30天有效'
+  </delete>
+  
+  <!-- 根据索引号查询该信息索引号是否已存在 -->
+  <select id="isExitInformationIndexNum" parameterType="filemanage.digitalarchives.pojo.InformationPortal" resultType="int">
+   select count(1) from am_da_informationportal where IP_INDEXNUMBER=#{iPIndexNum,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 根据文号查询该信息文号是否已存在 -->
+  <select id="isExitInformationDocumentNum" parameterType="filemanage.digitalarchives.pojo.InformationPortal" resultType="int">
+   select count(1) from am_da_informationportal where IP_DOCUMENTNUMBER=#{iPDocumentNum,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询所有的信息类型 -->
+  <select id="queryAllInformationType" resultMap="informationMap">
+     select ip_type from am_da_informationportal group by ip_type
+  </select>
+
+ <!--关键词条件查询信息  -->
+ <select id="queryInforByConditions" parameterType="filemanage.digitalarchives.vo.QueryInforByConditions" resultMap="inforConditionMap">
+      select su.* from(
+          select adif.*,rownum rownu from am_da_informationportal adif
+   <where>
+        rownum &lt;=${(before+after)}  
+       <if test="iPFormDate !=null">
+         and adif.IP_FORMDATE =#{iPFormDate,jdbcType=DATE}
+       </if>
+       <if test="iPType !=null and iPType !=''">
+        and adif.IP_TYPE=#{iPType,jdbcType=VARCHAR}
+       </if>
+       <if test="queryConditions !=null and queryConditions !=''">
+         and  adif.IP_INDEXNUMBER || adif.IP_DOCUMENTNUMBER || adif.IP_NAME
+         || adif.SUBJECT_HEADINGS
+          like CONCAT(CONCAT('%',#{queryConditions,jdbcType=VARCHAR}),'%')
+       </if>
+   </where>
+   )su where rownu &gt;#{before}
+ </select>
+ 
+ <!-- 关键词查询条数 -->
+ <select id="countQueryInforByConditions" parameterType="filemanage.digitalarchives.vo.QueryInforByConditions" resultType="int">
+   select count(*) from am_da_informationportal 
+   <where>
+       <if test="iPFormDate !=null">
+         and IP_FORMDATE =#{iPFormDate,jdbcType=DATE}
+       </if>
+       <if test="iPType !=null and iPType !=''">
+        and IP_TYPE=#{iPType,jdbcType=VARCHAR}
+       </if>
+       <if test="queryConditions !=null and queryConditions !=''">
+          and IP_INDEXNUMBER || IP_DOCUMENTNUMBER || IP_NAME
+         || SUBJECT_HEADINGS like CONCAT(CONCAT('%',#{queryConditions,jdbcType=VARCHAR}),'%')
+       </if>
+   </where>
+ </select>
+ 
+ <resultMap type="filemanage.digitalarchives.pojo.Picturecarousel" id="pictureMap">
+   <id column="PC_ID" property="pcId" jdbcType="VARCHAR"/>
+   <result column="PC_PHOTOADDRESS" property="pcPhotoAddress" jdbcType="VARCHAR"/>
+   <result column="PC_URL" property="pcUrl" jdbcType="VARCHAR"/>
+   <result column="PC_PERSON" property="pcPerson" jdbcType="VARCHAR"/>
+   <result column="PC_TIME" property="pcTime" jdbcType="DATE"/>
+ </resultMap>
+ 
+ <!-- 图片发布轮播 -->
+ <insert id="addPicturecarousel" parameterType="filemanage.digitalarchives.pojo.Picturecarousel">
+   insert into 
+   am_da_picturecarousel
+   (
+   	PC_PHOTOADDRESS,
+   	PC_URL,
+   	PC_ID,
+   	PC_PERSON,
+   	PC_TIME
+   	)
+   values
+   (
+   	#{pcPhotoAddress,jdbcType=VARCHAR},
+    #{pcUrl,jdbcType=VARCHAR},
+   	sys_guid(),
+    #{pcPerson,jdbcType=VARCHAR},
+    sysdate
+    )
+ </insert>
+ 
+ <!-- 轮播图片路径集合 -->
+ <select id="queryAllPicture" resultMap="pictureMap">
+   select * from(select * from am_da_picturecarousel order by PC_TIME ) where rownum &lt; 6
+ </select>
+ 
+ <!-- 统计轮播图片条数 -->
+ <select id="countAllPic" resultType="int">
+   select count(*) from am_da_picturecarousel order by PC_TIME 
+ </select>
+ 
+ <delete id="deleteAllFile">
+ 	delete from am_da_picturecarousel
+ </delete>
+ 
+ 
+
+
+
+
+
+
+
+</mapper>

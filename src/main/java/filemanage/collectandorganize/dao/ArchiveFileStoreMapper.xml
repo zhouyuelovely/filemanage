@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.collectandorganize.dao.ArchiveFileStoreMapper">
+	<resultMap type="filemanage.collectandorganize.pojo.ArchiveFile" id="archiveFileMap">
+		<id property="archiveFileId" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+		<result property="archiveFileResponsible" column="ARCHIVEFILE_RESPONSIBLE" jdbcType="VARCHAR"/>
+		<result property="archiveFileCreatetime" column="ARCHIVEFILE_CREATETIME" jdbcType="VARCHAR"/>
+		<result property="archiveFileAnual" column="ARCHIVEFILE_ANUAL" jdbcType="VARCHAR"/>
+		<result property="archiveFileTitle" column="ARCHIVEFILE_TITLE" jdbcType="VARCHAR"/>
+		<result property="archiveFileScanpople" column="ARCHIVEFILE_SCANPOPLE" jdbcType="VARCHAR"/>
+		<result property="archiveFilePages" column="ARCHIVEFILE_PAGES" jdbcType="VARCHAR"/>
+		<result property="archiveFileFinishingStatus" column="ARCHIVEFILE_FINISHINGSTATUS" jdbcType="VARCHAR"/>
+		<result property="afSecurityClassrification" column="AF_SECURITYCLASSRIFICATION" jdbcType="VARCHAR"/>
+		<result property="archiveFileAuthenticateStatus" column="ARCHIVEFILE_AUTHENTICATESTATUS" jdbcType="VARCHAR"/>
+		<result property="archiveFileFileNumber" column="ARCHIVEFILE_FILENUMBER" jdbcType="VARCHAR"/>
+		<result property="archiveFileReferenceNumber" column="ARCHIVEFILE_REFERENCENUMBER" jdbcType="VARCHAR"/>
+		<result property="archiveFileRemark" column="ARCHIVEFILE_REMARK" jdbcType="VARCHAR"/>
+		<result property="archiveFileIsDelete" column="ARCHIVEFILE_ISDELETE" jdbcType="VARCHAR"/>
+		<result property="signNumber" column="SIGN_NUMBER" jdbcType="NUMERIC"/>
+		<result property="finishingTime" column="FINISHINGTIME" jdbcType="DATE"/>
+		<result property="archiveFileScanDate" column="ARCHIVEFILE_SCANDATE" jdbcType="DATE"/>
+		<result property="collator" column="COLLATOR" jdbcType="DATE"/>
+		<association property="archive" javaType="filemanage.systemmanage.pojo.Archive">
+			<id property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+			<result property="quanzongNumber" column="QUANZONG_NUMBER" jdbcType="VARCHAR"/>
+			<result property="quanzongName" column="QUANZONG_NAME" jdbcType="VARCHAR"/>
+			<result property="quanzongPhone" column="QUANZONG_PHONE" jdbcType="VARCHAR"/>
+			<result property="quanzongCreatetime" column="QUANZONG_CREATETIME" jdbcType="VARCHAR"/>
+			<result property="quanzongCreator" column="QUANZONG_CREATOR" jdbcType="VARCHAR"/>
+			<result property="quanzongDescription" column="QUANZONG_DESCRIPTION" jdbcType="VARCHAR"/>
+			<result property="quanzongRemark" column="QUANZONG_REMARK" jdbcType="VARCHAR"/>
+		</association>
+		<association property="primaryClassFication" javaType="filemanage.systemmanage.pojo.PrimaryClassFication">
+			<id property="pcId" column="PC_ID" jdbcType="VARCHAR"/>
+			<result property="pcCode" column="PC_CODE" jdbcType="VARCHAR"/>
+			<result property="pcName" column="PC_NAME" jdbcType="VARCHAR"/>
+			<result property="pcDescription" column="PC_DESCRIPTION" jdbcType="VARCHAR"/>
+			<result property="pcProperty" column="PC_PROPERTY" jdbcType="VARCHAR"/>
+			<result property="pcCreator" column="PC_CREATOR" jdbcType="VARCHAR"/>
+			<result property="pcCreateTime" column="PC_CREATETIME" jdbcType="DATE"/>
+		</association>
+		<association property="secondryClassFication" javaType="filemanage.systemmanage.pojo.SecondryClassFication">
+			<id property="scId" column="SC_ID" jdbcType="VARCHAR"/>
+			<result property="scCode" column="SC_CODE" jdbcType="VARCHAR"/>
+			<result property="scName" column="SC_NAME" jdbcType="VARCHAR"/>
+			<result property="scDescription" column="SC_DESCRIPTION" jdbcType="VARCHAR"/>
+			<result property="scProperty" column="SC_PROPERTY" jdbcType="VARCHAR"/>
+			<result property="scStatus" column="SC_STATUS" jdbcType="VARCHAR"/>
+			<result property="scCreator" column="SC_CREATOR" jdbcType="VARCHAR"/>
+			<result property="scCreateTime" column="SC_CREATETIME" jdbcType="DATE"/>
+		</association>
+		<association property="amMaSmRetentionperiod" javaType="filemanage.systemmanage.pojo.AmMaSmRetentionperiod">
+			<id property="retentionperiodid" column="RETENTIONPERIOD_ID" jdbcType="VARCHAR"/>
+			<result property="retentionperiodcode" column="RETENTIONPERIOD_CODE" jdbcType="VARCHAR"/>
+			<result property="retentionperiodname" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR"/>
+			<result property="retentionperiodstatus" column="RETENTIONPERIOD_STATUS" jdbcType="VARCHAR"/>
+			<result property="retentionperioddescription" column="RETENTIONPERIOD_DESCRIPTION" jdbcType="VARCHAR"/>
+			<result property="retentionperiodcreator" column="RETENTIONPERIOD_CREATOR" jdbcType="VARCHAR"/>
+			<result property="retentionperiodcreatetime" column="RETENTIONPERIOD_CREATETIME" jdbcType="DATE"/>
+		</association>
+		<association property="organization" javaType="filemanage.systemmanage.pojo.Organization">
+			<id property="organizationId" column="ORGANIZATION_ID" jdbcType="VARCHAR"/>
+			<result property="organizationCode" column="ORGANIZATION_CODE" jdbcType="VARCHAR"/>
+			<result property="organizationName" column="ORGANIZATION_NAME" jdbcType="VARCHAR"/>
+			<result property="organizationPhone" column="ORGANIZATION_PHONE" jdbcType="VARCHAR"/>
+			<result property="organizationCreatetime" column="ORGANIZATION_CREATETIME" jdbcType="VARCHAR"/>
+			<result property="organizationCreator" column="ORGANIZATION_CREATOR" jdbcType="VARCHAR"/>
+			<result property="organizationDescription" column="ORGANIZATION_DESCRIPTION" jdbcType="VARCHAR"/>
+			<result property="organizationRemark" column="ORGANIZATION_REMARK" jdbcType="VARCHAR"/>
+		</association>
+		<association property="amCoBox" javaType="filemanage.systemmanage.pojo.AmCoBox">
+			<id property="boxid" column="BOX_ID" jdbcType="VARCHAR"/>
+			<result property="boxsituation" column="BOX_SITUATION" jdbcType="VARCHAR"/>
+			<result property="boxsericalnumber" column="BOX_SERICALNUMBER" jdbcType="VARCHAR"/>
+			<result property="boxthickness" column="BOX_THICKNESS" jdbcType="VARCHAR"/>
+			<result property="boxpage" column="BOX_PAGE" jdbcType="VARCHAR"/>
+			<result property="boxstatus" column="BOX_STATUS" jdbcType="VARCHAR"/>
+			<result property="boxcasesnumber" column="BOX_CASESNUMBER" jdbcType="VARCHAR"/>
+			<result property="boxanual" column="BOX_ANUAL" jdbcType="VARCHAR"/>
+			<result property="boxstartnumber" column="BOX_STARTNUMBER" jdbcType="VARCHAR"/>
+			<result property="boxendnumber" column="BOX_ENDNUMBER" jdbcType="VARCHAR"/>
+			<result property="boxnumber" column="BOX_NUMBER" jdbcType="VARCHAR"/>
+			<result property="boxAuditstart" column="BOX_AUDITSTART" jdbcType="VARCHAR"/>
+			<result property="rummager" column="rummager" jdbcType="VARCHAR"/>
+			<result property="checkTime" column="checktime" jdbcType="DATE"/>
+			<result property="boxcreatetime" column="BOX_CREATETIME" jdbcType="DATE"/>
+		</association>
+	</resultMap>
+	
+	<resultMap type="filemanage.collectandorganize.pojo.FileAttachment" id="fileAttachmentMap">
+		<id property="fileAttachmentId" column="FILE_ATTACHMENT_ID" jdbcType="VARCHAR"/>
+		<result property="archiveFileId" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPath" column="FILE_ATTACHMENT_PATH" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentName" column="FILE_ATTACHMENT_NAME" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPageNumber" column="FILE_ATTACHMENT_PAGENUMBER" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentMark" column="FILE_ATTACHMENT_MARK" jdbcType="VARCHAR"/>
+		<result property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<resultMap type="filemanage.collectandorganize.vo.QueryArchiveFileStoreHelp" id="archiveFileHelpMap">
+		<result property="anual" column="anual" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<!--sql片段  -->
+	<sql id="all">
+		select distinct 
+		aca.archivefile_id,
+		aca.archivefile_responsible,
+		aca.archivefile_createtime,
+		aca.archivefile_anual,
+		aca.archivefile_title,
+		aca.archivefile_scanpople,
+		aca.archivefile_pages,
+		aca.archivefile_scandate,
+		aca.archivefile_finishingstatus,
+		aca.af_securityclassrification,
+		aca.archivefile_authenticatestatus,
+		aca.archivefile_filenumber,
+		aca.archivefile_referencenumber,
+		aca.archivefile_remark,
+		aca.archivefile_isdelete,
+		aca.finishingtime,
+		aca.sign_number,
+		aca.collator,
+		amsq.quanzong_id,
+		amsq.quanzong_number,
+		amsq.quanzong_name,
+		amsq.quanzong_phone,
+		amsq.quanzong_createtime,
+		amsq.quanzong_creator,
+		amsq.quanzong_description,
+		amsq.quanzong_remark,
+		amsp.pc_id,
+		amsp.pc_code,
+		amsp.pc_name,
+		amsp.pc_description,
+		amsp.pc_property,
+		amsp.pc_createtime,
+		amsp.pc_creator,
+		amss.sc_id,
+		amss.sc_code,
+		amss.sc_name,
+		amss.sc_description,
+		amss.sc_property,
+		amss.sc_createtime,
+		amss.sc_status,
+		amss.sc_creator,
+		amsr.retentionperiod_id,
+		amsr.retentionperiod_code,
+		amsr.retentionperiod_name,
+		amsr.retentionperiod_status,
+		amsr.retentionperiod_description,
+		amsr.retentionperiod_createtime,
+		amsr.retentionperiod_creator, 
+		amso.organization_id,
+		amso.organization_code,
+		amso.organization_name,
+		amso.organization_phone,
+		amso.organization_createtime,
+		amso.organization_creator,
+		amso.organization_description,
+		amso.organization_remark,
+		acb.box_id,
+		acb.box_situation,
+		acb.box_sericalnumber,
+		acb.box_thickness,
+		acb.box_page,
+		acb.box_status,
+		acb.box_casesnumber,
+		acb.box_anual,
+		acb.box_startnumber,
+		acb.box_endnumber,
+		acb.box_number,
+		acb.box_createtime,
+		acb.box_auditstart,
+		acb.rummager,
+		acb.checktime 
+		from 
+		am_co_archivefile aca 
+		left join am_ma_sm_quanzong amsq 
+		on aca.quanzong_id=amsq.quanzong_id 
+		left join am_ma_sm_organization amso 
+		on aca.organization_id=amso.organization_id 
+		left join am_ma_sm_primaryclassification amsp 
+		on aca.primaryclassification_id=amsp.pc_id   
+		left join am_ma_sm_sclassification amss 
+		on aca.secondaryclassification_id=amss.sc_id 
+		left join am_ma_sm_retentionperiod amsr 
+		on aca.retentionperiod_id=amsr.retentionperiod_id 
+		left join am_co_box acb 
+		on aca.box_id=acb.box_id 
+	</sql>
+	
+	<!-- 查询全宗下所有采集文件 -->
+	<select id="findAllArchiveFile" resultMap="archiveFileMap" parameterType="map">
+		select a.* 
+		from (
+			select ac.*,rownum row_num 
+			from (
+				<include refid="all"/>
+				where aca.quanzong_id=#{archiveId,jdbcType=VARCHAR}
+				and aca.ARCHIVEFILE_ISDELETE='1' 
+				order by aca.archivefile_scandate
+			) ac
+		) a  
+		where a.row_num between #{begin} and #{end}
+	</select>
+	<!--全宗下文件总数量  -->
+	<select id="countFileNumberAllArchiveFile" resultType="int">
+		select count(archivefile_id) 
+		from am_co_archivefile 
+		where quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+		and ARCHIVEFILE_ISDELETE='1' 
+	</select>
+	<!--全宗下文件的总页数  -->
+	<select id="countAllPageNumber" resultType="int">
+		select sum(archivefile_pages) 
+		from am_co_archivefile 
+		where quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+		and ARCHIVEFILE_ISDELETE='1' 
+	</select>
+	<!-- 全宗下文件的所有年度 -->
+	<select id="listAnual" resultMap="archiveFileHelpMap">
+		select archivefile_anual anual
+		from am_co_archivefile 
+		where quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+		and ARCHIVEFILE_ISDELETE='1' 
+		group by archivefile_anual 
+	</select>
+	<!-- 全宗年度下文件集合 -->
+	<select id="findArchiveFile" resultMap="archiveFileMap" parameterType="map">
+		select a.* 
+		from (
+			select ac.*,rownum row_num 
+			from (
+				<include refid="all"/>
+				where aca.archivefile_anual=#{annual,jdbcType=VARCHAR} 
+				and aca.quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+				and aca.ARCHIVEFILE_ISDELETE='1' 
+				order by aca.archivefile_scandate
+			) ac
+		) a  
+		where a.row_num between #{begin} and #{end}
+	</select>
+	<!-- 全宗年度下文件数量 -->
+	<select id="countFileNumberArchiveFile" resultType="int">
+		select count(archivefile_id) 
+		from am_co_archivefile 
+		where archivefile_anual=#{annual,jdbcType=VARCHAR} 
+		and quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+		and ARCHIVEFILE_ISDELETE='1' 
+	</select>
+	<!--全宗年度下计算文件的总页数  -->
+	<select id="countPageNumber" resultType="int">
+		select sum(archivefile_pages) 
+		from am_co_archivefile 
+		where archivefile_anual=#{annual,jdbcType=VARCHAR} 
+		and quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+		and ARCHIVEFILE_ISDELETE='1' 
+	</select>
+	<!--条件查询文件信息  -->
+	<select id="queryArchiveFileByCondition" parameterType="map" resultMap="archiveFileMap">
+		select a.* 
+		from (
+			select ac.*,rownum row_num 
+			from (
+				<include refid="all"/>
+				where aca.quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+				<if test="anual!='' and anual!=null">
+					and aca.archivefile_anual=#{anual,jdbcType=VARCHAR} 
+				</if>
+				<if test="condition!='' and condition!=null">
+					and 
+					decode(archivefile_finishingstatus,'1','待整理','2','整理中','3','已整理')
+					||archivefile_createtime
+					||archivefile_anual
+					||archivefile_referencenumber
+					||archivefile_title
+					||ARCHIVEFILE_PAGES
+					||ARCHIVEFILE_SCANPOPLE
+					||to_char(ARCHIVEFILE_SCANDATE,'yyyy-MM-dd')
+					||archivefile_responsible 
+					like concat(concat('%',#{condition,jdbcType=VARCHAR}),'%') 
+				</if>
+				and ARCHIVEFILE_ISDELETE='1' 
+				order by aca.archivefile_scandate
+			) ac
+		) a  
+		where a.row_num between #{begin} and #{end}
+	</select>
+	<!-- 条件查询文件数量 -->
+	<select id="countArchiveFileNumberByCondition" parameterType="filemanage.collectandorganize.vo.QueryArchiveFileCondition" resultType="int">
+		select count(archivefile_id) 
+		from am_co_archivefile 
+		where quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+		<if test="anual!='' and anual!=null">
+			and archivefile_anual=#{anual,jdbcType=VARCHAR} 
+		</if>
+		<if test="condition!='' and condition!=null">
+			and 
+			decode(archivefile_finishingstatus,'1','待整理','2','整理中','3','已整理')
+			||archivefile_createtime
+			||archivefile_anual
+			||archivefile_referencenumber
+			||archivefile_title
+			||ARCHIVEFILE_PAGES
+			||ARCHIVEFILE_SCANPOPLE
+			||to_char(ARCHIVEFILE_SCANDATE,'yyyy-MM-dd')
+			||archivefile_responsible 
+			like concat(concat('%',#{condition,jdbcType=VARCHAR}),'%') 
+		</if>
+		and ARCHIVEFILE_ISDELETE='1' 
+	</select>
+	<!--条件查询文件页数  -->
+	<select id="countArchiveFilePagerByCondition" parameterType="filemanage.collectandorganize.vo.QueryArchiveFileCondition" resultType="int">
+		select sum(archivefile_pages) 
+		from am_co_archivefile 
+		where quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+		<if test="anual!='' and anual!=null">
+			and archivefile_anual=#{anual,jdbcType=VARCHAR} 
+		</if>
+		<if test="condition!='' and condition!=null">
+			and 
+			decode(archivefile_finishingstatus,'1','待整理','2','整理中','3','已整理')
+			||archivefile_createtime
+			||archivefile_anual
+			||archivefile_referencenumber
+			||archivefile_title
+			||ARCHIVEFILE_PAGES
+			||ARCHIVEFILE_SCANPOPLE
+			||to_char(ARCHIVEFILE_SCANDATE,'yyyy-MM-dd')
+			||archivefile_responsible  
+			like concat(concat('%',#{condition,jdbcType=VARCHAR}),'%') 
+		</if>
+		and ARCHIVEFILE_ISDELETE='1'
+	</select>
+	<!--更新（删除）文件状态  -->
+	<delete id="deleteArchiveFileByArchiveFileId">
+		delete from am_co_archivefile where ARCHIVEFILE_ID=#{archiveFileId,jdbcType=VARCHAR}
+	</delete>
+	<!--更新文件提交状态  -->
+	<update id="updateArchiveFileStartByArchiveFileId">
+		update am_co_archivefile set ARCHIVEFILE_FINISHINGSTATUS='2' 
+		where 
+		archivefile_anual=#{annual,jdbcType=VARCHAR} 
+		and quanzong_id=#{archiveId,jdbcType=VARCHAR} 
+		and ARCHIVEFILE_ISDELETE='1'
+	</update>
+	<update id="updateArchiveFileStartById">
+		update am_co_archivefile 
+		set ARCHIVEFILE_FINISHINGSTATUS='2' 
+		where 
+		archivefile_id=#{archiveFileId,jdbcType=VARCHAR}
+		and archivefile_isdelete='1'
+	</update>
+	<!--根据文件主键查询附件信息  -->
+	<select id="queryFileAttachmentByArchiveFileId" resultMap="fileAttachmentMap">
+		select *
+		from am_co_file_attachment  
+		where archivefile_id=#{archiveFileId,jdbcType=VARCHAR} 
+		order by to_number(file_attachment_pagenumber) 
+	</select>
+	<!-- 根据文件主键查询文件信息 -->
+	<select id="queryArchiveFileByArchiveFileId" resultMap="archiveFileMap">
+		<include refid="all"/> 
+		where aca.ARCHIVEFILE_ID=#{archiveFileId,jdbcType=VARCHAR}
+	</select>
+	<!-- 分页查询文件附件 -->
+	<select id="queryFileAttachmentByArchiveFileIdPages" resultMap="fileAttachmentMap">
+		select * from 
+			(select a.*,rownum row_num from
+				(select * from am_co_file_attachment 
+					where archivefile_id=#{archiveFileId,jdbcType=NUMERIC} 
+					order by to_number(file_attachment_pagenumber) 
+				) a
+			) acfa 
+		where acfa.row_num between #{begin,jdbcType=NUMERIC} and #{end,jdbcType=NUMERIC}
+	</select>
+	<!-- 统计文件附件的数量 -->
+	<select id="countFileAttachmentByArchiveFileIdPages" resultType="int">
+		select count(FILE_ATTACHMENT_ID) from am_co_file_attachment 
+		where archivefile_id=#{archiveFileId,jdbcType=VARCHAR} 
+	</select>
+	<!-- 添加文件附件信息 -->
+	<insert id="addFileAttachment" parameterType="filemanage.collectandorganize.pojo.FileAttachment">
+		insert into am_co_file_attachment(
+		file_attachment_id,
+		file_attachment_path,
+		file_attachment_name,
+		archivefile_id,
+		file_attachment_pagenumber,
+		file_attachment_mark,
+		QUANZONG_ID,
+		file_attachment_anual,
+		FILE_CREATETIME,
+		FILE_CREATOR) 
+		values(
+		#{fileAttachmentId,jdbcType=VARCHAR},
+		#{fileAttachmentPath,jdbcType=VARCHAR},
+		#{fileAttachmentName,jdbcType=VARCHAR},
+		#{archiveFileId,jdbcType=VARCHAR},
+		#{fileAttachmentPageNumber,jdbcType=VARCHAR},
+		#{fileAttachmentMark,jdbcType=VARCHAR},
+		#{quanzongId,jdbcType=VARCHAR},
+		#{fileAttachmentAnual,jdbcType=VARCHAR},
+		sysdate,
+		#{fileCreator,jdbcType=VARCHAR}
+		)
+	</insert>
+	<delete id="deleteFileAttachment">
+		delete from am_co_file_attachment where archivefile_id=#{archiveFileId,jdbcType=VARCHAR}
+	</delete>
+	<!-- 获取文件附件的信息 -->
+	<select id="havingFileAttachment" resultMap="fileAttachmentMap">
+		select * from am_co_file_attachment 
+		where archivefile_id=#{archiveFileId,jdbcType=VARCHAR} 
+		and file_attachment_pagenumber=#{fileAttachmentPageNumber,jdbcType=VARCHAR} 
+	</select>
+	<!--获取页码后文件的集合  -->
+	<select id="havingFileAttachmentList" resultMap="fileAttachmentMap">
+		select * from am_co_file_attachment 
+		where archivefile_id=#{archiveFileId,jdbcType=VARCHAR} 
+		and to_number(file_attachment_pagenumber)&gt;to_number(#{fileAttachmentPageNumber,jdbcType=VARCHAR}) 
+		order by to_number(file_attachment_pagenumber)
+	</select>
+	<!-- 更新文件的页码 -->
+	<update id="updateFileAttachmentPageNumber">
+		update am_co_file_attachment 
+		set file_attachment_pagenumber=#{fileAttachmentPageNumber,jdbcType=VARCHAR} 
+		where file_attachment_id=#{fileAttachmentId,jdbcType=VARCHAR}
+	</update>
+	<!--  删除附件-->
+	<delete id="deleteOneFileAttachment">
+		delete from am_co_file_attachment 
+		where archivefile_id=#{archiveFileId,jdbcType=VARCHAR} 
+		and file_attachment_pagenumber=#{fileAttachmentPageNumber,jdbcType=VARCHAR}  
+	</delete>
+	<!-- 更新文件信息 -->
+	<update id="updateArchiveFileByArchiveFileId" parameterType="filemanage.collectandorganize.pojo.ArchiveFile">
+		update am_co_archivefile 
+		set ARCHIVEFILE_RESPONSIBLE=#{archiveFileResponsible,jdbcType=VARCHAR},
+		ARCHIVEFILE_CREATETIME=#{archiveFileCreatetime,jdbcType=VARCHAR},
+		ARCHIVEFILE_ANUAL=#{archiveFileAnual,jdbcType=VARCHAR},
+		ARCHIVEFILE_TITLE=#{archiveFileTitle,jdbcType=VARCHAR},
+		ARCHIVEFILE_REFERENCENUMBER=#{archiveFileReferenceNumber,jdbcType=VARCHAR} 
+		where ARCHIVEFILE_ID=#{archiveFileId,jdbcType=VARCHAR}
+	</update>
+	<!-- 更新页码 -->
+	<update id="updateArchiveFilePages">
+		update am_co_archivefile 
+		set ARCHIVEFILE_PAGES=#{archiveFilePages,jdbcType=VARCHAR} 
+		where ARCHIVEFILE_ID=#{archiveFileId,jdbcType=VARCHAR}
+	</update>
+	<!--  根据盒子信息查询文件信息-->
+	<select id="queryArchiveFileByBoxId" resultMap="archiveFileMap">
+		select a.* 
+		from (
+			select ac.*,rownum row_num 
+			from (
+				<include refid="all"/>
+				where aca.box_id=#{boxId,jdbcType=VARCHAR} 
+				order by to_date(aca.ARCHIVEFILE_CREATETIME,'yyyy-MM-dd')
+			) ac
+		) a  
+		where a.row_num between #{begin} and #{end}
+	</select>
+	<!-- 根据盒子主键统计文件数量 -->
+	<select id="countArchiveFileByBoxId" resultType="int">
+		select count(aca.archivefile_id) 
+		from am_co_archivefile aca 
+		where aca.box_id=#{boxId,jdbcType=VARCHAR}
+	</select>
+	<!-- 根据盒子主键查询文件附件 -->
+	<select id="queryFileAttachmentByBoxId" resultMap="fileAttachmentMap" parameterType="Map">
+		select ac.* from
+		(select acf.*,rownum row_num from 
+		(select acfa.* 
+		from am_co_file_attachment acfa 
+		left join am_co_archivefile aca 
+		on acfa.archivefile_id=aca.archivefile_id 
+		where aca.box_id=
+		#{boxId,jdbcType=VARCHAR} 
+		and acfa.file_attachment_mark='1' 
+		order by to_date(aca.ARCHIVEFILE_CREATETIME,'yyyy-MM-dd')) acf) ac 
+		where ac.row_num between 
+		#{begin,jdbcType=NUMERIC} and #{end,jdbcType=NUMERIC}
+	</select>
+	<!--根据盒子主键查询文件附件的数量  -->
+	<select id="countFileAttachmentByBoxId" resultType="int">
+		select count(acfa.file_attachment_id) 
+		from am_co_file_attachment acfa 
+		left join am_co_archivefile aca 
+		on acfa.archivefile_id=aca.archivefile_id 
+		where aca.box_id=#{boxId,jdbcType=VARCHAR} 
+		and acfa.file_attachment_mark='1' 
+	</select>
+	
+	
+	<!--重新标记文件附件的首页  -->
+	<update id="updateFileAttachmentStart">
+		update am_co_file_attachment acfa 
+		set acfa.file_attachment_mark='0' 
+		where acfa.archivefile_id=#{archiveFileId,jdbcType=VARCHAR} 
+	</update>
+	<update id="updateFileAttachmentAnual">
+		update am_co_file_attachment acfa 
+		set acfa.FILE_ATTACHMENT_ANUAL=#{annual,jdbcType=VARCHAR} 
+		where acfa.archivefile_id=#{archiveFileId,jdbcType=VARCHAR} 
+	</update>
+	<update id="updateFileAttachmentRemark">
+		update am_co_file_attachment acfa 
+		set acfa.file_attachment_mark='1' 
+		where acfa.file_attachment_id=#{fileAttachmentId,jdbcType=VARCHAR} 
+	</update>
+	<select id="queryArchiveFile" resultMap="archiveFileMap">
+		<include refid="all"/> 
+		where 
+		aca.archivefile_title=#{archiveFileTitle,jdbcType = VARCHAR}  
+		<if test="archiveFileReferenceNumber!='' and archiveFileReferenceNumber!=null">
+			or aca.archivefile_referencenumber=#{archiveFileReferenceNumber,jdbcType = VARCHAR} 
+		</if>
+	</select>
+	<update id="updateFileAttachmentPath" parameterType="java.util.List">
+		<foreach collection="list" item="f" index="index" open="begin" close=";end;" separator=";">
+			update am_co_file_attachment 
+			<set>
+				file_attachment_path=#{f.fileAttachmentPath,jdbcType = VARCHAR}
+			</set>
+			where file_attachment_id=#{f.fileAttachmentId,jdbcType = VARCHAR}
+		</foreach>
+	</update>
+</mapper>

@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.fileBorrowing.dao.FileBorrowingMapper">
+	<!-- 借阅记录表映射 -->
+	<resultMap type="filemanage.fileBorrowing.pojo.BorrowRecords" id="BorrowRecords">
+		<id property="borrowRecordsId" column="BORROWRECORDS_ID" jdbcType="VARCHAR"/>
+		<result property="borrowRecordsName" column="BORROWRECORDS_NAME" jdbcType="VARCHAR"/>
+		<result property="borrowRecordsDepartment" column="BORROWRECORDS_DEPARTMENT" jdbcType="VARCHAR"/>
+		<result property="borrowRecordsBorrowDate" column="BORROWRECORDS_BORROWDATE" jdbcType="DATE"/>
+		<result property="borrowRecordsReturnDate" column="BORROWRECORDS_RETURNDATE" jdbcType="DATE"/>
+		<result property="borrowRecordsCarrier" column="BORROWRECORDS_CARRIER" jdbcType="NUMERIC"/>
+		<result property="borrowRecordsReason" column="BORROWRECORDS_REASON" jdbcType="VARCHAR"/>
+		<result property="borrowRecordsEvaluation" column="BORROWRECORDS_EVALUATION" jdbcType="VARCHAR"/>
+		<result property="borrowRecordsInstructions" column="BORROWRECORDS_INSTRUCTIONS" jdbcType="VARCHAR"/>
+		<result property="borrowRecordsStatus" column="BORROWRECORDS_STATUS" jdbcType="NUMERIC"/>
+		<result property="borrowRecordsNumber" column="BORROWRECORDS_NUMBER" jdbcType="NUMERIC"/>
+		<result property="borrowrecordsReasonrejection" column="BORROWRECORDS_REASONREJECTION" jdbcType="VARCHAR"/>
+	</resultMap>
+	<!-- 借阅明细表 -->
+	<resultMap type="filemanage.fileBorrowing.pojo.BorrowDetails" id="BorrowDetails">
+	<id property="borrowdetailsId" column="BORROWDETAILS_ID" jdbcType="VARCHAR"/>
+	<result property="quanzongNumber" column="QUANZONG_NUMBER" jdbcType="VARCHAR"/>
+	<result property="quanzongName" column="QUANZONG_NAME" jdbcType="VARCHAR"/>
+	<result property="borrowdetailsAnnual" column="BORROWDETAILS_ANNUAL" jdbcType="VARCHAR"/>
+	<result property="borrowdetailsTitle" column="BORROWDETAILS_TITLE" jdbcType="VARCHAR"/>
+	<result property="borrowrecordsId" column="BORROWRECORDS_ID" jdbcType="VARCHAR"/>
+	<result property="userId" column="USER_ID" jdbcType="VARCHAR"/>
+	<result property="archivefileId" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+	</resultMap>
+	<!-- 获取所属部门名称(进行了“欺诈方式”) -->
+	<select id="queryOrganizationName" resultMap="BorrowDetails" parameterType="filemanage.fileBorrowing.pojo.BorrowDetails">
+		select ORGANIZATION_NAME as QUANZONG_NAME 
+			from am_ma_sm_organization
+				where ORGANIZATION_ID = (
+			      select amsu.organization_id from am_ma_sm_user amsu where amsu.user_id = #{userId,jdbcType=VARCHAR}
+				)
+	</select>
+	<!-- 全宗名称下拉框数据展示 -->
+	<select id="queryQuanzongName" resultMap="BorrowDetails">
+		select 
+			amsqz.quanzong_id as BORROWDETAILS_ID,
+			amsqz.quanzong_name as QUANZONG_NAME
+		from am_ma_sm_quanzong amsqz
+	</select>
+	<!-- 根据全宗ID查询档案年度并在下拉框中展示 (进行了“欺诈方式”)-->
+	<select id="queryQuanzongId" resultMap="BorrowDetails" parameterType="Map">
+		select 
+			ARCHIVEFILE_ANUAL as BORROWDETAILS_ANNUAL
+		from am_co_archivefile acaf
+		inner join am_ma_sm_quanzong amsqz on amsqz.quanzong_id = acaf.quanzong_id
+		inner join AM_CO_BOX acb on acb.BOX_ID = acaf.BOX_ID
+		<where>
+			<if test="null != quanzongNumber and '' != quanzongNumber">
+				amsqz.quanzong_id = #{quanzongNumber,jdbcType=VARCHAR}
+			</if>
+			and acb.box_status='2'
+		</where>
+		group by ARCHIVEFILE_ANUAL
+	</select>
+	<!-- 借阅申请数据展示并分页(进行了“欺诈方式”) -->
+	<select id="borrowQueryFile" resultMap="BorrowDetails" parameterType="filemanage.fileBorrowing.pojo.BorrowDetails">
+		select fileBorrwing.* from (
+		    select 
+		          rownum r,
+		          BORROWDETAILS_ID,
+		          quanzong_name as QUANZONG_NAME,
+		          archivefile_anual as BORROWDETAILS_ANNUAL, 
+		          archivefile_title as BORROWDETAILS_TITLE,
+		          af_securityclassrification as USER_ID,
+		          quanzong_number as QUANZONG_NUMBER
+		      from (
+		        select 
+		        	  acaf.ARCHIVEFILE_ID as BORROWDETAILS_ID,
+		              amsqz.quanzong_name as quanzong_name,
+		              amsqz.quanzong_number as quanzong_number,
+		              acaf.archivefile_anual as archivefile_anual,
+		              acaf.archivefile_title as archivefile_title,
+		              acaf.af_securityclassrification as af_securityclassrification
+		        from am_co_archivefile acaf
+		        inner join am_ma_sm_quanzong amsqz on amsqz.quanzong_id = acaf.quanzong_id
+		        inner join AM_CO_BOX acb on acaf.BOX_ID = acb.BOX_ID
+		        <where> 
+		        	<if test="null != quanzongName and '' != quanzongName">
+			            amsqz.quanzong_id = #{quanzongName,jdbcType=VARCHAR}
+			        </if>
+			        <if test="null != borrowdetailsAnnual and '' != borrowdetailsAnnual">
+			        	and acaf.archivefile_anual = #{borrowdetailsAnnual,jdbcType=VARCHAR}
+			        </if>
+			        and acb.box_status='2'
+		        </where>
+		    )
+		    <where>
+		    	<!-- 借用mybatis 的对象映射机制，分页的参数直接引用对象（诈骗方式） -->
+			      <!--   rownum &lt;= 7#{quanzongNumber,jdbcType=VARCHAR} -->
+			   <if test="null != borrowdetailsTitle and ''!= borrowdetailsTitle">
+				   and  quanzong_name
+				    ||  archivefile_anual 
+				    ||  archivefile_title
+				    ||  af_securityclassrification like CONCAT(CONCAT('%',#{borrowdetailsTitle,jdbcType=VARCHAR}),'%')
+			   </if>
+		    </where>   
+		)fileBorrwing
+			<!-- 借用mybatis 的对象映射机制，分页的参数直接引用对象（诈骗方式） -->
+		    <!--  where fileBorrwing.r &gt;= 1#{borrowrecordsId,jdbcType=VARCHAR}  -->
+	</select>
+	
+	<!-- 借阅申请数据展示并分页 (总数)-->
+	<select id="borrowQueryFileCount" resultType="int" parameterType="filemanage.fileBorrowing.pojo.BorrowDetails">
+		    select 
+		          count(*)
+		      from (
+		        select 
+		              amsqz.quanzong_name as quanzong_name,
+		              acaf.archivefile_anual as archivefile_anual,
+		              acaf.archivefile_title as archivefile_title,
+		              acaf.af_securityclassrification as af_securityclassrification
+		        from am_co_archivefile acaf
+		        inner join am_ma_sm_quanzong amsqz on amsqz.quanzong_id = acaf.quanzong_id
+		        inner join AM_CO_BOX acb on acaf.BOX_ID = acb.BOX_ID
+		        <where> 
+		        	<if test="null != borrowrecordsId and '' != borrowrecordsId">
+				    	abbd.borrowrecords_id = #{borrowrecordsId ,jdbcType=VARCHAR}
+				    </if>
+		        	<if test="null != quanzongName and '' != quanzongName">
+			            and amsqz.quanzong_name like CONCAT(CONCAT('%',#{quanzongName,jdbcType=VARCHAR}),'%')
+			        </if>
+			        <if test="null != borrowdetailsAnnual and '' != borrowdetailsAnnual">
+			        	and acaf.archivefile_anual = #{borrowdetailsAnnual,jdbcType=VARCHAR}
+			        </if>
+			        	and acb.box_status='2'
+		        </where>
+		    )
+		    <where>
+			   <if test="null != borrowdetailsTitle and ''!= borrowdetailsTitle">
+				   and  quanzong_name
+				    ||  archivefile_anual 
+				    ||  archivefile_title
+				    ||  af_securityclassrification like CONCAT(CONCAT('%',#{borrowdetailsTitle,jdbcType=VARCHAR}),'%')
+			   </if>
+		    </where>   
+	</select>
+	
+	
+	<!-- 填写借阅申请单(填写借阅明细) -->
+	<insert id="borrowDetailsInsert" parameterType="filemanage.fileBorrowing.pojo.BorrowDetails">
+		insert into am_borrowing_borrowdetails 
+		values(
+			sys_guid(),
+			#{quanzongNumber,jdbcType=VARCHAR},
+			#{quanzongName,jdbcType=VARCHAR},
+			#{borrowdetailsAnnual,jdbcType=VARCHAR},
+			#{borrowdetailsTitle,jdbcType=VARCHAR},
+			#{borrowrecordsId,jdbcType=VARCHAR},
+			#{userId,jdbcType=VARCHAR},
+			#{archivefileId,jdbcType=VARCHAR})
+	</insert>
+	<!-- 填写借阅申请单(填写借阅记录) -->
+	<insert id="borrowRecordsInsert" parameterType="filemanage.fileBorrowing.pojo.BorrowRecords">
+		insert into am_borrowing_borrowrecords(
+			BORROWRECORDS_ID,
+			BORROWRECORDS_NAME,
+			BORROWRECORDS_DEPARTMENT,
+			BORROWRECORDS_BORROWDATE,
+			BORROWRECORDS_RETURNDATE,
+			BORROWRECORDS_CARRIER,
+			BORROWRECORDS_REASON,
+			BORROWRECORDS_NUMBER
+		)values(
+			#{borrowRecordsId,jdbcType=VARCHAR},
+			#{borrowRecordsName,jdbcType=VARCHAR},
+			#{borrowRecordsDepartment,jdbcType=VARCHAR},
+			to_char(sysdate,'yyyy-MM-dd'),
+			#{borrowRecordsReturnDate,jdbcType=VARCHAR},
+			#{borrowRecordsCarrier,jdbcType=NUMERIC},
+			#{borrowRecordsReason,jdbcType=VARCHAR},
+			#{borrowRecordsNumber,jdbcType=NUMERIC})
+	</insert>
+	<!-- 查询借阅记录表展示数据并进行分页以及条件查询 -->
+	<select id="borrowRecordsQuery" resultMap="BorrowRecords" parameterType="filemanage.fileBorrowing.pojo.BorrowRecords">
+		select records.* from (
+		    select 
+		           rownum r,
+		           data.*
+		            from (
+		                 select
+							   BORROWRECORDS_NAME as BORROWRECORDS_NAME,
+		                       BORROWRECORDS_BORROWDATE as BORROWRECORDS_BORROWDATE,
+		                       BORROWRECORDS_RETURNDATE as BORROWRECORDS_RETURNDATE,
+		                       BORROWRECORDS_NUMBER as BORROWRECORDS_NUMBER,
+		                       decode(abbc.BORROWRECORDS_CARRIER,'1','纸质原件','2','复印件','3','电子原件') as BORROWRECORDS_CARRIER,
+		                       BORROWRECORDS_REASON as BORROWRECORDS_REASON,
+		                       decode(abbc.BORROWRECORDS_STATUS,'1','待审核','2','已驳回','3','已通过','4','已归还') as BORROWRECORDS_STATUS,
+		                       abbd.borrowrecords_id as borrowrecords_id,
+                           	   abbc.BORROWRECORDS_REASONREJECTION as BORROWRECORDS_REASONREJECTION
+		                 from am_borrowing_borrowrecords abbc
+		                 inner join am_borrowing_borrowdetails abbd on abbd.borrowrecords_id = abbc.borrowrecords_id
+		                 <where> 
+				            <if test="null != borrowRecordsId and '' != borrowRecordsId">
+				               abbd.user_id =#{borrowRecordsId ,jdbcType=VARCHAR}
+				            </if>
+				            <if test="null != borrowRecordsCarrier and '' != borrowRecordsCarrier">
+				               and  BORROWRECORDS_CARRIER = #{borrowRecordsCarrier ,jdbcType=NUMERIC}
+				            </if>
+				            <if test="null != borrowRecordsStatus and '' != borrowRecordsStatus">
+				               and  BORROWRECORDS_STATUS =#{borrowRecordsStatus ,jdbcType=NUMERIC}
+				            </if>
+		                 </where>
+		                 group by 
+		                 		BORROWRECORDS_NAME,
+	                            BORROWRECORDS_BORROWDATE,
+	                            BORROWRECORDS_RETURNDATE,
+	                            BORROWRECORDS_NUMBER,
+	                            BORROWRECORDS_CARRIER,
+	                            BORROWRECORDS_REASON,
+	                            BORROWRECORDS_STATUS,
+	                            abbd.borrowrecords_id,
+	                            abbc.BORROWRECORDS_REASONREJECTION
+	                     order by BORROWRECORDS_BORROWDATE desc
+		                 )data
+		                 <!-- <where>
+		                 	rownum &lt;= 100
+		                 </where> -->
+		)records
+		<!-- where records.r &gt;=1 -->
+	</select>
+	<!-- 查询借阅记录表展示数据并进行分页以及条件查询 (总数) -->
+	<select id="borrowRecordsCountQuery" resultType="int" parameterType="filemanage.fileBorrowing.pojo.BorrowRecords">
+				select
+				     count(*) as borrowRecordsNumber
+				from am_borrowing_borrowrecords abbc
+				inner join am_borrowing_borrowdetails abbd on abbd.borrowrecords_id = abbc.borrowrecords_id
+				<where> 
+				<if test="null != borrowRecordsId and '' != borrowRecordsId">
+					 abbd.user_id =#{borrowRecordsId ,jdbcType=VARCHAR}
+				</if>
+				<if test="null != borrowRecordsCarrier and '' != borrowRecordsCarrier">
+					 and  BORROWRECORDS_CARRIER = #{borrowRecordsCarrier ,jdbcType=NUMERIC}
+				</if>
+				<if test="null != borrowRecordsStatus and '' != borrowRecordsStatus">
+					 and  BORROWRECORDS_STATUS =#{borrowRecordsStatus ,jdbcType=NUMERIC}
+				</if>
+				</where>
+	</select>
+	<!-- 借阅明细(记录查询) -->
+	<select id="borrowRecordsSelect" resultMap="BorrowRecords" parameterType="filemanage.fileBorrowing.pojo.BorrowRecords">
+		select 
+	      abbc.BORROWRECORDS_NAME as BORROWRECORDS_NAME,
+	      abbc.BORROWRECORDS_DEPARTMENT as BORROWRECORDS_DEPARTMENT,
+	      abbc.BORROWRECORDS_BORROWDATE as BORROWRECORDS_BORROWDATE,
+	      abbc.BORROWRECORDS_RETURNDATE as BORROWRECORDS_RETURNDATE,
+	      decode(abbc.BORROWRECORDS_CARRIER ,'1','纸质原件','2','复印件','3','电子原件') as BORROWRECORDS_CARRIER,
+	      abbc.BORROWRECORDS_REASON as BORROWRECORDS_REASON 
+	    from am_borrowing_borrowrecords abbc
+	    <where>
+	    	<if test="null != borrowRecordsId and '' != borrowRecordsId">
+	    		abbc.borrowrecords_id = #{borrowRecordsId ,jdbcType=VARCHAR}
+	    	</if>
+	    </where>
+	</select>
+	<!-- 借阅明细（明细表查询） -->
+	<select id="borrowDetailsSelect" resultMap="BorrowDetails" parameterType="filemanage.fileBorrowing.pojo.BorrowDetails">
+		select 
+			borrowd.* 
+		from (
+		    select 
+		      rownum r,
+		      abbw.BORROWRECORDS_CARRIER as USER_ID,
+		      ARCHIVEFILE_ID as ARCHIVEFILE_ID,
+		      abbd.QUANZONG_NAME,
+		      abbd.BORROWDETAILS_ANNUAL,
+		      abbd.BORROWDETAILS_TITLE
+		    from am_borrowing_borrowdetails abbd
+		    inner join am_borrowing_borrowrecords abbw on abbw.borrowrecords_id = abbd.borrowrecords_id
+		    <where>
+			          <!-- rownum &lt;= 5 -->
+			    <if test="null != borrowrecordsId and '' != borrowrecordsId">
+			    	  abbd.borrowrecords_id = #{borrowrecordsId ,jdbcType=VARCHAR}
+			    </if>
+		    </where>
+		)borrowd
+		<!-- <where>
+		    borrowd.r &gt;=1
+		</where> -->    
+	</select>
+	<!-- 借阅明细（明细表查询）(总数) -->
+	<select id="borrowDetailsSelectCount" resultType="int" parameterType="Map">
+		    select 
+		      count(BORROWDETAILS_ID) as BORROWDETAILS_ID
+		    from am_borrowing_borrowdetails abbd
+		    <where>
+			    <if test="null != borrowRecordsId and '' != borrowRecordsId">
+			    	and   abbd.borrowrecords_id = #{borrowRecordsId ,jdbcType=VARCHAR}
+			    </if>
+		    </where>
+	</select>
+	<!-- 归还 -->
+	<update id="fileReturn" parameterType="filemanage.fileBorrowing.pojo.BorrowRecords">
+		update 
+			am_borrowing_borrowrecords 
+		set 
+			BORROWRECORDS_EVALUATION = #{borrowRecordsEvaluation ,jdbcType=VARCHAR},
+			BORROWRECORDS_INSTRUCTIONS = #{borrowRecordsInstructions ,jdbcType=VARCHAR},
+			BORROWRECORDS_STATUS = '4'
+		<where>
+			<if test="null != borrowRecordsId and '' != borrowRecordsId">
+				BORROWRECORDS_ID = #{borrowRecordsId ,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</update>
+	<!-- 续借 -->
+	<update id="fileRenew" parameterType="filemanage.fileBorrowing.pojo.BorrowRecords">
+		update 
+			am_borrowing_borrowrecords 
+		set 
+			BORROWRECORDS_RETURNDATE =#{borrowRecordsReturnDate ,jdbcType=VARCHAR},
+			BORROWRECORDS_REASON=#{borrowRecordsReason ,jdbcType=VARCHAR},
+			BORROWRECORDS_STATUS='1'
+		<where>
+			<if test="null != borrowRecordsId and '' != borrowRecordsId">
+				BORROWRECORDS_ID = #{borrowRecordsId ,jdbcType=VARCHAR}
+			</if>
+		</where> 
+	</update>
+	<!-- 借阅审核（已通过，已驳回） -->
+	<update id="fileAudit" parameterType="filemanage.fileBorrowing.pojo.BorrowRecords">
+		update 
+			am_borrowing_borrowrecords 
+		set 
+			<if test="null != borrowrecordsReasonrejection and '' != borrowrecordsReasonrejection">
+				BORROWRECORDS_REASONREJECTION=#{borrowrecordsReasonrejection ,jdbcType=VARCHAR},
+			</if>
+			<if test="null != borrowRecordsStatus and '' != borrowRecordsStatus">
+				BORROWRECORDS_STATUS=#{borrowRecordsStatus ,jdbcType=VARCHAR}
+			</if>
+			
+		<where>
+			<if test="null != borrowRecordsId and '' != borrowRecordsId">
+				BORROWRECORDS_ID = #{borrowRecordsId ,jdbcType=VARCHAR}
+			</if>
+		</where> 
+	</update>
+</mapper>

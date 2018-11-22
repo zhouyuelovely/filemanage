@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.digitalarchives.dao.ElectronicDocumentMapper">
+	<resultMap type="filemanage.digitalarchives.pojo.ElectronicDocument"
+		id="electronicDocumentMap">
+		<id property="archivefileId" column="ARCHIVEFILE_ID" jdbcType="VARCHAR" />
+		<result property="archivefileAnual" column="ARCHIVEFILE_ANUAL"
+			jdbcType="VARCHAR" />
+		<result property="archivefileCreatetime" column="ARCHIVEFILE_CREATETIME"
+			jdbcType="VARCHAR" />
+		<result property="archivefileResponsible" column="ARCHIVEFILE_RESPONSIBLE"
+			jdbcType="VARCHAR" />
+		<result property="archivefileReferencenumber" column="ARCHIVEFILE_REFERENCENUMBER"
+			jdbcType="VARCHAR" />
+		<result property="archivefileTitle" column="ARCHIVEFILE_TITLE"
+			jdbcType="VARCHAR" />
+		<result property="receiptTime" column="RECEIP_TTIME" jdbcType="DATE" />
+		<association property="archive"
+			javaType="filemanage.systemmanage.pojo.Archive">
+			<id property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR" />
+			<result property="quanzongNumber" column="QUANZONG_NUMBER"
+				jdbcType="VARCHAR" />
+			<result property="quanzongName" column="QUANZONG_NAME"
+				jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+	
+	<resultMap type="filemanage.collectandorganize.pojo.FileAttachment" id="fileAttachmentMap">
+		<id property="fileAttachmentId" column="FILE_ATTACHMENT_ID" jdbcType="VARCHAR"/>
+		<result property="archiveFileId" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPath" column="FILE_ATTACHMENT_PATH" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentName" column="FILE_ATTACHMENT_NAME" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPageNumber" column="FILE_ATTACHMENT_PAGENUMBER" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentMark" column="FILE_ATTACHMENT_MARK" jdbcType="VARCHAR"/>
+		<result property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+		<result property="fileCreatetime" column="FILE_CREATETIME" jdbcType="DATE"/>
+	</resultMap>
+
+	<!-- 电子文件表信息按条件查询 -->
+	<sql id="selectall">
+		SELECT ACA.ARCHIVEFILE_ID,
+		ACA.ARCHIVEFILE_ANUAL,
+		ACA.ARCHIVEFILE_CREATETIME,
+		ACA.ARCHIVEFILE_RESPONSIBLE,
+		ACA.ARCHIVEFILE_REFERENCENUMBER,
+		ACA.ARCHIVEFILE_TITLE,
+		ACA.RECEIP_TTIME,
+		AMS.QUANZONG_ID,
+		AMS.QUANZONG_NUMBER,
+		AMS.QUANZONG_NAME 
+		FRON AM_CO_ARCHIVEFILE ACA LEFT JOIN AM_MA_SM_QUANZONG AMS ON ACA.QUANZONG_ID = AMS.QUANZONG_ID
+	</sql>
+	
+	<!-- 查询电子文件表所有信息 -->
+	<select id="queryElectronicDocumentList" resultMap="electronicDocumentMap">
+		<include refid="selectall"/>
+		
+	</select>
+	
+	<!-- 统计电子文件数量 -->
+	<select id="countElectronicDocumentList" resultType="int">
+		SELECT COUNT(*)
+		FROM AM_CO_ARCHIVEFILE ACA LEFT JOIN AM_MA_SM_QUANZONG AMS ON ACA.QUANZONG_ID = AMS.QUANZONG_ID 
+	</select>
+	
+	
+	<!-- 按条件查询电子文件表信息 -->
+	<select id="queryElectronicDocumentByCondition" parameterType="filemanage.digitalarchives.pojo.ElectronicDocument"
+		resultMap="electronicDocumentMap">
+		<include refid="selectall" />
+		<where>
+			<if test="quanzongName!='' and quanzongName!=null">
+				AND AMS.QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+			</if>
+			<if test="archivefileAnual!='' and archivefileAnual!=null">
+				AND ACA.ARCHIVEFILE_ANUAL=#{archivefileAnual,jdbcType=VARCHAR}
+			</if>
+			<if test="startDate!=null and startDate!=''">
+				AND ACA.RECEIP_TTIME &gt; to_date(#{startDate},'YYYY-MM-DD hh24:mi')
+			</if>
+			<if test="endDate!=null and endDate!=''">
+				AND ACA.RECEIP_TTIME &lt; to_date(#{endDate},'YYYY-MM-DD hh24:mi')
+			</if>
+		</where>
+	</select>
+	<!-- 根据条件统计电子文件信息 -->
+	<select id="countElectronicDocumentByCondition" parameterType="filemanage.digitalarchives.pojo.ElectronicDocument" resultType="int">
+		SELECT COUNT(*)
+		FROM AM_CO_ARCHIVEFILE ACA LEFT JOIN AM_MA_SM_QUANZONG AMS ON ACA.QUANZONG_ID = AMS.QUANZONG_ID
+		<where>
+			<if test="quanzongName!='' and quanzongName!=null">
+				AND AMS.QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+			</if>
+			<if test="archivefileAnual!='' and archivefileAnual!=null">
+				AND ACA.ARCHIVEFILE_ANUAL=#{archivefileAnual,jdbcType=VARCHAR}
+			</if>
+			<if test="startDate!=null and startDate!=''">
+				AND ACA.RECEIP_TTIME &gt; to_date(#{startDate},'YYYY-MM-DD hh24:mi')
+			</if>
+			<if test="endDate!=null and endDate!=''">
+				AND ACA.RECEIP_TTIME &lt; to_date(#{endDate},'YYYY-MM-DD hh24:mi')
+			</if>
+		</where>
+	</select>
+	
+	<!-- 统计电子附件图片数量 -->
+	<select id="countElectronicAttachment" resultType="int">
+		SELECT COUNT(*) FROM AM_CO_FILE_ATTACHMENT
+		WHERE FILE_ATTACHMENT_MARK = '1';
+	</select>
+	
+	<!-- 查询电子附件路径集合(图片展示) -->
+	<select id="queryElectronicAttachmentList" parameterType="Map" resultMap="fileAttachmentMap">
+		SELECT ACT.*
+		FROM
+		(SELECT AC.*,ROWNUM RN FROM
+		(SELECT A.FILE_ATTACHMENT_PATH
+     	FROM AM_CO_FILE_ATTACHMENT A
+     	WHERE FILE_ATTACHMENT_MARK = '1'
+     	ORDER BY FILE_CREATETIME)AC 
+    	WHERE ROWNUM&lt;=${(size+start)})ACT
+		WHERE RN&gt;#{start}
+	</select>
+	
+	<!-- 根据文件主键统计图片数量 -->
+	<select id="countAllElectronicImg" resultType="int" parameterType="String">
+		SELECT COUNT(*) FROM AM_CO_FILE_ATTACHMENT
+		WHERE ARCHIVEFILE_ID=#{archiveFileId,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 分页返回图片路径集合 resultType=java.lang.String-->
+	<select id="listAllElectronicImg" parameterType="Map" resultMap="fileAttachmentMap">
+		SELECT ACT.*
+		FROM
+		(SELECT AC.*,ROWNUM RN FROM
+		(SELECT A.FILE_ATTACHMENT_PATH,
+		A.FILE_CREATETIME,
+		A.FILE_ATTACHMENT_PAGENUMBER
+     	FROM AM_CO_FILE_ATTACHMENT A
+     	WHERE ARCHIVEFILE_ID=#{archiveFileId,jdbcType=VARCHAR}
+     	ORDER BY TO_NUMBER(FILE_ATTACHMENT_PAGENUMBER))AC 
+    	WHERE ROWNUM&lt;=${(size+start)})ACT
+		WHERE RN&gt;#{start} 
+	</select>
+	
+</mapper>

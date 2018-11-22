@@ -1,0 +1,21 @@
+table tr th div, table tr td {
+	text-align: center;
+}
+/*添加全宗弹出层样式*/
+.add_lb1 {
+	margin: 20px 85px;
+}
+
+.add_lb2 {
+	margin: 20px 70px;
+}
+
+.gong_color {
+	color: red;
+	font-weight: bold;
+}
+
+body .add_label_bg>.layui-layer-title, .btn_color {
+	background: #EA5519;
+	color: #FFFFFF;
+}

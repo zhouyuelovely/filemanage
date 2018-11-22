@@ -1,0 +1,630 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.danganmanage.dao.DanganManageMapper">
+ <resultMap type="filemanage.danganmanage.vo.AmCoBoxConditons" id="amCoBoxMap">
+   <id column="BOX_ID" property="boxid" jdbcType="VARCHAR"/>
+   <result column="BOX_STATUS" property="boxstatus" jdbcType="VARCHAR"/>
+   <result column="BOX_ANUAL" property="boxanual" jdbcType="VARCHAR"/>
+   <result column="BOX_STARTNUMBER" property="boxstartnumber" jdbcType="VARCHAR"/>
+   <result column="BOX_ENDNUMBER" property="boxendnumber" jdbcType="VARCHAR"/>
+   <result column="BOX_NUMBER" property="boxnumber" jdbcType="VARCHAR"/>
+   <result column="BOX_AUDITSTART" property="boxAuditstart" jdbcType="VARCHAR"/>
+   <result column="BOX_REVIEWSTART" property="boxReviewstart" jdbcType="VARCHAR"/>
+   <result column="RETENTIONPERIOD_ID" property="retentionperiodid" jdbcType="VARCHAR"/>
+   <result column="RETENTIONPERIOD_NAME" property="retentionperiodname" jdbcType="VARCHAR"/>
+    <result column="QUANZONG_ID" property="quanzongId" jdbcType="VARCHAR"/>
+     <result column="QUANZONG_NUMBER" property="quanzongNumber" jdbcType="VARCHAR"/>
+     <result column="QUANZONG_NAME" property="quanzongName" jdbcType="VARCHAR"/>
+       <result column="PC_ID" property="pcId" jdbcType="VARCHAR"/>
+        <result column="SC_NAME" property="scName" jdbcType="VARCHAR"/>
+         <result property="archivefileresponsible" column="ARCHIVEFILE_RESPONSIBLE" jdbcType="VARCHAR"/>
+		<result property="archivefilecreatetime" column="ARCHIVEFILE_CREATETIME" jdbcType="VARCHAR"/>
+		<result property="archivefiletitle" column="ARCHIVEFILE_TITLE" jdbcType="VARCHAR"/>
+		<result property="archivefilepages" column="ARCHIVEFILE_PAGES" jdbcType="VARCHAR"/>
+		<result property="afsecurityclassrification" column="AF_SECURITYCLASSRIFICATION" jdbcType="VARCHAR"/>
+		<result property="archivefilefilenumber" column="ARCHIVEFILE_FILENUMBER" jdbcType="VARCHAR"/>
+		<result property="archivefilereferencenumber" column="ARCHIVEFILE_REFERENCENUMBER" jdbcType="VARCHAR"/>
+		<result property="archivefileremark" column="ARCHIVEFILE_REMARK" jdbcType="VARCHAR"/>
+        
+     <!-- 文件表 -->
+     <association property="amCoArchivefile" javaType="filemanage.collectandorganize.vo.AmCoArchivefile">
+       <id property="archivefileid" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+       <result property="archivefileresponsible" column="ARCHIVEFILE_RESPONSIBLE" jdbcType="VARCHAR"/>
+		<result property="archivefilecreatetime" column="ARCHIVEFILE_CREATETIME" jdbcType="VARCHAR"/>
+		<result property="archivefileanual" column="ARCHIVEFILE_ANUAL" jdbcType="VARCHAR"/>
+		<result property="archivefiletitle" column="ARCHIVEFILE_TITLE" jdbcType="VARCHAR"/>
+		<result property="archivefilescanpople" column="ARCHIVEFILE_SCANPOPLE" jdbcType="VARCHAR"/>
+		<result property="quanzongid" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+		<result property="archivefilepages" column="ARCHIVEFILE_PAGES" jdbcType="VARCHAR"/>
+		<result property="archivefilescandate" column="ARCHIVEFILE_SCANDATE" jdbcType="DATE"/>
+		<result property="archivefilefinishingstatus" column="ARCHIVEFILE_FINISHINGSTATUS" jdbcType="VARCHAR"/>
+		<result property="organizationid" column="ORGANIZATION_ID" jdbcType="VARCHAR"/>
+		<result property="primaryclassificationid" column="PRIMARYCLASSIFICATION_ID" jdbcType="VARCHAR"/>
+		<result property="pcname" column="PC_NAME" jdbcType="VARCHAR"/>
+		<result property="secondaryclassificationid" column="SECONDARYCLASSIFICATION_ID" jdbcType="VARCHAR"/>
+		<result property="scname" column="SC_NAME" jdbcType="VARCHAR"/>
+		<result property="retentionperiodid" column="RETENTIONPERIOD_ID" jdbcType="VARCHAR"/>
+		<result property="retentionperiodname" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR"/>
+		<result property="afsecurityclassrification" column="AF_SECURITYCLASSRIFICATION" jdbcType="VARCHAR"/>
+		<result property="archivefileauthenticatestatus" column="ARCHIVEFILE_AUTHENTICATESTATUS" jdbcType="VARCHAR"/>
+		<result property="archivefilefilenumber" column="ARCHIVEFILE_FILENUMBER" jdbcType="VARCHAR"/>
+		<result property="archivefilereferencenumber" column="ARCHIVEFILE_REFERENCENUMBER" jdbcType="VARCHAR"/>
+		<result property="archivefileremark" column="ARCHIVEFILE_REMARK" jdbcType="VARCHAR"/>
+		<result property="boxid" column="BOX_ID" jdbcType="VARCHAR"/>
+		<result property="collator" column="COLLATOR" jdbcType="VARCHAR"/>
+		<result property="finishingTime" column="FINISHINGTIME" jdbcType="DATE"/>
+     </association>   
+   <!-- 全宗表 -->
+   <association property="archive" javaType="filemanage.systemmanage.pojo.Archive">
+     <id column="QUANZONG_ID" property="quanzongId" jdbcType="VARCHAR"/>
+     <result column="QUANZONG_NUMBER" property="quanzongNumber" jdbcType="VARCHAR"/>
+     <result column="QUANZONG_NAME" property="quanzongName" jdbcType="VARCHAR"/>
+   </association>
+   <!-- 机构表 -->
+    <association property="organization" javaType="filemanage.systemmanage.pojo.Organization">
+      <id column="ORGANIZATION_ID" property="organizationId" jdbcType="VARCHAR"/>
+      <result column="ORGANIZATION_NAME" property="organizationName" jdbcType="VARCHAR"/>
+     <result column="ORGANIZATION_CODE" property="organizationCode" jdbcType="VARCHAR"/>
+     <result column="PC_ID" property="pcId" jdbcType="VARCHAR"/>
+    </association>
+    <!-- 保管期限表 -->
+    <association property="retentionperiod" javaType="filemanage.systemmanage.pojo.AmMaSmRetentionperiod">
+    <id column="RETENTIONPERIOD_ID" property="retentionperiodid" jdbcType="VARCHAR"/>
+    <result column="RETENTIONPERIOD_CODE" property="retentionperiodcode" jdbcType="VARCHAR"/>
+    <result column="RETENTIONPERIOD_NAME" property="retentionperiodname" jdbcType="VARCHAR"/>
+    </association>
+    <association property="primaryClassFication" javaType="filemanage.systemmanage.pojo.PrimaryClassFication">
+      <id column="PC_ID" property="pcId" jdbcType="VARCHAR"/>
+     <result column="PC_CODE" property="pcCode" jdbcType="VARCHAR"/>
+     <result column="PC_NAME" property="pcName" jdbcType="VARCHAR"/>
+     <result column="PC_DESCRIPTION" property="pcDescription" jdbcType="VARCHAR"/>
+     <result column="PC_PROPERTY" property="pcProperty" jdbcType="VARCHAR"/>
+     <result column="PC_CREATETIME" property="pcCreateTime" jdbcType="DATE"/>
+     <result column="PC_CREATOR" property="pcCreator" jdbcType="VARCHAR"/>
+    </association>
+    <!-- 二级分类表 -->
+    <association property="secondryClassFication" javaType="filemanage.systemmanage.pojo.SecondryClassFication">
+      <id column="SC_ID" property="scId" jdbcType="VARCHAR"/>
+      <result column="SC_CODE" property="scCode" jdbcType="VARCHAR"/>
+       <result column="SC_NAME" property="scName" jdbcType="VARCHAR"/>
+         <result column="PC_ID" property="pcId" jdbcType="VARCHAR"/>
+         <result column="SC_STATUS" property="scStatus" jdbcType="VARCHAR"/>
+    </association>
+ </resultMap>
+ 
+ <resultMap type="filemanage.collectandorganize.pojo.FileAttachment" id="fileAttachmentMap">
+		<id property="fileAttachmentId" column="FILE_ATTACHMENT_ID" jdbcType="VARCHAR"/>
+		<result property="archiveFileId" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPath" column="FILE_ATTACHMENT_PATH" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentName" column="FILE_ATTACHMENT_NAME" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPageNumber" column="FILE_ATTACHMENT_PAGENUMBER" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentMark" column="FILE_ATTACHMENT_MARK" jdbcType="VARCHAR"/>
+		<result property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+	</resultMap>
+ 
+ <resultMap type="filemanage.collectandorganize.vo.AmCoArchivefile" id="fileMap">
+      <id property="archivefileid" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+       <result property="archivefileresponsible" column="ARCHIVEFILE_RESPONSIBLE" jdbcType="VARCHAR"/>
+		<result property="archivefilecreatetime" column="ARCHIVEFILE_CREATETIME" jdbcType="VARCHAR"/>
+		<result property="archivefileanual" column="ARCHIVEFILE_ANUAL" jdbcType="VARCHAR"/>
+		<result property="archivefiletitle" column="ARCHIVEFILE_TITLE" jdbcType="VARCHAR"/>
+		<result property="archivefilescanpople" column="ARCHIVEFILE_SCANPOPLE" jdbcType="VARCHAR"/>
+		<result property="quanzongid" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+		<result property="archivefilepages" column="ARCHIVEFILE_PAGES" jdbcType="VARCHAR"/>
+		<result property="archivefilescandate" column="ARCHIVEFILE_SCANDATE" jdbcType="DATE"/>
+		<result property="archivefilefinishingstatus" column="ARCHIVEFILE_FINISHINGSTATUS" jdbcType="VARCHAR"/>
+		<result property="organizationid" column="ORGANIZATION_ID" jdbcType="VARCHAR"/>
+		<result property="primaryclassificationid" column="PRIMARYCLASSIFICATION_ID" jdbcType="VARCHAR"/>
+		<result property="pcname" column="PC_NAME" jdbcType="VARCHAR"/>
+		<result property="secondaryclassificationid" column="SECONDARYCLASSIFICATION_ID" jdbcType="VARCHAR"/>
+		<result property="scname" column="SC_NAME" jdbcType="VARCHAR"/>
+		<result property="retentionperiodid" column="RETENTIONPERIOD_ID" jdbcType="VARCHAR"/>
+		<result property="retentionperiodname" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR"/>
+		<result property="afsecurityclassrification" column="AF_SECURITYCLASSRIFICATION" jdbcType="VARCHAR"/>
+		<result property="archivefileauthenticatestatus" column="ARCHIVEFILE_AUTHENTICATESTATUS" jdbcType="VARCHAR"/>
+		<result property="archivefilefilenumber" column="ARCHIVEFILE_FILENUMBER" jdbcType="VARCHAR"/>
+		<result property="archivefilereferencenumber" column="ARCHIVEFILE_REFERENCENUMBER" jdbcType="VARCHAR"/>
+		<result property="archivefileremark" column="ARCHIVEFILE_REMARK" jdbcType="VARCHAR"/>
+		<result property="boxid" column="BOX_ID" jdbcType="VARCHAR"/>
+		<result property="collator" column="COLLATOR" jdbcType="VARCHAR"/>
+		<result property="finishingTime" column="FINISHINGTIME" jdbcType="DATE"/>
+		<result property="boxnumber" column="BOX_NUMBER" jdbcType="VARCHAR"/>
+ </resultMap>
+ <!-- 历史数据表 -->
+ <resultMap type="filemanage.danganmanage.vo.QueryHistoryByCondition" id="historyMap">
+   <id column="HISTORYDATA_ID" property="historydataId" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_TITLE" property="historydataTitle" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_NUMBER" property="historydataNumber" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_TYPECODE" property="historydataTypecode" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_PAGES" property="historydataPages" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_FILEDATE" property="historydataFiledate" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_TYPE" property="historydataType" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_SECURITY_LEVEL" property="historydataSecurityLevel" jdbcType="VARCHAR"/>
+    <result column="QUANZONG_ID" property="quanzongId" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_ARCHIVALYEAR" property="historydataArchivalYear" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_PARTNUMBER" property="historydataPartNumber" jdbcType="VARCHAR"/>
+    <result column="RETENTIONPERIOD_ID" property="retentionperiodId" jdbcType="VARCHAR"/>
+    <result column="ORGANIZATION_ID" property="organizationId" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_AF_RESPONSIBLE" property="historydataAFResponsible" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_REFERENCENUMBER" property="historydataReferencenumber" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_NAME" property="historydataName" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_CLIFICATIONNUM" property="historydataClificationNum" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_BOXNUMBER" property="historydataBoxNumber" jdbcType="VARCHAR"/>
+    <result column="KEYWORDS" property="keywords" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_TEXTITEM" property="historydataTextitem" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_CARRIERTYPE" property="historydataCarrierType" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_CARRIERMORPHOLOGY" property="historydataCarriermorphology" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_ADMISSIONDATE" property="historydataAdmissiondate" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_NOTES" property="historydataNotes" jdbcType="VARCHAR"/>
+     <result column="RETENTIONPERIOD_NAME" property="retentionperiodname" jdbcType="VARCHAR"/>
+      <result column="QUANZONG_NAME" property="quanzongName" jdbcType="VARCHAR"/>
+        <result column="PC_NAME" property="pcName" jdbcType="VARCHAR"/>
+ </resultMap>
+ 
+ <!-- 历史数据附件表 -->
+ <resultMap type="filemanage.recorded.pojo.HistoryAnnex" id="historyAnnexMap">
+    <id column="HISTORYANNEX_ID" property="historyannexId" jdbcType="VARCHAR"/>
+    <result column="HISTORYANNEX_PATH" property="historyannexPath" jdbcType="VARCHAR"/>
+    <result column="HISTORYANNEX_NAME" property="historyannexName" jdbcType="VARCHAR"/>
+    <result column="HISTORYDATA_ID" property="historydataId" jdbcType="VARCHAR"/>
+ </resultMap>
+ 
+ <resultMap type="filemanage.danganmanage.vo.BoxCondition" id="BoxConditionMap">
+			<id property="boxId" column="BOX_ID" jdbcType="VARCHAR"/>
+			<result property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+			 <result column="QUANZONG_NUMBER" property="quanzongNumber" jdbcType="VARCHAR"/>
+			<result property="quanzongName" column="QUANZONG_NAME" jdbcType="VARCHAR"/>
+		    <result property="archivefileid" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+			<result property="boxAnual" column="BOX_ANUAL" jdbcType="VARCHAR"/>
+		   <result property="archivefileanual" column="ARCHIVEFILE_ANUAL" jdbcType="VARCHAR"/>
+			<result property="pcName" column="PC_NAME" jdbcType="VARCHAR"/>
+			<result property="retentionperiodname" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR"/>
+			<result column="HISTORYDATA_ID" property="historydataId" jdbcType="VARCHAR"/>
+			 <result column="HISTORYDATA_ARCHIVALYEAR" property="historydataArchivalYear" jdbcType="VARCHAR"/>
+			  <result column="HISTORYDATA_TYPE" property="historydataType" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<sql id="boxManageSQL">
+			select  distinct qu.quanzong_number,qu.quanzong_name,box.box_id,box.box_status,
+			box.box_anual,box.box_startnumber,box.box_endnumber,box.box_number,
+       sc.sc_name,rp.retentionperiod_name,pc.pc_name,aca.af_securityclassrification 
+       from am_co_box box inner join am_ma_sm_quanzong qu
+       on qu.quanzong_id=box.quanzong_id inner join am_ma_sm_sclassification sc on sc.sc_id=box.sc_id
+       inner join am_ma_sm_retentionperiod rp on rp.retentionperiod_id=box.retentionperiod_id
+       inner join am_ma_sm_primaryclassification pc on pc.pc_id=sc.pc_id
+       inner join am_co_archivefile aca on aca.box_id=box.box_id
+		</sql>
+	 <sql id="fileManageSQL">
+	     select aca.archivefile_id,aca.archivefile_filenumber,aca.archivefile_referencenumber,
+	     aca.archivefile_responsible,aca.archivefile_title,
+      aca.archivefile_createtime,aca.archivefile_pages,aca.archivefile_remark,
+      aca.af_securityclassrification,aca.archivefile_anual,box.box_number,box.box_status,
+      qu.quanzong_name,pc.pc_name,rp.retentionperiod_name from am_co_archivefile aca
+      inner join am_co_box box on box.box_id=aca.box_id inner join am_ma_sm_quanzong qu
+      on qu.quanzong_id=aca.quanzong_id inner join am_ma_sm_primaryclassification pc on
+      pc.pc_id=aca.primaryclassification_id inner join am_ma_sm_retentionperiod rp on 
+      rp.retentionperiod_id=aca.retentionperiod_id
+	 </sql>
+	 
+	 <sql id="historyDataSQL">
+	  select * from  am_fd_historydata history 
+	 </sql>	
+	 
+	 <select id="selectAllBox" parameterType="Map" resultMap="amCoBoxMap">
+	    select sus.* from(
+	     select su.*, rownum rownu from (
+         <include refid="boxManageSQL"/>
+         where  box_status='2')su where rownum &lt;=${(before+after)} ) sus where sus.rownu &gt;#{before}
+	 </select>
+	 
+	 <select id="countSelectAllBox" resultType="int">
+	    select count(*) from (select * from(<include refid="boxManageSQL"/>)
+	    where  box_status='2')
+	 </select>
+	 
+	 <select id="countFileNumByBox" resultType="int">
+	   select count(*) from (select * from(<include refid="fileManageSQL"/>)
+	    where  box_status='2')
+	 </select>
+ 
+ <!-- 查询所有的审核合格的盒信息 -->
+ <select id="queryAllBox" resultMap="amCoBoxMap" parameterType="Map">
+     select sus.* from(
+     select su.*, rownum rownu from (
+       <include refid="boxManageSQL"/>
+     where QUANZONG_NAME=#{boxCondition.quanzongName,jdbcType=VARCHAR} and pc_name=#{boxCondition.pcName,jdbcType=VARCHAR}
+      and BOX_ANUAL=#{boxCondition.boxAnual,jdbcType=VARCHAR} and RETENTIONPERIOD_NAME=#{boxCondition.retentionperiodname,jdbcType=VARCHAR} and
+     box_status='2')su where rownum &lt;=${(before+after)} ) sus where sus.rownu &gt;#{before}
+   
+ </select>
+ 
+ <!-- 统计所有审核合格的盒 -->
+ <select id="countAllBox" resultType="int" parameterType="filemanage.danganmanage.vo.BoxCondition">
+  select count(*) from (select * from(<include refid="boxManageSQL"/>)
+   where QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR} and pc_name=#{pcName,jdbcType=VARCHAR}
+      and BOX_ANUAL=#{boxAnual,jdbcType=VARCHAR} and RETENTIONPERIOD_NAME=#{retentionperiodname,jdbcType=VARCHAR} and
+     box_status='2')
+     
+ </select>
+ 
+ <select id="countFileBoxNumByCondition" resultType="int" parameterType="filemanage.danganmanage.vo.BoxCondition">
+   select count(*) from (select * from(select  qu.quanzong_number,qu.quanzong_name,box.box_id,box.box_status,
+      box.box_anual,box.box_startnumber,box.box_endnumber,box.box_number,
+       sc.sc_name,rp.retentionperiod_name,pc.pc_name,aca.af_securityclassrification 
+       from am_co_box box inner join am_ma_sm_quanzong qu
+       on qu.quanzong_id=box.quanzong_id inner join am_ma_sm_sclassification sc on sc.sc_id=box.sc_id
+       inner join am_ma_sm_retentionperiod rp on rp.retentionperiod_id=box.retentionperiod_id
+       inner join am_ma_sm_primaryclassification pc on pc.pc_id=sc.pc_id
+       inner join am_co_archivefile aca on aca.box_id=box.box_id)
+   where QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR} and pc_name=#{pcName,jdbcType=VARCHAR}
+      and BOX_ANUAL=#{boxAnual,jdbcType=VARCHAR} and RETENTIONPERIOD_NAME=#{retentionperiodname,jdbcType=VARCHAR} and
+     box_status='2')
+ </select>
+ 
+ <!-- 统计所有已归档合格的文件 -->
+ <select id="countFileNum" resultType="int" parameterType="filemanage.danganmanage.vo.BoxCondition">
+    select count(*) from (select * from(<include refid="fileManageSQL"/>))
+       where QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR} and pc_name=#{pcName,jdbcType=VARCHAR}
+      and archivefile_anual=#{archivefileanual,jdbcType=VARCHAR} and RETENTIONPERIOD_NAME=#{retentionperiodname,jdbcType=VARCHAR} and box_status='2'  
+ </select>
+ 
+ <!-- 根据全宗名称查询该全宗下的一级分类 -->
+ <select id="queryPcByquanzongName" parameterType="filemanage.danganmanage.vo.BoxCondition" resultMap="BoxConditionMap">
+   SELECT  DISTINCT pc_name FROM(<include refid="boxManageSQL"/>)
+    where  QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+ </select>
+ 
+ <select id="queryPcByquanzongName2" parameterType="filemanage.danganmanage.vo.BoxCondition" resultMap="BoxConditionMap">
+   SELECT  DISTINCT pc_name FROM(<include refid="fileManageSQL"/>)
+    where  QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+ </select>
+ 
+ <!-- 根据全宗名称和一级分类名称查询年度 -->
+ <select id="queryBoxAnualByquanzongNameAndPcName" parameterType="filemanage.danganmanage.vo.BoxCondition" resultMap="BoxConditionMap">
+   SELECT DISTINCT BOX_ANUAL FROM(<include refid="boxManageSQL"/>)
+   where QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR} and pc_name=#{pcName,jdbcType=VARCHAR}
+ </select>
+ 
+ <select id="queryBoxAnualByquanzongNameAndPcName2" parameterType="filemanage.danganmanage.vo.BoxCondition" resultMap="BoxConditionMap">
+   SELECT DISTINCT archivefile_anual FROM(<include refid="fileManageSQL"/>)
+   where QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR} and pc_name=#{pcName,jdbcType=VARCHAR}
+ </select>
+ 
+ <!-- 根据全宗名称和一级分类名称还有年度查询保管期限名称 -->
+ <select id="queryRpNameByquanzongNameAndPcNameAndBoxAnual" parameterType="filemanage.danganmanage.vo.BoxCondition" resultMap="BoxConditionMap">
+   SELECT DISTINCT RETENTIONPERIOD_NAME FROM(<include refid="boxManageSQL"/>)
+    where QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR} and pc_name=#{pcName,jdbcType=VARCHAR}
+    and BOX_ANUAL=#{boxAnual,jdbcType=VARCHAR}
+ </select>
+ 
+ <!-- 根据全宗名称和一级分类名称还有年度查询保管期限名称 -->
+ <select id="queryRpNameByquanzongNameAndPcNameAndBoxAnual2" parameterType="filemanage.danganmanage.vo.BoxCondition" resultMap="BoxConditionMap">
+   SELECT DISTINCT RETENTIONPERIOD_NAME FROM(<include refid="fileManageSQL"/>)
+    where QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR} and pc_name=#{pcName,jdbcType=VARCHAR}
+    and archivefile_anual=#{archivefileanual,jdbcType=VARCHAR}
+ </select>
+ 
+ <!-- 根据关键词查询盒信息 -->
+  <select id="queryBoxByConditions" parameterType="Map" resultMap="amCoBoxMap">
+         select sus.* from(
+            select su.*, rownum rownu from (
+               select distinct qu.quanzong_number,qu.quanzong_name,box.box_id,box.box_status,
+			box.box_anual,box.box_startnumber,box.box_endnumber,box.box_number,
+       sc.sc_name,rp.retentionperiod_name,pc.pc_name,aca.af_securityclassrification 
+       from am_co_box box inner join am_ma_sm_quanzong qu
+       on qu.quanzong_id=box.quanzong_id inner join am_ma_sm_sclassification sc on sc.sc_id=box.sc_id
+       inner join am_ma_sm_retentionperiod rp on rp.retentionperiod_id=box.retentionperiod_id
+       inner join am_ma_sm_primaryclassification pc on pc.pc_id=sc.pc_id
+       inner join am_co_archivefile aca on aca.box_id=box.box_id 
+        where box.box_status='2' and qu.quanzong_number || qu.quanzong_name || pc.pc_name ||box.box_anual 
+        || rp.retentionperiod_name
+      || sc.sc_name || box.box_number || box.box_startnumber || box.box_endnumber like 
+      CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')
+      ) su  where rownum &lt;=${(before+after)} )sus where sus.rownu &gt;#{before}
+  </select>
+  
+  <!-- 根据关键词统计盒数量 -->
+   <select id="countBoxByConditions" parameterType="String" resultType="int">
+     select count(*) from  am_co_box box inner join am_ma_sm_quanzong qu
+       on qu.quanzong_id=box.quanzong_id inner join am_ma_sm_sclassification sc on sc.sc_id=box.sc_id
+       inner join am_ma_sm_retentionperiod rp on rp.retentionperiod_id=box.retentionperiod_id
+       inner join am_ma_sm_primaryclassification pc on pc.pc_id=sc.pc_id
+       inner join am_co_archivefile aca on aca.box_id=box.box_id 
+        where box.box_status='2' and qu.quanzong_number || qu.quanzong_name || pc.pc_name ||box.box_anual 
+        || rp.retentionperiod_name
+      || sc.sc_name || box.box_number || box.box_startnumber || box.box_endnumber like 
+      CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')
+  
+   </select>
+   
+   <select id="selectAllFile2" resultMap="fileMap" parameterType="Map">
+     select sus.* from(
+        select su.*, rownum rownu from (
+         <include refid="fileManageSQL"/>
+     where  box_status='2' order by to_date(archivefile_createTime,
+		'yyyy-mm-dd'))su  where rownum &lt;=${(before+after)} ) sus where sus.rownu &gt;#{before}
+   </select>
+   
+   <select id="countAllFilePages" resultType="int">
+     select sum(archivefile_pages) from (select * from(<include refid="fileManageSQL"/>))
+     where  box_status='2' 
+   </select>
+   
+   <!-- 查询所有的已合格归档的文件 -->
+   <select id="queryAllFile" resultMap="fileMap" parameterType="Map">
+     
+     select sus.* from(
+        select su.*, rownum rownu from (
+         <include refid="fileManageSQL"/>
+     where  qu.QUANZONG_NAME=#{boxCondition.quanzongName,jdbcType=VARCHAR} and  pc.pc_name=#{boxCondition.pcName,jdbcType=VARCHAR}
+      and  aca.archivefile_anual=#{boxCondition.archivefileanual,jdbcType=VARCHAR} and  rp.RETENTIONPERIOD_NAME=#{boxCondition.retentionperiodname,jdbcType=VARCHAR} and
+     box.box_status='2' order by to_date(archivefile_createTime,
+		'yyyy-mm-dd'))su  where rownum &lt;=${(before+after)} ) sus where sus.rownu &gt;#{before}
+   </select>
+   
+   <!--  统计合格归档文件页数-->
+   <select id="countFilePages" resultType="int" parameterType="filemanage.danganmanage.vo.BoxCondition">
+      select sum(archivefile_pages) from (select * from(<include refid="fileManageSQL"/>))
+       where QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR} and pc_name=#{pcName,jdbcType=VARCHAR}
+      and archivefile_anual=#{archivefileanual,jdbcType=VARCHAR} and RETENTIONPERIOD_NAME=#{retentionperiodname,jdbcType=VARCHAR} and box_status='2'
+   </select>
+   
+   <!-- 以件管理关键词查询 -->
+   <select id="queryFileByConditions" parameterType="Map" resultMap="fileMap">
+        select sus.* from(
+           select su.*, rownum rownu from (
+             select aca.archivefile_id,aca.archivefile_filenumber,aca.archivefile_referencenumber,
+	     aca.archivefile_responsible,aca.archivefile_title,
+      aca.archivefile_createtime,aca.archivefile_pages,aca.archivefile_remark,
+      aca.af_securityclassrification,aca.archivefile_anual,box.box_number,box.box_status,
+      qu.quanzong_name,pc.pc_name,rp.retentionperiod_name from am_co_archivefile aca
+      inner join am_co_box box on box.box_id=aca.box_id inner join am_ma_sm_quanzong qu
+      on qu.quanzong_id=aca.quanzong_id inner join am_ma_sm_primaryclassification pc on
+      pc.pc_id=aca.primaryclassification_id inner join am_ma_sm_retentionperiod rp on 
+      rp.retentionperiod_id=aca.retentionperiod_id
+     where box.box_status='2' and  
+     aca.archivefile_filenumber || aca.archivefile_referencenumber
+     || aca.archivefile_responsible || aca.archivefile_title || aca.archivefile_createtime || aca.af_securityclassrification
+     || box.BOX_NUMBER || aca.ARCHIVEFILE_REMARK like 
+     CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%') order by to_date(archivefile_createTime,
+		'yyyy-mm-dd'))su  where rownum &lt;=${(before+after)}) sus where sus.rownu &gt;#{before}
+ 
+   </select>
+   
+   <!-- 统计以件管理关键词查询个数 -->
+   <select id="countFileByConditions" parameterType="String" resultType="int">
+    select count(*) from
+      am_co_archivefile aca
+      inner join am_co_box box on box.box_id=aca.box_id inner join am_ma_sm_quanzong qu
+      on qu.quanzong_id=aca.quanzong_id inner join am_ma_sm_primaryclassification pc on
+      pc.pc_id=aca.primaryclassification_id inner join am_ma_sm_retentionperiod rp on 
+      rp.retentionperiod_id=aca.retentionperiod_id
+     where box.box_status='2' 
+     and aca.archivefile_filenumber || aca.archivefile_referencenumber
+     || aca.archivefile_responsible || aca.archivefile_title || aca.archivefile_createtime || aca.af_securityclassrification
+     || box.BOX_NUMBER || aca.ARCHIVEFILE_REMARK like CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')  
+   </select>
+   
+   <!-- 条件查询下统计盒数  -->
+   <select id="countBoxByCondition" parameterType="filemanage.danganmanage.vo.QueryBoxByCondition" resultType="int">
+      select count(*) from am_co_box box inner join am_ma_sm_quanzong qu
+       on qu.quanzong_id=box.quanzong_id inner join am_ma_sm_sclassification sc on sc.sc_id=box.sc_id
+       inner join am_ma_sm_retentionperiod rp on rp.retentionperiod_id=box.retentionperiod_id
+       inner join am_ma_sm_primaryclassification pc on pc.pc_id=sc.pc_id
+       inner join am_co_archivefile aca on aca.box_id=box.box_id 
+        where box.box_status='2' and qu.quanzong_number || qu.quanzong_name || pc.pc_name ||box.box_anual 
+        || rp.retentionperiod_name
+      || sc.sc_name || box.box_number || box.box_startnumber || box.box_endnumber like 
+      CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')
+
+   </select>
+   
+   <!--以盒管理 条件查询下统计件数 -->
+   <select id="countFileNumByCondition" parameterType="filemanage.danganmanage.vo.QueryBoxByCondition" resultType="int">
+      select count(box_casesnumber) from am_co_box box inner join am_ma_sm_quanzong qu
+       on qu.quanzong_id=box.quanzong_id inner join am_ma_sm_sclassification sc on sc.sc_id=box.sc_id
+       inner join am_ma_sm_retentionperiod rp on rp.retentionperiod_id=box.retentionperiod_id
+       inner join am_ma_sm_primaryclassification pc on pc.pc_id=sc.pc_id
+       inner join am_co_archivefile aca on aca.box_id=box.box_id 
+        where box.box_status='2'
+    	<if test="conditions !=null and conditions !=''">
+        and qu.quanzong_number || qu.quanzong_name || pc.pc_name ||box.box_anual 
+        || rp.retentionperiod_name
+      || sc.sc_name || box.box_number || box.box_startnumber || box.box_endnumber like 
+      CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')
+     </if> 
+   </select>
+   
+   <!-- 条件查询下统计文件页数 -->
+   <select id="countFilePagesByCondition" parameterType="filemanage.danganmanage.vo.QueryFileByCondition" resultType="int">
+      select sum(archivefile_pages) from am_co_archivefile aca
+      inner join am_co_box box on box.box_id=aca.box_id
+      where box.box_status='2'
+      <if test="conditions !=null and conditions !=''">
+       and aca.archivefile_filenumber || aca.archivefile_referencenumber
+     || aca.archivefile_responsible || aca.archivefile_title || aca.archivefile_createtime || aca.af_securityclassrification
+     || box.BOX_NUMBER || aca.ARCHIVEFILE_REMARK like CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')  
+      </if>
+   </select>
+   
+   <!-- 以件管理条件查询下统计件数 -->
+   <select id="countFileNumByCondition2" parameterType="filemanage.danganmanage.vo.QueryFileByCondition" resultType="int">
+      select count(*) from am_co_archivefile aca
+      inner join am_co_box box on box.box_id=aca.box_id inner join am_ma_sm_quanzong qu
+      on qu.quanzong_id=aca.quanzong_id inner join am_ma_sm_primaryclassification pc on
+      pc.pc_id=aca.primaryclassification_id inner join am_ma_sm_retentionperiod rp on 
+      rp.retentionperiod_id=aca.retentionperiod_id
+		where box.box_status='2' 
+    	<if test="conditions !=null and conditions !=''">
+       and aca.archivefile_filenumber || aca.archivefile_referencenumber
+     || aca.archivefile_responsible || aca.archivefile_title || aca.archivefile_createtime || aca.af_securityclassrification
+     || box.BOX_NUMBER || aca.ARCHIVEFILE_REMARK like CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')  
+      </if>
+   </select>
+   
+   <!-- 查询所有的全宗名称-->
+   <select id="queryAllQuanzongName" resultMap="BoxConditionMap">
+     	SELECT DISTINCT QUANZONG_NAME FROM(<include refid="boxManageSQL"/>)
+   </select>
+   
+   <select id="queryAllQuanzongName2" resultMap="BoxConditionMap">
+     	SELECT DISTINCT QUANZONG_NAME FROM(<include refid="fileManageSQL"/>)
+   </select>
+   
+   <select id="queryAllQuanzongName3" resultMap="BoxConditionMap">
+     	SELECT DISTINCT QUANZONG_NAME FROM(<include refid="historyDataSQL"/>)
+   </select>
+   
+   <select id="queryPcByquanzongName3" parameterType="filemanage.danganmanage.vo.BoxCondition" resultMap="BoxConditionMap">
+       SELECT  DISTINCT HISTORYDATA_TYPE FROM(<include refid="historyDataSQL"/>)
+     where  QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+   </select>
+   
+   <select id="queryBoxAnualByquanzongNameAndPcName3" parameterType="filemanage.danganmanage.vo.BoxCondition" resultMap="BoxConditionMap">
+       SELECT DISTINCT HISTORYDATA_ARCHIVALYEAR FROM(<include refid="historyDataSQL"/>)
+   where QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR} and HISTORYDATA_TYPE=#{historydataType,jdbcType=VARCHAR}
+   </select>
+   
+   <select id="queryRpNameByquanzongNameAndPcNameAndBoxAnual3" parameterType="filemanage.danganmanage.vo.BoxCondition" resultMap="BoxConditionMap">
+      SELECT DISTINCT RETENTIONPERIOD_NAME FROM(<include refid="historyDataSQL"/>)
+    where QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR} and HISTORYDATA_TYPE=#{historydataType,jdbcType=VARCHAR}
+    and HISTORYDATA_ARCHIVALYEAR=#{historydataArchivalYear,jdbcType=VARCHAR}
+   </select>
+   
+   <select id="selectAllHistoryData" resultMap="historyMap" parameterType="Map">
+     select sus.* from(
+          select su.*,rownum rownu from(
+          <include refid="historyDataSQL"/>)su 
+        where   rownum &lt;=${(before+after)} ) sus where sus.rownu &gt;#{before}
+   </select>
+   
+   <!-- 查询所有的历史数据 -->
+   <select id="queryAllHistoryData" resultMap="historyMap" parameterType="Map">
+      select sus.* from(
+          select su.*,rownum rownu from(
+          <include refid="historyDataSQL"/>
+        where 
+       QUANZONG_NAME=#{boxCondition.quanzongName,jdbcType=VARCHAR} and HISTORYDATA_TYPE=#{boxCondition.historydataType,jdbcType=VARCHAR}
+      and HISTORYDATA_ARCHIVALYEAR=#{boxCondition.historydataArchivalYear,jdbcType=VARCHAR} and RETENTIONPERIOD_NAME=#{boxCondition.retentionperiodname,jdbcType=VARCHAR}
+       ) su  where
+       rownum &lt;=${(before+after)} ) sus where sus.rownu &gt;#{before}
+   </select>
+   
+   <!-- 根据历史数据主键查询单个历史数据文件的附件信息 -->
+   <select id="queryHistoryAnnexByHistoryId" parameterType="String" resultMap="historyAnnexMap">
+      select * from am_fd_historyannex where HISTORYDATA_ID=#{historydataId,jdbcType=VARCHAR}
+   </select>
+   
+   <select id="countSelectAllHistoryData" resultType="int">
+     select count(*)  from (select * from(<include refid="historyDataSQL"/>))
+   </select>
+   
+   <!-- 统计所有的历史数据 -->
+   <select id="countAllHistoryData" resultType="int" parameterType="filemanage.danganmanage.vo.BoxCondition">
+     select count(*)  from (select * from(<include refid="historyDataSQL"/>))
+         where QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR} and HISTORYDATA_TYPE=#{historydataType,jdbcType=VARCHAR}
+      and HISTORYDATA_ARCHIVALYEAR=#{historydataArchivalYear,jdbcType=VARCHAR} and RETENTIONPERIOD_NAME=#{retentionperiodname,jdbcType=VARCHAR}    
+   </select>
+   
+   <select id="countSelectAllHistoryDataPages" resultType="int">
+     select sum(historydata_pages) from (select * from(<include refid="historyDataSQL"/>))
+   </select>
+   
+   <!-- 统计历史数据的总页数 -->
+   <select id="countHistoryDataPages" resultType="int" parameterType="filemanage.danganmanage.vo.BoxCondition">
+     select sum(historydata_pages) from (select * from(<include refid="historyDataSQL"/>))
+     where QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR} and HISTORYDATA_TYPE=#{historydataType,jdbcType=VARCHAR}
+      and HISTORYDATA_ARCHIVALYEAR=#{historydataArchivalYear,jdbcType=VARCHAR} and RETENTIONPERIOD_NAME=#{retentionperiodname,jdbcType=VARCHAR}
+   </select>
+   
+   <!-- 历史数据管理关键词查询 -->
+   <select id="queryHistoryByConditions" parameterType="Map" resultMap="historyMap">
+   
+  	select sus.* from(
+         select su.*,rownum rownu from(
+             <include refid="historyDataSQL"/>
+           where  HISTORYDATA_NUMBER || HISTORYDATA_REFERENCENUMBER ||
+          HISTORYDATA_AF_RESPONSIBLE || HISTORYDATA_TITLE || HISTORYDATA_FILEDATE
+           || HISTORYDATA_SECURITY_LEVEL || HISTORYDATA_BOXNUMBER || HISTORYDATA_NOTES
+           like CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%') )su  where  
+           rownum &lt;=${(before+after)})sus where sus.rownu &gt;=#{before} 
+          
+   </select>
+   
+   <!-- 统计历史数据管理关键词条数 -->
+   <select id="countHistoryByConditions" parameterType="String" resultType="int">
+      select count(*) from (select * from(<include refid="historyDataSQL"/>)) 
+           where  HISTORYDATA_NUMBER || HISTORYDATA_REFERENCENUMBER ||
+           HISTORYDATA_AF_RESPONSIBLE || HISTORYDATA_TITLE || HISTORYDATA_FILEDATE
+           || HISTORYDATA_SECURITY_LEVEL || HISTORYDATA_BOXNUMBER || HISTORYDATA_NOTES
+           like CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%') 
+   </select>
+   
+   <!-- 条件查询下统计历史数据件数 -->
+   <select id="countHistoryDataByCondition" parameterType="filemanage.danganmanage.vo.QueryFileByCondition" resultType="int">
+      select  count(historydata_id) from(select * from(<include refid="historyDataSQL"/>)) 
+       <where>
+         <if test="conditions !=null and conditions !=''">
+           and HISTORYDATA_NUMBER || HISTORYDATA_REFERENCENUMBER ||
+          HISTORYDATA_AF_RESPONSIBLE || HISTORYDATA_TITLE || HISTORYDATA_FILEDATE
+           || HISTORYDATA_SECURITY_LEVEL || HISTORYDATA_BOXNUMBER || HISTORYDATA_NOTES
+           like CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%') 
+         </if>
+       </where>
+   </select>
+   
+   <!--  条件查询下统计历史数据页数 -->
+   <select id="countHistoryDataPagesByCondition" parameterType="filemanage.danganmanage.vo.QueryFileByCondition" resultType="int">
+     select sum(historydata_pages) from (select * from(<include refid="historyDataSQL"/>))
+       <where>
+         <if test="conditions !=null and conditions !=''">
+            and  HISTORYDATA_NUMBER || HISTORYDATA_REFERENCENUMBER ||
+          HISTORYDATA_AF_RESPONSIBLE || HISTORYDATA_TITLE || HISTORYDATA_FILEDATE
+           || HISTORYDATA_SECURITY_LEVEL || HISTORYDATA_BOXNUMBER || HISTORYDATA_NOTES
+           like CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%') 
+         </if>
+       </where>
+   </select>
+   
+   <!-- 根据文件主键查询文件附件 -->
+   <select id="queryFileAttachmentByArchiveFileId" parameterType="String" resultMap="fileAttachmentMap">
+      select *
+		from am_co_file_attachment  
+		where archivefile_id=#{archiveFileId,jdbcType=VARCHAR} 
+		order by to_number(file_attachment_pagenumber) 
+   </select>
+   
+   <!-- 根据历史数据主键查询单个历史数据文件的附件信息 -->
+   <select id="queryHistoryAnnexByHistoryId2" parameterType="String" resultMap="historyAnnexMap">
+      select * from am_fd_historyannex where HISTORYDATA_ID=#{historydataId,jdbcType=VARCHAR}
+   </select>
+   
+   <select id="selectAllFile"  resultMap="fileMap">
+     <include refid="fileManageSQL"/>
+   </select>
+  
+ <!-- 搜索框模糊查询 -->
+	<select id="fuzzyEditingFileTitle" resultMap="fileMap">
+		 select aca.archivefile_id,aca.archivefile_filenumber,aca.archivefile_referencenumber,
+	     aca.archivefile_responsible,aca.archivefile_title,
+      aca.archivefile_createtime,aca.archivefile_pages,aca.archivefile_remark,
+      aca.af_securityclassrification,aca.archivefile_anual,box.box_number,box.box_status,
+      qu.quanzong_name,pc.pc_name,rp.retentionperiod_name from am_co_archivefile aca
+      inner join am_co_box box on box.box_id=aca.box_id inner join am_ma_sm_quanzong qu
+      on qu.quanzong_id=aca.quanzong_id inner join am_ma_sm_primaryclassification pc on
+      pc.pc_id=aca.primaryclassification_id inner join am_ma_sm_retentionperiod rp on 
+      rp.retentionperiod_id=aca.retentionperiod_id
+      <if test="searchBody !=null and searchBody !=''">
+		and
+		aca.archivefile_title
+		like CONCAT(CONCAT('%', #{searchBody}), '%')
+		or
+		aca.archivefile_createtime like CONCAT(CONCAT('%', #{searchBody}), '%')
+		or
+		qu.quanzong_name like CONCAT(CONCAT('%', #{searchBody}), '%')
+		or
+		rp.retentionperiod_name like CONCAT(CONCAT('%', #{searchBody}), '%')
+		</if>
+	</select>
+
+</mapper>

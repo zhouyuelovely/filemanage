@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.digitalarchives.dao.AdviceMapper">
+	<!-- 咨询建议 -->
+	<resultMap type="filemanage.digitalarchives.pojo.Advice" id="adviceMap">
+		<id property="adviceId" column="ADVICE_ID" jdbcType="VARCHAR"/>
+		<result property="adviceType" column="ADVICE_TYPE" jdbcType="VARCHAR"/>
+		<result property="advicePublicinformation" column="ADVICE_PUBLICINFORMATION" jdbcType="VARCHAR"/>
+		<result property="adviceTheme" column="ADVICE_THEME" jdbcType="VARCHAR"/>
+		<result property="adviceContent" column="ADVICE_CONTENT" jdbcType="VARCHAR"/>
+		<result property="adviceTime" column="ADVICE_TIME" jdbcType="DATE"/>
+		<result property="adviceStatus" column="ADVICE_STATUS" jdbcType="VARCHAR"/>
+		<result property="ruserId" column="RUSER_ID" jdbcType="VARCHAR"/>
+		<result property="replyContent" column="REPLY_CONTENT" jdbcType="VARCHAR"/>
+		<result property="replyTime" column="REPLY_TIME" jdbcType="DATE"/>
+		<association property="userIds" column="user_id" javaType="filemanage.login.pojo.User">
+			<id property="userId" column="USERID" jdbcType="DOUBLE"/>
+			<id property="userName" column="USERNAME" jdbcType="VARCHAR"/>
+		</association>
+	</resultMap>
+	<!-- 回复 -->
+	<resultMap type="filemanage.digitalarchives.pojo.Reply" id="replyMap">
+		<id property="replyId" column="REPLY_ID" jdbcType="VARCHAR"/>
+		<result property="replyTime" column="REPLY_TIME" jdbcType="VARCHAR"/>
+		<result property="replyContent" column="REPLY_CONTENT" jdbcType="VARCHAR"/>
+		<result property="ruserId" column="RUSER_ID" jdbcType="VARCHAR"/>
+		<association property="adviceId" javaType="filemanage.digitalarchives.pojo.Advice">
+			<id property="adviceId" column="ADVICE_ID" jdbcType="VARCHAR"/>
+			<result property="adviceStatus" column="ADVICE_STATUS" jdbcType="VARCHAR"/>
+		</association>
+	</resultMap>
+	<!-- 关键词查询咨询建议 -->
+	<select id="adviceQuery" resultMap="adviceMap" parameterType="filemanage.digitalarchives.pojo.Advice">
+			select 
+			     advice_id,
+			     advice_type,
+			     advice_publicinformation,
+			     advice_theme,
+			     ADVICE_CONTENT,
+			     advice_time,
+			     advice_status,
+			     userId,
+			     RUSER_ID,
+			     REPLY_CONTENT,
+			     REPLY_TIME
+			from (
+					select 
+					   ada.advice_id as advice_id,
+				       decode(ada.advice_type,'1','咨询','2','建议') as advice_type,
+				       ada.advice_publicinformation as advice_publicinformation,
+				       ada.advice_theme as advice_theme,
+				       ada.ADVICE_CONTENT as ADVICE_CONTENT,
+				       to_char(ada.advice_time,'yyyy-MM-dd') as advice_time,
+				       decode(ada.advice_status,'1','待回复','2','已回复') as advice_status,
+				       ada.user_id as userId,
+				       amsu.USER_ID as RUSER_ID,
+			           adr.REPLY_CONTENT as REPLY_CONTENT,
+			           adr.REPLY_TIME as REPLY_TIME
+				  from am_da_advice ada
+				  left join am_da_reply adr on adr.ADVICE_ID = ada.advice_id
+				  left join am_ma_sm_user amsu on amsu.user_id = adr.ruser_id
+			) adas
+				   <where>
+				    	<if test="null != adviceType and '' != adviceType">
+				    		   advice_type
+					       ||  advice_publicinformation
+					       ||  advice_theme
+					       ||  advice_time
+					       ||  advice_status
+					       like concat(concat('%',#{adviceType ,jdbcType=VARCHAR}),'%')	
+				    	</if>   	
+				    </where>
+	       
+	</select>
+	<!-- 查询总咨询数 -->
+	<select id="adviceCount" resultType="int" parameterType="filemanage.digitalarchives.pojo.Advice">
+		select 
+	       count(ADVICE_ID)
+	  from am_da_advice ada
+	    <where>
+	    	<if test="adviceType != null and adviceType != ''">
+	    		   ada.advice_type
+		       ||  ada.advice_publicinformation
+		       ||  ada.advice_theme
+		       ||   to_char(ada.advice_time,'yyyy-MM-dd')
+		       ||  ada.advice_status
+		       like concat(concat('%',#{adviceType ,jdbcType=VARCHAR}),'%')	
+	    	</if>   	
+	    </where> 
+	</select>
+	<!-- 查询单个咨询建议信息(查看) -->
+	<select id="adviceSelect" resultMap="adviceMap" parameterType="filemanage.digitalarchives.pojo.Advice">
+		select 
+	       ada.ADVICE_THEME,
+	       ada.ADVICE_TYPE,
+	       ada.ADVICE_PUBLICINFORMATION,
+	       ada.ADVICE_TIME,
+	       ada.ADVICE_CONTENT,
+	       adr.REPLY_TIME,
+	       adr.REPLY_CONTENT
+	  from am_da_advice ada
+	  inner join am_da_reply adr on adr.advice_id = ada.advice_id
+	       where
+	           ada.ADVICE_ID = #{adviceId ,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 新增咨询建议  -->
+	<insert id="insertAdvice" parameterType="filemanage.digitalarchives.pojo.Advice">
+		insert into am_da_advice(
+			ADVICE_ID,ADVICE_THEME,
+			ADVICE_TYPE,
+			ADVICE_PUBLICINFORMATION,
+			ADVICE_TIME,
+			ADVICE_CONTENT,
+			ADVICE_STATUS,
+			USER_ID
+			)
+       values(
+       		sys_guid(),
+       		#{adviceTheme ,jdbcType=VARCHAR},
+       		#{adviceType ,jdbcType=VARCHAR},
+       		#{advicePublicinformation ,jdbcType=VARCHAR},
+       		to_date(to_char(sysdate,'yyyy-MM-dd'),'yyyy-MM-dd'),
+       		#{adviceContent,jdbcType=VARCHAR},
+       		'1',
+       		#{userIds.userId,jdbcType=VARCHAR}
+       	)
+	</insert>
+	<!-- 新增管理员回复 --> 
+	<insert id="insertReply" parameterType="filemanage.digitalarchives.pojo.Reply">
+	insert into am_da_reply(
+			REPLY_ID,
+			REPLY_TIME,
+			REPLY_CONTENT,
+			RUSER_ID,
+			ADVICE_ID
+		)
+       values(
+       		sys_guid(),
+       		to_date(to_char(sysdate,'yyyy-MM-dd'),'yyyy-MM-dd'),
+       		#{replyContent ,jdbcType=VARCHAR},
+       		#{ruserId ,jdbcType=VARCHAR},
+       		#{adviceId.adviceId ,jdbcType=VARCHAR}
+       	)
+	</insert>
+	<!-- 更新咨询建议表的回复主键 -->
+	<update id="updateAdvice" parameterType="filemanage.digitalarchives.pojo.Advice">
+		update am_da_advice 
+			set 
+				REPLY_ID=#{ruserId ,jdbcType=VARCHAR},
+				ADVICE_STATUS = '2' 
+			where 
+				ADVICE_ID = #{adviceId ,jdbcType=VARCHAR}
+	</update>
+</mapper>

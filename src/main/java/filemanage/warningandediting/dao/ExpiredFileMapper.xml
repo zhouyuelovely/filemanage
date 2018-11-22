@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="filemanage.warningandediting.dao.ExpiredFileMapper">
+	<resultMap type="filemanage.warningandediting.pojo.ExpiredFile"
+		id="expireFile">
+
+		<result property="qzName" column="Quanzong_name" />
+		<result property="archivefileId" column="archivefile_id" />
+		<result property="fileNumber" column="Archivefile_filenumber" />
+		<result property="rackNumber" column="storage_racknumber" />
+		<result property="boxNumber" column="box_number" />
+		<result property="fileCreateDate" column="Archivefile_createtime" />
+		<result property="saveDays" column="retentionperiod_name" />
+
+	</resultMap>
+
+	<!-- 查询所有到期档案 -->
+	<select id="queryAllExpiredFile" resultMap="expireFile">
+		select su.* from(
+		select
+		q.Quanzong_name,
+		f.archivefile_id,
+		f.Archivefile_filenumber,
+		s.storage_racknumber,
+		b.box_number,
+		f.Archivefile_createtime,
+		r.retentionperiod_name,
+		rownum
+		rown
+		from
+		am_ma_sm_quanzong q,
+		am_co_archivefile f,
+		am_co_box b,
+		AM_WAREHOUSE_STORAGE s,
+		am_ma_sm_retentionperiod r
+		where
+		f.quanzong_id =
+		q.quanzong_id
+		and
+		f.box_id =
+		b.box_id
+		and
+		b.quanzong_id =
+		q.quanzong_id
+		and
+		f.retentionperiod_id =
+		r.retentionperiod_id
+		and
+		b.retentionperiod_id =
+		r.retentionperiod_id
+		and
+		r.retentionperiod_name != '永久'
+		 and
+    b.storage_id = s.storage_id
+		and
+		rownum&lt;=${(after)})su where rown
+		&gt;#{before}
+		order by
+		to_date(Archivefile_createtime,'yyyy-mm-dd
+		hh24:mi:ss') desc
+	</select>
+
+	<!--统计到期档案数量 -->
+	<select id="countExpiredFile" resultType="int">
+		select
+		COUNT(q.Quanzong_name)
+		from
+		am_ma_sm_quanzong q,
+		am_co_archivefile f,
+		am_co_box b,
+		AM_WAREHOUSE_STORAGE s,
+		am_ma_sm_retentionperiod r
+		where
+		f.quanzong_id = q.quanzong_id
+		and
+		f.box_id = b.box_id
+		and
+		b.quanzong_id =
+		q.quanzong_id
+		and
+		f.retentionperiod_id =
+		r.retentionperiod_id
+		and
+		b.retentionperiod_id = r.retentionperiod_id
+		 and
+    b.storage_id = s.storage_id
+		and
+		r.retentionperiod_name != '永久'
+		and
+		to_number(REGEXP_REPLACE(r.retentionperiod_name,'[^0-9]') * 365)&lt;30
+	</select>
+
+	<!-- 查询所有全宗名 -->
+	<select id="queryAllQzName" resultMap="expireFile">
+		select distinct
+		q.Quanzong_name
+		from
+		am_ma_sm_quanzong q,
+		am_co_archivefile f,
+		am_co_box
+		b,
+		AM_WAREHOUSE_STORAGE s,
+		am_ma_sm_retentionperiod r
+		where
+		f.quanzong_id
+		=
+		q.quanzong_id
+		and
+		f.box_id
+		=
+		b.box_id
+		and
+		b.quanzong_id =
+		q.quanzong_id
+		<!-- and s.box_id = b.box_id -->
+		and
+		f.retentionperiod_id = r.retentionperiod_id
+		and
+		b.retentionperiod_id
+		= r.retentionperiod_id
+		and
+		r.retentionperiod_name
+		!= '永久'
+	</select>
+
+	<!-- 用于预警天数的跳转 -->
+	<select id="queryExpiredFile" resultMap="expireFile">
+		select distinct
+		f.Archivefile_createtime,
+		r.retentionperiod_name
+		from
+		am_ma_sm_quanzong
+		q,
+		am_co_archivefile f,
+		am_co_box b,
+		AM_WAREHOUSE_STORAGE s,
+		am_ma_sm_retentionperiod r
+		where
+		f.quanzong_id =
+		q.quanzong_id
+		and
+		f.box_id =
+		b.box_id
+		and
+		b.quanzong_id =
+		q.quanzong_id
+		<!-- and s.box_id = b.box_id -->
+		and
+		f.retentionperiod_id = r.retentionperiod_id
+		 and
+    b.storage_id = s.storage_id
+		and
+		b.retentionperiod_id
+		= r.retentionperiod_id
+		and
+		r.retentionperiod_name
+		!= '永久'
+	</select>
+
+	<!-- 根据全宗名查看文件 -->
+	<select id="queryFileByQzName" resultMap="expireFile">
+		select su.* from(
+		select
+		q.Quanzong_name,
+		f.archivefile_id,
+		f.Archivefile_filenumber,
+		s.storage_racknumber,
+		b.box_number,
+		f.Archivefile_createtime,
+		r.retentionperiod_name,
+		rownum
+		rown
+		from
+		am_ma_sm_quanzong q,
+		am_co_archivefile f,
+		am_co_box b,
+		AM_WAREHOUSE_STORAGE s,
+		am_ma_sm_retentionperiod r
+		where
+		f.quanzong_id =
+		q.quanzong_id
+		and
+		f.box_id =
+		b.box_id
+		and
+		b.quanzong_id =
+		q.quanzong_id
+		<!-- and s.box_id = b.box_id -->
+		and
+		f.retentionperiod_id = r.retentionperiod_id
+		 and
+    b.storage_id = s.storage_id
+		and
+		b.retentionperiod_id
+		= r.retentionperiod_id
+		and
+		q.Quanzong_name =
+		#{qzName}
+		and
+		r.retentionperiod_name != '永久'
+		and
+		rownum&lt;=${(after)})su
+		where rown
+		&gt;#{before}
+		order by
+		to_date(Archivefile_createtime,'yyyy-mm-dd
+		hh24:mi:ss') desc
+	</select>
+
+	<!-- 统计根据全宗名查看文件 -->
+	<select id="countFileByQzName" resultType="int">
+		select
+		COUNT(q.Quanzong_name)
+		from
+		am_ma_sm_quanzong q,
+		am_co_archivefile
+		f,
+		am_co_box b,
+		AM_WAREHOUSE_STORAGE s,
+		am_ma_sm_retentionperiod r
+		where
+		f.quanzong_id =
+		q.quanzong_id
+		and
+		f.box_id =
+		b.box_id
+		and
+		b.quanzong_id =
+		q.quanzong_id
+		<!-- and s.box_id = b.box_id -->
+		 and
+    b.storage_id = s.storage_id
+		and
+		f.retentionperiod_id =
+		r.retentionperiod_id
+		and
+		b.retentionperiod_id =
+		r.retentionperiod_id
+		and
+		q.Quanzong_name =
+		#{qzName}
+		and
+		r.retentionperiod_name != '永久'
+	</select>
+
+	<!-- 根据预警天数查看文件 -->
+	<select id="queryFileBySurplusDays" resultMap="expireFile">
+		select su.* from(
+		select
+		q.Quanzong_name,
+		f.archivefile_id,
+		f.Archivefile_filenumber,
+		s.storage_racknumber,
+		b.box_number,
+		f.Archivefile_createtime,
+		r.retentionperiod_name,
+		rownum
+		rown
+		from
+		am_ma_sm_quanzong q,
+		am_co_archivefile f,
+		am_co_box b,
+		AM_WAREHOUSE_STORAGE s,
+		am_ma_sm_retentionperiod r
+		where
+		f.quanzong_id =
+		q.quanzong_id
+		and
+		f.box_id =
+		b.box_id
+		and
+		b.quanzong_id =
+		q.quanzong_id
+		<!-- and s.box_id = b.box_id -->
+		and
+		f.retentionperiod_id = r.retentionperiod_id
+		and
+		b.retentionperiod_id
+		= r.retentionperiod_id
+		 and
+    b.storage_id = s.storage_id
+		and
+		r.retentionperiod_name =
+		#{saveDays}
+		and
+		r.retentionperiod_name != '永久'
+		and
+		rownum&lt;=${(after)})su
+		where rown
+		&gt;#{before}
+		order by
+		to_date(Archivefile_createtime,'yyyy-mm-dd
+		hh24:mi:ss') desc
+	</select>
+
+	<!-- 统计根据预警天数查看文件 -->
+	<select id="countFileBySurplusDays" resultType="int">
+		select
+		COUNT(q.Quanzong_name)
+		from
+		am_ma_sm_quanzong q,
+		am_co_archivefile
+		f,
+		am_co_box b,
+		AM_WAREHOUSE_STORAGE s,
+		am_ma_sm_retentionperiod r
+		where
+		f.quanzong_id =
+		q.quanzong_id
+		and
+		f.box_id =
+		b.box_id
+		 and
+    b.storage_id = s.storage_id
+		and
+		b.quanzong_id =
+		q.quanzong_id
+		<!-- and s.box_id = b.box_id -->
+		and
+		f.retentionperiod_id =
+		r.retentionperiod_id
+		and
+		b.retentionperiod_id =
+		r.retentionperiod_id
+		and
+		r.retentionperiod_name =
+		#{saveDays}
+		and
+		r.retentionperiod_name != '永久'
+	</select>
+</mapper>

@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.recorded.dao.ArchiveFileRecordedTableMapper">
+	<resultMap type="filemanage.recorded.vo.RecodedTableSelect" id="selMap">
+		<result property="selectKey" column="selKey" jdbcType="VARCHAR"/>
+		<result property="selectValue" column="selVlaue" jdbcType="VARCHAR"/>
+	</resultMap>
+	<resultMap type="filemanage.systemmanage.pojo.AmCoBox" id="boxMap">
+		<id property="boxid" column="box_id" jdbcType="VARCHAR"/>
+		<result property="boxstartnumber" column="box_startnumber" jdbcType="VARCHAR"/>
+		<result property="boxendnumber" column="box_endnumber" jdbcType="VARCHAR"/>
+		<result property="boxnumber" column="box_number" jdbcType="VARCHAR"/>
+		<result property="boxpage" column="box_page" jdbcType="VARCHAR"/>
+		<result property="boxBoxingStart" column="box_boxingstart" jdbcType="VARCHAR"/>
+		<result property="boxanual" column="box_anual" jdbcType="VARCHAR"/>
+		<result property="boxstatus" column="box_status" jdbcType="VARCHAR"/>
+		<association property="archive" javaType="filemanage.systemmanage.pojo.Archive">
+			<result property="quanzongNumber" column="quanzong_number" jdbcType="VARCHAR"/>
+			<result property="quanzongName" column="quanzong_name" jdbcType="VARCHAR"/>
+		</association>
+		<association property="secondryClassFication" javaType="filemanage.systemmanage.pojo.SecondryClassFication">
+			<result property="scName" column="sc_name" jdbcType="VARCHAR"/>
+		</association>
+		<association property="retentionperiod" javaType="filemanage.systemmanage.pojo.AmMaSmRetentionperiod">
+			<result property="retentionperiodname" column="retentionperiod_name" jdbcType="VARCHAR"/>
+		</association>
+	</resultMap>
+	<resultMap type="AmCoBoxattachment" id="attMap">
+		<id property="boxattachmentId" column="boxattachment_id" jdbcType="VARCHAR"/>
+		<result property="boxYear" column="box_year" jdbcType="VARCHAR"/>
+		<result property="boxattachmentBox" column="boxattachment_box" jdbcType="VARCHAR"/>
+		<result property="boxattachmentFile" column="boxattachment_file" jdbcType="VARCHAR"/>
+		<result property="boxattachmentForm" column="boxattachment_form" jdbcType="VARCHAR"/>
+		<result property="boxId" column="box_id" jdbcType="VARCHAR"/>
+		<association property="archive" javaType="filemanage.systemmanage.pojo.Archive">
+			<id property="quanzongId" column="quanzong_id" jdbcType="VARCHAR"/>
+			<result property="quanzongNumber" column="quanzong_number" jdbcType="VARCHAR"/>
+			<result property="quanzongName" column="quanzong_name" jdbcType="VARCHAR"/>
+		</association>
+	</resultMap>
+	<sql id="boxCon">
+		select 
+		acb.box_id,
+		acb.box_startnumber,
+		acb.box_endnumber,
+		acb.box_number,
+		acb.box_page,
+		acb.box_boxingstart,
+		acb.box_anual,
+		acb.box_status,
+		amsq.quanzong_number,
+		amsq.quanzong_name,
+		amss.sc_name,
+		amsr.retentionperiod_name 
+		from  
+		am_co_box acb 
+		left join 
+		am_ma_sm_quanzong amsq
+		on amsq.quanzong_id=acb.quanzong_id 
+		left join 
+		am_ma_sm_sclassification amss
+		on amss.sc_id=acb.sc_id 
+		left join 
+		am_ma_sm_primaryclassification amsp 
+		on amsp.pc_id=acb.pc_id 
+		left join 
+		am_ma_sm_retentionperiod amsr 
+		on acb.retentionperiod_id=amsr.retentionperiod_id 
+	</sql>
+	
+	
+	
+	<!--一级分类  -->
+	<select id="findSelectPc" resultMap="selMap">
+		select 
+		amsp.pc_id selKey,amsp.pc_name selVlaue 
+		from 
+		am_ma_sm_primaryclassification amsp 
+		where 
+		amsp.pc_id in
+		(
+			select 
+			distinct 
+			acb.pc_id 
+			from am_co_box acb 
+			where 
+			acb.quanzong_id=#{quanzongId,jdbcType=VARCHAR} 
+			and acb.box_status between '2' and '4' 
+			and acb.box_boxingstart between '1' and '2' 
+		)
+	</select>
+	<!--年度  -->
+	<select id="findSelectAnual" resultType="java.lang.String">
+		select 
+		distinct acb.box_anual 
+		from am_co_box acb 
+		where acb.quanzong_id=#{quanzongId,jdbcType=VARCHAR} 
+		and acb.box_status between '2' and '4' 
+		and acb.box_boxingstart between '1' and '2' 
+	</select>
+	<!-- 著录列表 -->
+	<select id="findAmCoBoxByQuanzongId" resultMap="boxMap" parameterType="map">
+		select a.* from
+		(
+			select 
+			ac.*,rownum row_num 
+			from 
+			(
+				<include refid="boxCon"/>
+				where acb.quanzong_id=#{quanzongId,jdbcType=VARCHAR} 
+				and acb.box_status between '2' and '4' 
+				and acb.box_boxingstart between '1' and '2' 
+			) ac
+		) a 
+		where a.row_num between #{begin} and #{end}
+	</select>
+	<!-- 统计数量 -->
+	<select id="countAmCoBoxByQuanzongId" resultType="int">
+		select count(box_id) 
+		from 
+		am_co_box acb 
+		where acb.quanzong_id=#{quanzongId,jdbcType=VARCHAR} 
+		and acb.box_status between '2' and '4' 
+		and acb.box_boxingstart between '1' and '2' 
+	</select>
+	<!-- 统计盒内文件数量 -->
+	<select id="countFileAmCoBoxByQuanzongId" resultType="int">
+		select 
+		count(aca.archivefile_id) 
+		from 
+		am_co_archivefile aca 
+		where 
+		aca.box_id in 
+			(
+				select 
+				acb.box_id 
+				from 
+				am_co_box acb 
+				where acb.quanzong_id=#{quanzongId,jdbcType=VARCHAR} 
+				and acb.box_status between '2' and '4' 
+				and acb.box_boxingstart between '1' and '2' 
+			)
+	</select>
+	<!-- select 著录列表 -->
+	<select id="findAmCoBoxBySelect" resultMap="boxMap" parameterType="map">
+		select a.* from
+		(
+			select 
+			ac.*,rownum row_num 
+			from 
+			(
+				<include refid="boxCon"/>
+				where acb.quanzong_id=#{quanzongId,jdbcType=VARCHAR} 
+				and acb.box_status between '2' and '4'  
+				and acb.box_boxingstart between '1' and '2' 
+				<if test="pcId!='' and pcId!=null ">
+					and amsp.pc_id=#{pcId,jdbcType=VARCHAR}
+				</if>
+				<if test="anual!='' and  anual!=null ">
+					and acb.box_anual=#{anual,jdbcType=VARCHAR}
+				</if>
+				<if test="start!='' and start!=null ">
+					and acb.box_boxingstart=#{start,jdbcType=VARCHAR}
+				</if>
+			) ac
+		) a 
+		where a.row_num between #{begin} and #{end}
+	</select>
+	<!-- select 著录列表数量 -->
+	<select id="countAmCoBoxBySelect" resultType="int" parameterType="map">
+		select count(box_id) 
+		from 
+		am_co_box acb 
+		left join 
+		am_ma_sm_primaryclassification amsp 
+		on amsp.pc_id=acb.pc_id 
+		where acb.quanzong_id=#{quanzongId,jdbcType=VARCHAR} 
+		and acb.box_status between '2' and '4'  
+		and acb.box_boxingstart between '1' and '2' 
+		<if test="pcId!='' and pcId!=null ">
+			and amsp.pc_id=#{pcId}
+		</if>
+		<if test="anual!='' and  anual!=null ">
+			and acb.box_anual=#{anual,jdbcType=VARCHAR}
+		</if>
+		<if test="start!='' and start!=null ">
+			and acb.box_boxingstart=#{start,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<!-- select统计文件数量 -->
+	<select id="countFileAmCoBoxBySelect" resultType="int" parameterType="map">
+		select 
+		count(aca.archivefile_id) 
+		from 
+		am_co_archivefile aca 
+		where 
+		aca.box_id in 
+			(
+				select 
+				acb.box_id 
+				from 
+				am_co_box acb 
+				left join 
+				am_ma_sm_primaryclassification amsp 
+				on amsp.pc_id=acb.pc_id 
+				where acb.quanzong_id=#{quanzongId,jdbcType=VARCHAR} 
+				and acb.box_status between '2' and '4'  
+				and acb.box_boxingstart between '1' and '2' 
+				<if test="pcId!='' and pcId!=null ">
+					and amsp.pc_id=#{pcId}
+				</if>
+				<if test="anual!='' and  anual!=null ">
+					and acb.box_anual=#{anual,jdbcType=VARCHAR}
+				</if>
+				<if test="start!='' and start!=null ">
+					and acb.box_boxingstart=#{start,jdbcType=VARCHAR}
+				</if>
+			)
+	</select>
+	<!--条件查询  -->
+	<select id="findAmCoBoxByCondition" resultMap="boxMap" parameterType="map">
+		select a.* from
+		(
+			select 
+			ac.*,rownum row_num 
+			from 
+			(
+				<include refid="boxCon"/>
+				where acb.quanzong_id=#{quanzongId,jdbcType=VARCHAR} 
+				and acb.box_status between '2' and '4'  
+				and acb.box_boxingstart between '1' and '2' 
+				<if test="condition!='' and condition!=null">
+					and acb.box_anual||
+						acb.box_startnumber||
+						acb.box_endnumber||
+						acb.box_number||
+						acb.box_page||
+						acb.box_boxingstart||
+						amsq.quanzong_number||
+						amsq.quanzong_name||
+						amsp.pc_name||
+						amsr.retentionperiod_name like concat(concat('%',#{condition,jdbcType=VARCHAR}),'%')
+				</if>
+			) ac
+		) a 
+		where a.row_num between #{begin} and #{end}
+	</select>
+	<!-- 条件统计 -->
+	<select id="countAmCoBoxByCondition" resultType="int" parameterType="map">
+		select count(box_id) 
+		from 
+		am_co_box acb 
+		left join 
+		am_ma_sm_quanzong amsq
+		on amsq.quanzong_id=acb.quanzong_id 
+		left join 
+		am_ma_sm_primaryclassification amsp 
+		on amsp.pc_id=acb.pc_id 
+		left join 
+		am_ma_sm_retentionperiod amsr 
+		on acb.retentionperiod_id=amsr.retentionperiod_id 
+		where acb.quanzong_id=#{quanzongId,jdbcType=VARCHAR} 
+		and acb.box_status between '2' and '4'  
+		and acb.box_boxingstart between '1' and '2' 
+		<if test="condition!='' and condition!=null ">
+			and acb.box_anual||
+				acb.box_startnumber||
+				acb.box_endnumber||
+				acb.box_number||
+				acb.box_page||
+				acb.box_boxingstart||
+				amsq.quanzong_number||
+				amsq.quanzong_name||
+				amsp.pc_name||
+				amsr.retentionperiod_name like concat(concat('%',#{condition,jdbcType=VARCHAR}),'%')
+		</if>
+	</select>
+	<!-- 统计文件数量 -->
+	<select id="countFileAmCoBoxByCondition" resultType="int" parameterType="map">
+		select 
+		count(aca.archivefile_id) 
+		from 
+		am_co_archivefile aca 
+		where 
+		aca.box_id in 
+			(
+				select 
+				acb.box_id 
+				from 
+				am_co_box acb 
+				left join 
+				am_ma_sm_quanzong amsq
+				on amsq.quanzong_id=acb.quanzong_id 
+				left join 
+				am_ma_sm_primaryclassification amsp 
+				on amsp.pc_id=acb.pc_id 
+				left join 
+				am_ma_sm_retentionperiod amsr 
+				on acb.retentionperiod_id=amsr.retentionperiod_id 
+				where acb.quanzong_id=#{quanzongId,jdbcType=VARCHAR} 
+				and acb.box_status between '2' and '4' 
+				and acb.box_boxingstart between '1' and '2'  
+				<if test="condition!='' and condition!=null ">
+					and acb.box_anual||
+						acb.box_startnumber||
+						acb.box_endnumber||
+						acb.box_number||
+						acb.box_page||
+						acb.box_boxingstart||
+						amsq.quanzong_number||
+						amsq.quanzong_name||
+						amsp.pc_name||
+						amsr.retentionperiod_name like concat(concat('%',#{condition,jdbcType=VARCHAR}),'%')
+				</if>
+			)
+	</select>
+	<!-- 盒子查询文件附件 -->
+	<select id="havingFileAttachByBoxId" resultType="java.lang.String">
+		select 
+		acfa.file_attachment_path 
+		from 
+		am_co_file_attachment acfa 
+		where 
+		acfa.archivefile_id in 
+			(
+				select 
+				aca.archivefile_id 
+				from 
+				am_co_archivefile aca 
+				where aca.box_id=#{boxId}
+			)
+	</select>
+	<!-- 删除文件附件 -->
+	<delete id="deleteFileAttachByBoxId">
+		delete 
+		from 
+		am_co_file_attachment acfa 
+		where 
+		acfa.archivefile_id in 
+			(
+				select 
+				aca.archivefile_id 
+				from 
+				am_co_archivefile aca 
+				where aca.box_id=#{boxId}
+			)
+	</delete>
+	<!-- 删除文件 -->
+	<delete id="deleteFileByBoxId">
+		delete from am_co_archivefile aca where aca.box_id=#{boxId}
+	</delete>
+	<!-- 获取盒子附件 -->
+	<select id="havingBoxAttachByBoxId" resultMap="attMap">
+		select 
+		acba.boxattachment_id,
+		acba.boxattachment_box,
+		acba.boxattachment_file,
+		acba.boxattachment_form,
+		acba.box_id,
+		amsq.quanzong_id,
+		amsq.quanzong_number,
+		amsq.quanzong_name 
+		from 
+		am_co_boxattachment acba 
+		left join 
+		am_ma_sm_quanzong amsq 
+		on 
+		amsq.quanzong_id=acba.quanzong_id 
+		where 
+		acba.box_id=#{boxId}
+	</select>
+	<!-- 删除盒子附件 -->
+	<delete id="deleteBoxAttachByBoxId">
+		delete from am_co_boxattachment acba where acba.box_id=#{boxId}
+	</delete>
+	<!-- 删除盒子 -->
+	<delete id="deleteBoxByBoxId">
+		delete from am_co_box acb where acb.box_id=#{boxId}
+	</delete>
+	<!-- 提交进馆 -->
+	<update id="updateBoxStart" parameterType="map">
+		update 
+		am_co_box acb 
+		set acb.box_status='2' 
+		where acb.box_id in 
+		<foreach item="s" index="index" collection="str" open="(" separator="," close=")">
+			#{s}
+		</foreach>
+	</update>
+</mapper>

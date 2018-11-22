@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.systemmanage.dao.UserMapper">
+   <resultMap type="filemanage.login.pojo.User" id="userMap">
+      <id column="USER_ID" property="userId" jdbcType="VARCHAR"/>
+      <result column="USER_NAME"  property="userName" jdbcType="VARCHAR"/>
+      <result column="USER_PASSWORD"  property="userPassword" jdbcType="VARCHAR"/>
+      <result column="USER_IDNUMBER"  property="userIdNumber" jdbcType="VARCHAR"/>
+      <result column="USER_TELEPHONE"  property="userTelePhone" jdbcType="VARCHAR"/>
+      <result column="USER_WORKNUMBER"  property="userWorkNumber" jdbcType="VARCHAR"/>
+      <result column="USER_SEX"  property="userSex" jdbcType="VARCHAR"/>
+      <result column="USER_IPADDRESS"  property="userIpAddress" jdbcType="VARCHAR"/>
+      <result column="USER_HOSTNAME"  property="userHostName" jdbcType="VARCHAR"/>
+       <result column="USER_CREATETIME"  property="userCreateTime" jdbcType="DATE"/>
+      <result column="USER_TYPE"  property="userType" jdbcType="VARCHAR"/>
+       <result  column="QUANZONG_ID" property="quanzongId" jdbcType="VARCHAR" />
+        <result column="ORGANIZATION_ID" property="organizationId" jdbcType="VARCHAR" />
+        <result column="ROLE_ID"  property="roleId" jdbcType="VARCHAR"/>
+        <result column="QUANZONG_NAME" property="quanzongName"
+			jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_NAME" property="organizationName"
+			jdbcType="VARCHAR" />
+		<result column="ROLE_NAME" property="roleName" jdbcType="VARCHAR" />
+		<result column="conditions" property="conditions" jdbcType="VARCHAR" />	
+       <!-- 全宗信息   一对一 -->
+      <association property="archive" javaType="filemanage.systemmanage.pojo.Archive">
+          <result  column="QUANZONG_ID" property="quanzongId" jdbcType="VARCHAR" />
+		 <result column="QUANZONG_NUMBER" property="quanzongNumber"
+			jdbcType="VARCHAR" />
+		<result column="QUANZONG_NAME" property="quanzongName"
+			jdbcType="VARCHAR" />
+		<result column="QUANZONG_PHONE" property="quanzongPhone"
+			jdbcType="VARCHAR" />
+		<result column="QUANZONG_CREATETIME" property="quanzongCreatetime"
+			jdbcType="VARCHAR" />
+		<result column="QUANZONG_CREATOR" property="quanzongCreator"
+			jdbcType="VARCHAR" />
+		<result column="QUANZONG_DESCRIPTION" property="quanzongDescription"
+			jdbcType="VARCHAR" />
+		<result column="QUANZONG_REMARK" property="quanzongRemark"
+			jdbcType="VARCHAR" />
+      </association>
+      <!-- 部门信息   一对一 -->
+       <association property="org" javaType="filemanage.systemmanage.pojo.Organization">
+           <result column="ORGANIZATION_ID" property="organizationId" jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_CODE" property="organizationCode"
+			jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_NAME" property="organizationName"
+			jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_PHONE" property="organizationPhone"
+			jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_CREATETIME" property="organizationCreatetime"
+			jdbcType="DATE" />
+		<result column="ORGANIZATION_CREATOR" property="organizationCreator"
+			jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_DESCRIPTION" property="quanzongDescription"
+			jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_REMARK" property="quanzongRemark"
+			jdbcType="VARCHAR" />
+       </association>
+      <!-- 角色信息  一对一 -->
+      <association property="role" javaType="filemanage.systemmanage.pojo.Role">
+          <result column="ROLE_ID"  property="roleId" jdbcType="VARCHAR"/>
+          <result column="ROLE_NAME" property="roleName" jdbcType="VARCHAR" />
+		<result column="ROLE_DESCRIPTION" property="roleDescription"
+			jdbcType="VARCHAR" />
+		<result column="ROLE_CREATETIME" property="roleCreatetime"
+			jdbcType="DATE" />
+		<result column="ROLE_CREATOR" property="roleCreator"
+			jdbcType="VARCHAR" />
+		<result column="ROLE_PROPERTY" property="roleProperty"
+			jdbcType="VARCHAR" />
+      </association>
+   </resultMap>
+   <!-- 根据用户登录获取该用户的所有信息 -->
+   <select id="queryUserAllManager" resultMap="userMap" parameterType="filemanage.login.pojo.User">
+	   	select * from am_ma_sm_user amsu 
+	   	  inner join am_ma_sm_quanzong amsq on amsq.quanzong_id = amsu.quanzong_id
+	   	<where>
+			 	amsu.user_id = #{userId,jdbcType=VARCHAR}
+			and amsu.quanzong_id =
+			     (
+			     	select QUANZONG_ID from am_ma_sm_quanzong where QUANZONG_ID = #{quanzongId,jdbcType=VARCHAR}
+			     )
+       	</where>
+   </select>
+   <!-- 查询所有的用户 -->
+   <select id="queryAllUser" resultMap="userMap">
+   
+   select sus.* from (
+  select
+      rownum r,
+      su.* 
+    from 
+    (
+      select 
+        u.user_id,
+        u.user_name,
+        u.user_sex,
+        u.user_idnumber,
+        u.user_telephone,
+        u.user_worknumber,
+        u.quanzong_id,
+        qu.quanzong_name,
+        u.organization_id,
+        org.organization_name,
+        u.role_id,
+        role.role_name
+        from am_ma_sm_user u 
+           left join am_ma_sm_quanzong qu on qu.QUANZONG_ID = u.QUANZONG_ID
+           left join am_ma_sm_organization org on org.organization_id = u.organization_id 
+           left join am_ma_sm_role role on role.role_id = u.role_id
+           order by u.user_id
+    )su
+           where rownum &lt;=${(before+after)} 
+  )sus
+    where  sus.r &gt;#{before}
+   
+   </select>
+   
+   <!-- 根据用户主键查询用户 -->
+   <select id="queryUserById" parameterType="java.lang.String" resultMap="userMap">
+   select amsu.*,amsq.*,amso.*,amsr.* from am_ma_sm_user amsu
+     left join am_ma_sm_quanzong amsq on amsq.quanzong_id = amsu.quanzong_id
+     left join am_ma_sm_organization amso on amso.organization_id = amsu.organization_id
+     left join am_ma_sm_role amsr on amsr.role_id = amsu.role_id
+     where amsu.USER_ID=#{userId,jdbcType=VARCHAR}
+   </select>
+
+   <!-- 添加用户 -->
+   <insert id="addUser" parameterType="filemanage.login.pojo.User">
+    insert into am_ma_sm_user(USER_ID,USER_NAME,USER_PASSWORD,USER_IDNUMBER,USER_TELEPHONE,USER_WORKNUMBER,USER_SEX,USER_IPADDRESS,USER_HOSTNAME,QUANZONG_ID,ORGANIZATION_ID,ROLE_ID,USER_CREATETIME,USER_TYPE)
+     values(am_user_seq.nextval,#{userName,jdbcType=VARCHAR},#{userPassword,jdbcType=VARCHAR},
+     #{userIdNumber,jdbcType=VARCHAR},#{userTelePhone,jdbcType=VARCHAR},
+     #{userWorkNumber,jdbcType=VARCHAR},#{userSex,jdbcType=VARCHAR},
+     #{userIpAddress,jdbcType=VARCHAR},#{userHostName,jdbcType=VARCHAR},
+      #{quanzongId,jdbcType=VARCHAR},#{organizationId,jdbcType=VARCHAR},
+      #{roleId,jdbcType=VARCHAR},
+     sysdate,#{userType,jdbcType=VARCHAR})
+   </insert>
+   
+   <!-- 修改用户 -->
+   <update id="updateUser" parameterType="filemanage.login.pojo.User">
+     update am_ma_sm_user set 
+         USER_NAME=#{userName,jdbcType=VARCHAR},
+        USER_SEX=#{userSex,jdbcType=VARCHAR},
+         USER_IDNUMBER=#{userIdNumber,jdbcType=VARCHAR},
+         QUANZONG_ID=#{quanzongId,jdbcType=VARCHAR},
+         USER_TELEPHONE=#{userTelePhone,jdbcType=VARCHAR},
+        ORGANIZATION_ID=#{organizationId,jdbcType=VARCHAR},
+        USER_WORKNUMBER=#{userWorkNumber,jdbcType=VARCHAR},
+         ROLE_ID=#{roleId,jdbcType=VARCHAR}
+      where USER_ID=#{userId,jdbcType=VARCHAR}
+   
+   </update>
+   
+   <!-- 根据用户主键删除用户 -->
+   <delete id="deleteUserById" parameterType="java.lang.String">
+    delete from am_ma_sm_user where  USER_ID=#{userId,jdbcType=VARCHAR}
+   </delete>
+   
+   <!-- 统计用户记录条数 -->
+   <select id="countAllUser" resultType="int">
+    select count(*) from am_ma_sm_user
+   </select>
+
+  <!-- 批量重置用户密码为123456 -->
+  <update id="resetUserPassword" parameterType="java.lang.String">
+    update am_ma_sm_user set USER_PASSWORD=#{userPassword,jdbcType=VARCHAR}
+     where USER_ID=#{userId,jdbcType=VARCHAR}
+  </update>
+
+  <!-- 判断用户名是否存在 -->
+  <select id="isExitUserName" parameterType="filemanage.login.pojo.User" resultType="int">
+    select count(1) from am_ma_sm_user where USER_NAME=#{userName,jdbcType=VARCHAR}
+  </select>
+ 
+   <!-- 判断身份证号是否存在 -->
+    <select id="isExitIdNumber" parameterType="filemanage.login.pojo.User" resultType="int">
+    select count(1) from am_ma_sm_user where  USER_IDNUMBER=#{userIdNumber,jdbcType=VARCHAR}
+   </select>
+  
+   <!-- 判断手机号是否存在 -->
+   <select id="isExitTelPhone" parameterType="filemanage.login.pojo.User" resultType="int">
+    select count(1) from am_ma_sm_user where  USER_TELEPHONE=#{userTelePhone,jdbcType=VARCHAR}
+   </select>
+   
+   <!-- 判断工号是否存在 -->
+   <select id="isExitWorkNumber" parameterType="filemanage.login.pojo.User" resultType="int">
+    select count(1) from am_ma_sm_user where  USER_WORKNUMBER=#{userWorkNumber,jdbcType=VARCHAR}
+   </select>
+   
+   <!-- 关键词查询用户 -->
+   <select id="queryUserByConditions" parameterType="java.lang.String" resultMap="userMap">
+    select qu.*,u.*,o.*,role.* from am_ma_sm_user u left join am_ma_sm_quanzong qu on u.QUANZONG_ID=qu.QUANZONG_ID 
+     left join am_ma_sm_organization o on o.organization_id=u.organization_id left join
+       am_ma_sm_role role on role.role_id=u.role_id where
+         u.USER_NAME || u.USER_IDNUMBER || u.USER_TELEPHONE || u.USER_WORKNUMBER || qu.QUANZONG_NAME
+         || o.ORGANIZATION_NAME || role.ROLE_NAME like CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')
+   </select>
+   
+   <!-- 统计查询关键词条数 -->
+   <select id="countUserByConditions" resultType="int"  parameterType="java.lang.String">
+     select count(*) from am_ma_sm_user u left join am_ma_sm_quanzong qu on u.QUANZONG_ID=qu.QUANZONG_ID 
+     left join am_ma_sm_organization o on o.organization_id=u.organization_id left join
+       am_ma_sm_role role on role.role_id=u.role_id
+     where  u.USER_NAME || u.USER_IDNUMBER || u.USER_TELEPHONE || u.USER_WORKNUMBER || qu.QUANZONG_NAME
+         || o.ORGANIZATION_NAME || role.ROLE_NAME like CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')
+   </select>
+   
+   <!-- 根据全宗名称查询全宗主键 -->
+   <select id="queryArchiveIdByName" parameterType="String" resultType="String">
+      select quanzong_id from am_ma_sm_quanzong where quanzong_name=#{quanzongName,jdbcType=VARCHAR}
+   </select>
+   
+   <!-- 根据机构名称查询机构主键 -->
+   <select id="queryOrgIdByName" resultType="String">
+     select ORGANIZATION_ID from am_ma_sm_organization where ORGANIZATION_NAME=#{0}
+      and QUANZONG_ID = (select QUANZONG_ID from AM_MA_SM_QUANZONG where QUANZONG_NAME = #{1})
+   </select>
+   
+   <!-- 根据角色名称查询角色主键 -->
+   <select id="queryRoleIdByName" parameterType="String" resultType="String">
+     select role_id from am_ma_sm_role where role_name =#{roleName,jdbcType=VARCHAR}
+   </select>
+   
+   <!-- 根据全宗名称统计全宗主键个数 -->
+   <select id="countArchiveIdByName" parameterType="String" resultType="int">
+     select count(quanzong_id) from am_ma_sm_quanzong where quanzong_name=#{quanzongName,jdbcType=VARCHAR}
+   </select>
+   
+   <!-- 根据机构名称统计机构主键个数 -->
+   <select id="countOrgIdByName" parameterType="String" resultType="int">
+      select count(ORGANIZATION_ID) from am_ma_sm_organization where ORGANIZATION_NAME=#{organizationName,jdbcType=VARCHAR}
+   </select>
+   
+   <!-- 根据角色名称统计角色主键个数 -->
+    <select id="countRoleIdByName" parameterType="String" resultType="int">
+      select count(role_id) from am_ma_sm_role where role_name =#{roleName,jdbcType=VARCHAR}
+    </select>
+    
+    <!-- 查询用户表的所有用户 -->
+    <select id="listAllUser" resultMap="userMap">
+      select * from am_ma_sm_user
+    </select>
+
+</mapper>

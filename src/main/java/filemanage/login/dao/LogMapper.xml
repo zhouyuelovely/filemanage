@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.login.dao.LogMapper">
+	<resultMap type="filemanage.login.pojo.User" id="userLogMap">
+		<id property="userId" column="USER_ID" jdbcType="VARCHAR" />
+		<result property="userName" column="USER_NAME" jdbcType="VARCHAR" />
+		<result property="userPassword" column="USER_PASSWORD"
+			jdbcType="VARCHAR" />
+		<result property="userIdNumber" column="USER_IDNUMBER"
+			jdbcType="VARCHAR" />
+		<result property="userTelePhone" column="USER_TELEPHONE"
+			jdbcType="VARCHAR" />
+		<result property="userWorkNumber" column="USER_WORKNUMBER"
+			jdbcType="VARCHAR" />
+		<result property="userSex" column="USER_SEX" jdbcType="VARCHAR" />
+		<result property="userIpAddress" column="USER_IPADDRESS"
+			jdbcType="VARCHAR" />
+		<result property="userHostName" column="USER_HOSTNAME"
+			jdbcType="VARCHAR" />
+		<result property="userCreateTime" column="USER_CREATETIME"
+			jdbcType="DATE" />
+		<result property="userType" column="USER_TYPE" jdbcType="VARCHAR" />
+		<!-- 全宗信息 一对一 -->
+		<association property="archive"
+			javaType="filemanage.systemmanage.pojo.Archive">
+			<id property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR" />
+			<result property="quanzongNumber" column="QUANZONG_NUMBER"
+				jdbcType="VARCHAR" />
+			<result property="quanzongName" column="QUANZONG_NAME"
+				jdbcType="VARCHAR" />
+			<result property="quanzongPhone" column="QUANZONG_PHONE"
+				jdbcType="VARCHAR" />
+			<result property="quanzongCreatetime" column="QUANZONG_CREATETIME"
+				jdbcType="VARCHAR" />
+			<result property="quanzongCreator" column="QUANZONG_CREATOR"
+				jdbcType="VARCHAR" />
+			<result property="quanzongDescription" column="QUANZONG_DESCRIPTION"
+				jdbcType="VARCHAR" />
+			<result property="quanzongRemark" column="QUANZONG_REMARK"
+				jdbcType="VARCHAR" />
+		</association>
+		<!-- 部门信息 一对一 -->
+		<association property="org"
+			javaType="filemanage.systemmanage.pojo.Organization">
+			<id property="organizationId" column="ORGANIZATION_ID" jdbcType="VARCHAR" />
+			<result property="organizationCode" column="ORGANIZATION_CODE"
+				jdbcType="VARCHAR" />
+			<result property="organizationName" column="ORGANIZATION_NAME"
+				jdbcType="VARCHAR" />
+			<result property="organizationPhone" column="ORGANIZATION_PHONE"
+				jdbcType="VARCHAR" />
+			<result property="organizationCreatetime" column="ORGANIZATION_CREATETIME"
+				jdbcType="VARCHAR" />
+			<result property="organizationCreator" column="ORGANIZATION_CREATOR"
+				jdbcType="VARCHAR" />
+			<result property="quanzongDescription" column="ORGANIZATION_DESCRIPTION"
+				jdbcType="VARCHAR" />
+			<result property="quanzongRemark" column="ORGANIZATION_REMARK"
+				jdbcType="VARCHAR" />
+		</association>
+		<!-- 角色信息 一对一 -->
+		<association property="role" javaType="filemanage.systemmanage.pojo.Role">
+			<id property="roleId" column="ROLE_ID" jdbcType="VARCHAR" />
+			<result property="roleName" column="ROLE_NAME" jdbcType="VARCHAR" />
+			<result property="roleDescription" column="ROLE_DESCRIPTION"
+				jdbcType="VARCHAR" />
+			<result property="roleCreatetime" column="ROLE_CREATETIME"
+				jdbcType="DATE" />
+			<result property="roleCreator" column="ROLE_CREATOR" jdbcType="VARCHAR" />
+			<result property="roleProperty" column="ROLE_PROPERTY"
+				jdbcType="VARCHAR" />
+			<collection property="authorities" ofType="filemanage.systemmanage.pojo.Authority">
+				<result property="permissionId" column="PERMISSION_ID" jdbcType="VARCHAR"/>
+				<result property="permissionName" column="PERMISSION_NAME" jdbcType="VARCHAR"/>
+				<result property="permissionUrl" column="PERMISSION_URL" jdbcType="VARCHAR"/>
+				<result property="permissionDescription" column="PERMISSION_DESCRIPTION" jdbcType="VARCHAR"/>
+				<result property="permissionBelong" column="PERMISSION_BELONG" jdbcType="VARCHAR"/>
+			</collection>
+		</association>
+	</resultMap>
+	
+	<resultMap type="filemanage.systemmanage.pojo.Authority" id="authMap">
+		<id property="permissionId" column="PERMISSION_ID" jdbcType="VARCHAR"/>
+		<result property="permissionName" column="PERMISSION_NAME" jdbcType="VARCHAR"/>
+		<result property="permissionUrl" column="PERMISSION_URL" jdbcType="VARCHAR"/>
+		<result property="permissionDescription" column="PERMISSION_DESCRIPTION" jdbcType="VARCHAR"/>
+		<result property="permissionBelong" column="PERMISSION_BELONG" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+
+	<select id="queryUserByUserName" resultMap="userLogMap">
+		select
+ 		amsu.*,amsq.*,amso.*,amsr.*,amsp.*
+	    from
+	    am_ma_sm_user amsu left join
+	    am_ma_sm_quanzong amsq
+	    on amsu.quanzong_id=amsq.quanzong_id
+	    left join
+	    am_ma_sm_organization amso
+	    on amsu.organization_id=amso.organization_id
+	    left join am_ma_sm_role amsr
+	    on amsu.role_id=amsr.role_id 
+	    left join am_ma_sm_roleandpermission amsrp 
+	    on amsrp.role_id=amsr.role_id 
+	    left join am_ma_sm_permission amsp 
+	    on amsp.permission_id=amsrp.permission_id 
+		where
+		amsu.user_name=#{username,jdbcType=VARCHAR} 
+		order by to_number(amsp.permission_id)
+	</select>
+
+	<insert id="registerUser" parameterType="filemanage.login.pojo.User">
+		insert into
+		AM_MA_SM_USER(User_Id,User_Name,User_Password,USER_HOSTNAME,USER_IPADDRESS)
+		values(am_user_seq.nextval,#{userName},#{userPassword},#{userHostName},#{userIpAddress})
+	</insert>
+	
+	
+	<select id="filePremission" resultMap="authMap">
+		select 
+		amsp.* 
+		from 
+		am_ma_sm_permission amsp 
+		where 
+		amsp.permission_id between #{begin,jdbcType=NUMERIC} and #{end,jdbcType=NUMERIC} 
+		order by to_number(amsp.permission_id)
+	</select>
+</mapper>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.collectandorganize.dao.AmCoBoxattachmentMapper">
+	<resultMap type="filemanage.collectandorganize.pojo.AmCoBoxattachment" id="boxattachmentMap">
+		<id property="boxattachmentId" column="BOXATTACHMENT_ID" jdbcType="VARCHAR"/>
+		<result property="boxattachmentBox" column="BOXATTACHMENT_BOX" jdbcType="VARCHAR"/>
+		<result property="boxattachmentFile" column="BOXATTACHMENT_FILE" jdbcType="VARCHAR"/>
+		<result property="boxattachmentForm" column="BOXATTACHMENT_FORM" jdbcType="VARCHAR"/>
+		<result property="boxId" column="BOX_ID" jdbcType="VARCHAR"/>
+		<result property="boxYear" column="BOX_YEAR" jdbcType="VARCHAR"/>
+		<result property="boxQuanzongNumber" column="BOX_QUANZONG_NUMBER" jdbcType="VARCHAR"/>
+	</resultMap>
+	<select id="queryAmCoBoxattachment" resultMap="boxattachmentMap">
+		select * from AM_CO_BOXATTACHMENT where box_id=#{boxId,jdbcType=VARCHAR}
+	</select>
+</mapper>

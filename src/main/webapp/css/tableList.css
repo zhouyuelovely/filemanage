@@ -1,0 +1,26 @@
+#thelist>div {
+	float: left;
+	width: 200px;
+}
+
+#uploader {
+	width: 100%;
+	clear: both;
+	padding: 20px 0;
+}
+
+#thelist {
+	min-height: 500px;
+}
+
+.imgsup {
+	width: 120px;
+	height: 120px;
+}
+
+.info {
+	width: 200px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}

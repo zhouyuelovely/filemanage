@@ -1,0 +1,75 @@
+  @charset "utf-8";
+				#index-bg{
+					background: url(/filemanage/imgs/digital-bg.png)no-repeat center;
+					background-size: 100%;
+				    bottom: 0px;
+				}
+				.digital_nav li{
+					float: left;
+					margin: 20px;
+					width:43%;
+					height:220px;
+					cursor: pointer;
+				}
+				.digital_nav li{
+					display: inline-block;
+				}
+				.digital_nav li img{
+					width: 100%;
+					height: 100%;
+				}
+				
+				#message{
+					
+					margin:20px;
+					height: 100%;
+					background: #e2e4ea;
+					background: rgba(0,1,0,0.1);
+					opacity:1;
+					overflow: hidden;
+				}
+				#message h4{
+					padding-top: 15px;
+				}
+				#message h4 i{
+					padding-left: 15px;
+					padding-right: 5px;
+				}
+				.title-list {
+					min-height: 300px;
+					color: #000000;
+				}
+				.title-list li{
+					float: left;
+					width: 100%;
+					margin: 2% 0;
+					cursor: pointer;
+				}
+				.title-list li p:first-of-type{
+					float: left;
+					text-align: right;
+				}
+				.title-list li p:last-of-type{
+					float: right;
+					padding-right: 15px;
+				}
+				.title-list li i{
+					float: left;
+					font-size: 4px;
+					line-height: 20px;
+					padding-left: 15px;
+				}
+				.title-list-t{
+					min-height: 125px;
+					
+				}
+				.title-list-t li{
+					cursor: pointer;
+				}
+				.title-list-t li p {
+				    padding-left: 15px;
+				    padding-right: 15px;
+				    text-align: right;
+				}
+				
+				

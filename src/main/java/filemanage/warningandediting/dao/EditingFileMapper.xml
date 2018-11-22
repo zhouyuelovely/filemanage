@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="filemanage.warningandediting.dao.EditingFileMapper">
+	<resultMap type="filemanage.warningandediting.pojo.EditingFile" id="editingFile">
+		<result property="editingId" column="editing_id"  jdbcType="VARCHAR"/>
+		<result property="editingTitle" column="editing_title" jdbcType="VARCHAR"/>
+		<result property="editingTypeName" column="editing_type_name" jdbcType="VARCHAR"/>
+		<result property="editingType" column="EDITING_TYPE" jdbcType="NUMERIC"/>
+		<result property="editingType" column="EDITING_TYPE_ID" jdbcType="NUMERIC"/>
+		<result property="editingDate" column="editing_date" jdbcType="DATE"/>
+		<result property="editingAuthor" column="editing_author" jdbcType="VARCHAR"/>
+		<result property="editingController" column="EDITING_CONTENT" jdbcType="CLOB"/>
+
+	</resultMap>
+
+	<!-- 查询所有编研文件 -->
+	<select id="queryEditingFile" resultMap="editingFile">
+		select su.* from(
+		select
+		e.editing_id,
+		t.editing_type_name,
+		e.editing_date,
+		e.editing_title,
+		e.editing_author,
+		e.EDITING_CONTENT,
+		rownum
+		rown
+		from
+		AM_EDITING_EDITING e,
+		AM_EDITING_TYPE t
+		where
+		e.editing_type =
+		t.editing_type_id
+		and
+		rownum&lt;=${(after)}
+		order by
+		e.editing_date desc
+		)su where rown
+		&gt;#{before}
+
+	</select>
+
+	<!-- 统计编研文件数量 -->
+	<select id="countEditingFile" resultType="int">
+		select
+		COUNT(e.editing_title)
+		from
+		AM_EDITING_EDITING e,
+		AM_EDITING_TYPE t
+		where
+		e.editing_type = t.editing_type_id
+	</select>
+
+	<!-- 查看边沿内容 -->
+	<select id="queryEditingFileBody" resultMap="editingFile" parameterType="String">
+		select
+		e.editing_id,
+		t.editing_type_name,
+		e.editing_date,
+		e.editing_title,
+		e.editing_author,
+		e.EDITING_CONTENT
+		from
+		AM_EDITING_EDITING e left join
+		AM_EDITING_TYPE t 
+		on
+		e.editing_type =
+		t.editing_type_id
+		where
+		 e.editing_id = #{editingId,jdbcType=VARCHAR}
+		
+	</select>
+
+	<!-- 查询所有编研类型 -->
+	<select id="queryEditingFileType" resultMap="editingFile">
+		select
+		EDITING_TYPE_ID,
+		editing_type_name
+		from
+		AM_EDITING_TYPE
+	</select>
+
+	<!-- 查询所有编研日期 -->
+	<select id="queryEditingFileDate" resultMap="editingFile">
+		select distinct
+		e.editing_date
+		from
+		AM_EDITING_EDITING e,
+		AM_EDITING_TYPE t
+		where
+		e.editing_type = t.editing_type_id
+	</select>
+
+	<!-- 搜索框模糊查询 -->
+	<select id="fuzzyEditingFile" resultMap="editingFile">
+		select su.* from(
+		select
+		e.editing_id,
+		t.editing_type_name,
+		e.editing_date,
+		e.editing_title,
+		e.editing_author,
+		e.EDITING_CONTENT,
+		rownum
+		rown
+		from
+		AM_EDITING_EDITING e,
+		AM_EDITING_TYPE t
+		where
+		e.editing_type =
+		t.editing_type_id
+		and
+		t.editing_type_name ||
+		e.editing_date ||
+		e.editing_title ||
+		e.editing_author ||
+		e.editing_type
+		like CONCAT(CONCAT('%', #{searchBody}), '%')
+		and
+		rownum&lt;=${(after)}
+		order by
+		e.editing_date desc
+		)su
+		where rown
+		&gt;#{before}
+	</select>
+
+	<!-- 统计模糊查询条数 -->
+	<select id="countFuzzyEditingFile" resultType="int" parameterType="String">
+		select
+		COUNT(e.editing_title)
+		from
+		AM_EDITING_EDITING e,
+		AM_EDITING_TYPE t
+		where
+		e.editing_type =
+		t.editing_type_id
+		and
+		t.editing_type_name ||
+		e.editing_date ||
+		e.editing_title ||
+		e.editing_author
+		like
+		CONCAT(CONCAT('%', #{searchBody}), '%')
+	</select>
+
+	<!-- 下拉查看文件 -->
+	<select id="queryEditingFileByType" resultMap="editingFile">
+		select su.* from(
+		select
+		e.editing_id,
+		t.editing_type_name,
+		e.editing_date,
+		e.editing_title,
+		e.editing_author,
+		e.EDITING_CONTENT,
+		rownum
+		rown
+		from
+		AM_EDITING_EDITING e,
+		AM_EDITING_TYPE t
+		where
+		e.editing_type =
+		t.editing_type_id
+		and
+		t.editing_type_name = #{editingTypeName,jdbcType=VARCHAR}
+		and
+		rownum&lt;=${(after)}
+		order by
+		e.editing_date desc
+		)su where rown
+		&gt;#{before}
+	</select>
+
+	<!-- 统计下拉查看文件 -->
+	<select id="countQueryEditingFileByType" resultType="int" parameterType="String">
+		select
+		COUNT(e.editing_title)
+		from
+		AM_EDITING_EDITING e,
+		AM_EDITING_TYPE t
+		where
+		e.editing_type = t.editing_type_id
+		and
+		t.editing_type_name =
+		#{editingTypeName,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 下拉查看文件 -->
+	<select id="queryEditingFileByDate" resultMap="editingFile">
+		select su.* from(
+		select
+		e.editing_id,
+		t.editing_type_name,
+		e.editing_date,
+		e.editing_title,
+		e.editing_author,
+		e.EDITING_CONTENT,
+		rownum
+		rown
+		from
+		AM_EDITING_EDITING e,
+		AM_EDITING_TYPE t
+		where
+		e.editing_type =
+		t.editing_type_id
+		and
+		e.editing_date = #{editingDate,jdbcType=DATE}
+		and
+		rownum&lt;=${(after)}
+		order by
+		e.editing_date desc
+		)su where rown
+		&gt;#{before}
+	</select>
+
+	<!-- 统计下拉查看文件 -->
+	<select id="countQueryEditingFileByDate" resultType="int">
+		select
+		COUNT(e.editing_title)
+		from
+		AM_EDITING_EDITING e,
+		AM_EDITING_TYPE t
+		where
+		e.editing_type = t.editing_type_id
+		and
+		e.editing_date = #{editingDate,jdbcType=DATE}
+	</select>
+
+	<delete id="deleteEditingFile">
+		delete from AM_EDITING_EDITING where editing_id =
+		#{editingId,jdbcType=VARCHAR}
+	</delete>
+
+
+	<!-- 查询所有编研文件 -->
+	<select id="queryAllEditingFile" resultMap="editingFile">
+		select
+		e.editing_id,
+		t.editing_type_name,
+		e.editing_date,
+		e.editing_title,
+		e.editing_author,
+		e.EDITING_CONTENT
+		from
+		AM_EDITING_EDITING e,
+		AM_EDITING_TYPE t
+		where
+		e.editing_type =
+		t.editing_type_id
+	</select>
+
+	<!-- 添加编研文件 -->
+	<insert id="addEditingFile" parameterType="filemanage.warningandediting.pojo.EditingFile">
+		insert into
+		AM_EDITING_EDITING(editing_id,editing_date,EDITING_TYPE,editing_title,editing_author,EDITING_CONTENT)
+		values
+		(sys_guid(),#{editingDate,jdbcType=VARCHAR},#{editingType,jdbcType=NUMERIC},
+		#{editingTitle,jdbcType=VARCHAR},#{editingAuthor,jdbcType=VARCHAR},#{editingController,jdbcType=CLOB})
+	</insert>
+
+	<!-- 查询类型主键 -->
+	<select id="queryByTypeName" resultMap="editingFile" parameterType="String">
+		select
+		 *
+		from
+		AM_EDITING_TYPE
+		where
+		editing_type_name =
+		#{editingTypeName,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 修改编研文件 -->
+	<update id="updateEditingFile" parameterType="filemanage.warningandediting.pojo.EditingFile">
+		update AM_EDITING_EDITING set
+		EDITING_TYPE=#{editingType,jdbcType=NUMERIC},editing_title=#{editingTitle,jdbcType=VARCHAR},
+		EDITING_CONTENT=#{editingController,jdbcType=CLOB}
+		where editing_id = #{editingId,jdbcType=VARCHAR}
+	</update>
+</mapper>

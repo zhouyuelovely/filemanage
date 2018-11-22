@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.collectandorganize.dao.FilePackingBoxMapper">
+	<!-- 文件表 22-->
+	<resultMap type="filemanage.collectandorganize.vo.AmCoArchivefile" id="AmCoArchivefile">
+		<id property="archivefileid" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+		<result property="archivefileresponsible" column="ARCHIVEFILE_RESPONSIBLE" jdbcType="VARCHAR"/>
+		<result property="archivefilecreatetime" column="ARCHIVEFILE_CREATETIME" jdbcType="VARCHAR"/>
+		<result property="archivefileanual" column="ARCHIVEFILE_ANUAL" jdbcType="VARCHAR"/>
+		<result property="archivefiletitle" column="ARCHIVEFILE_TITLE" jdbcType="VARCHAR"/>
+		<result property="archivefilescanpople" column="ARCHIVEFILE_SCANPOPLE" jdbcType="VARCHAR"/>
+		<result property="quanzongid" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+		<result property="archivefilepages" column="ARCHIVEFILE_PAGES" jdbcType="VARCHAR"/>
+		<result property="archivefilescandate" column="ARCHIVEFILE_SCANDATE" jdbcType="DATE"/>
+		<result property="archivefilefinishingstatus" column="ARCHIVEFILE_FINISHINGSTATUS" jdbcType="VARCHAR"/>
+		<result property="organizationid" column="ORGANIZATION_ID" jdbcType="VARCHAR"/>
+		<result property="primaryclassificationid" column="PRIMARYCLASSIFICATION_ID" jdbcType="VARCHAR"/>
+		<result property="pcname" column="PC_NAME" jdbcType="VARCHAR"/>
+		<result property="secondaryclassificationid" column="SECONDARYCLASSIFICATION_ID" jdbcType="VARCHAR"/>
+		<result property="scname" column="SC_NAME" jdbcType="VARCHAR"/>
+		<result property="retentionperiodid" column="RETENTIONPERIOD_ID" jdbcType="VARCHAR"/>
+		<result property="retentionperiodname" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR"/>
+		<result property="afsecurityclassrification" column="AF_SECURITYCLASSRIFICATION" jdbcType="VARCHAR"/>
+		<result property="archivefileauthenticatestatus" column="ARCHIVEFILE_AUTHENTICATESTATUS" jdbcType="VARCHAR"/>
+		<result property="archivefilefilenumber" column="ARCHIVEFILE_FILENUMBER" jdbcType="VARCHAR"/>
+		<result property="archivefilereferencenumber" column="ARCHIVEFILE_REFERENCENUMBER" jdbcType="VARCHAR"/>
+		<result property="archivefileremark" column="ARCHIVEFILE_REMARK" jdbcType="VARCHAR"/>
+		<result property="boxid" column="BOX_ID" jdbcType="VARCHAR"/>
+		<result property="collator" column="COLLATOR" jdbcType="VARCHAR"/>
+		<result property="finishingTime" column="FINISHINGTIME" jdbcType="DATE"/>
+	</resultMap>
+	<!-- 档案盒表 -->
+	<resultMap type="filemanage.systemmanage.pojo.AmCoBox" id="AmCoBox">
+		<id property="boxid" column="BOX_ID" jdbcType="VARCHAR"/>
+		<result property="boxsituation" column="BOX_SITUATION" jdbcType="VARCHAR"/>
+		<result property="boxsericalnumber" column="BOX_SERICALNUMBER" jdbcType="VARCHAR"/>
+		<result property="boxthickness" column="BOX_THICKNESS" jdbcType="VARCHAR"/>
+		<result property="boxpage" column="BOX_PAGE" jdbcType="VARCHAR"/>
+		<result property="boxstatus" column="BOX_STATUS" jdbcType="VARCHAR"/>
+		<result property="boxcasesnumber" column="BOX_CASESNUMBER" jdbcType="VARCHAR"/>
+		<result property="AmCoBox" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+		<result property="boxanual" column="BOX_ANUAL" jdbcType="VARCHAR"/>
+		<result property="retentionperiodid" column="RETENTIONPERIOD_ID" jdbcType="VARCHAR"/>
+		<result property="organizationid" column="ORGANIZATION_ID" jdbcType="VARCHAR"/>
+		<result property="AmCoBox" column="SC_ID" jdbcType="VARCHAR"/>
+		<result property="boxstartnumber" column="BOX_STARTNUMBER" jdbcType="VARCHAR"/>
+		<result property="boxendnumber" column="BOX_ENDNUMBER" jdbcType="VARCHAR"/>
+		<result property="boxnumber" column="BOX_NUMBER" jdbcType="VARCHAR"/>
+		<result property="boxcreatetime" column="BOX_CREATETIME" jdbcType="DATE"/>
+		<!-- <result property="AmCoBox" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/> -->
+	</resultMap>
+	<!-- 档案附件表 -->
+	<resultMap type="filemanage.collectandorganize.pojo.FileAttachment" id="FileAttachment">
+		<result property="fileAttachmentId" column="FILE_ATTACHMENT_ID" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPath" column="FILE_ATTACHMENT_PATH" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentName" column="FILE_ATTACHMENT_NAME" jdbcType="VARCHAR"/>
+		<result property="archiveFileId" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPageNumber" column="FILE_ATTACHMENT_PAGENUMBER" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentMark" column="FILE_ATTACHMENT_MARK" jdbcType="VARCHAR"/>
+		<result property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentAnual" column="FILE_ATTACHMENT_ANUAL" jdbcType="VARCHAR"/>
+		<result property="fileCreatetime" column="FILE_CREATETIME" jdbcType="VARCHAR"/>
+		<result property="fileCreator" column="FILE_CREATOR" jdbcType="VARCHAR"/>
+	</resultMap>
+	<!-- 档案盒附件表 -->
+	<resultMap type="filemanage.collectandorganize.pojo.AmCoBoxattachment" id="AmCoBoxattachment">
+		<result property="boxattachmentId" column="BOXATTACHMENT_ID" jdbcType="VARCHAR"/>
+		<result property="boxattachmentBox" column="BOXATTACHMENT_BOX" jdbcType="VARCHAR"/>
+		<result property="boxattachmentFile" column="BOXATTACHMENT_FILE" jdbcType="VARCHAR"/>
+		<result property="boxattachmentForm" column="BOXATTACHMENT_FORM" jdbcType="VARCHAR"/>
+		<result property="boxId" column="BOX_ID" jdbcType="VARCHAR"/>
+		<result property="boxYear" column="BOX_YEAR" jdbcType="VARCHAR"/>
+		<result property="AmCoBoxattachment" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+	</resultMap>
+	<!-- 主要的查询结果 -->
+	<sql id="mainDataQuery">
+		 ARCHIVEFILE_FILENUMBER,
+		 ARCHIVEFILE_REFERENCENUMBER,
+		 ARCHIVEFILE_RESPONSIBLE,
+		 ARCHIVEFILE_TITLE,
+		 ARCHIVEFILE_CREATETIME,
+		 AF_SECURITYCLASSRIFICATION,
+		 ARCHIVEFILE_PAGES,
+		 ARCHIVEFILE_REMARK，
+		 quanzong_id，
+		 PRIMARYCLASSIFICATION_ID,
+		 SECONDARYCLASSIFICATION_ID,
+		 RETENTIONPERIOD_ID,
+		 ARCHIVEFILE_ANUAL,
+		 ARCHIVEFILE_ID,
+		 COLLATOR
+	</sql>
+	<!-- SQL块查询的基础数据 -->
+	<sql id="dataQuery">
+		select 
+			      aca.ARCHIVEFILE_FILENUMBER as ARCHIVEFILE_FILENUMBER,
+			      aca.ARCHIVEFILE_REFERENCENUMBER as ARCHIVEFILE_REFERENCENUMBER,
+			      aca.ARCHIVEFILE_RESPONSIBLE as ARCHIVEFILE_RESPONSIBLE,
+			      aca.ARCHIVEFILE_TITLE as ARCHIVEFILE_TITLE,
+			      aca.ARCHIVEFILE_CREATETIME as ARCHIVEFILE_CREATETIME,
+			      aca.AF_SECURITYCLASSRIFICATION as AF_SECURITYCLASSRIFICATION,
+			      aca.ARCHIVEFILE_PAGES as ARCHIVEFILE_PAGES,
+			      aca.ARCHIVEFILE_REMARK as ARCHIVEFILE_REMARK,
+			      aca.quanzong_id as quanzong_id,
+	              aca.PRIMARYCLASSIFICATION_ID as PRIMARYCLASSIFICATION_ID,
+	              aca.SECONDARYCLASSIFICATION_ID as SECONDARYCLASSIFICATION_ID,
+	              aca.RETENTIONPERIOD_ID as RETENTIONPERIOD_ID,
+	              aca.ARCHIVEFILE_ANUAL as ARCHIVEFILE_ANUAL,
+	              aca.ARCHIVEFILE_ID as ARCHIVEFILE_ID,
+	              aca.COLLATOR as COLLATOR
+			      from am_co_archivefile aca
+			inner join am_ma_sm_quanzong amaq on amaq.quanzong_id = aca.quanzong_id
+			inner join am_ma_sm_retentionperiod amsr on amsr.retentionperiod_id = aca.retentionperiod_id
+			inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = aca.primaryclassification_id
+			inner join am_ma_sm_sclassification amss on amss.sc_id = aca.secondaryclassification_id
+			<where>
+					aca.BOX_ID is null
+				<if test="null != quanzongid and  '' != quanzongid ">
+				and	aca.quanzong_id = #{quanzongid ,jdbcType=VARCHAR}
+				</if>
+				<if test="null != archivefileanual and  '' != archivefileanual ">
+				and aca.ARCHIVEFILE_ANUAL = #{archivefileanual ,jdbcType=VARCHAR}
+				</if>
+				<if test="null != retentionperiodid and  '' != retentionperiodid ">
+				and aca.retentionperiod_id =#{retentionperiodid ,jdbcType=VARCHAR}	
+				</if>
+				<if test="null != primaryclassificationid and  '' != primaryclassificationid ">
+				and aca.primaryclassification_id=#{primaryclassificationid ,jdbcType=VARCHAR}	
+				</if>
+				<if test="null != secondaryclassificationid and  '' != secondaryclassificationid ">
+				and aca.SECONDARYCLASSIFICATION_ID = #{secondaryclassificationid ,jdbcType=VARCHAR}	
+				</if>
+			</where>
+	</sql>
+	<!-- 针对基础数据进行的查询条件关键词 -->
+	<sql id="keyWords">
+		<if test="null != archivefilefilenumber and  '' != archivefilefilenumber ">
+					acaAll.ARCHIVEFILE_FILENUMBER 
+		        || acaAll.ARCHIVEFILE_REFERENCENUMBER 
+		        || acaAll.ARCHIVEFILE_RESPONSIBLE  
+				|| acaAll.ARCHIVEFILE_TITLE 	
+				|| acaAll.ARCHIVEFILE_CREATETIME 
+				|| acaAll.AF_SECURITYCLASSRIFICATION like CONCAT(CONCAT('%',#{archivefilefilenumber,jdbcType=VARCHAR}),'%')
+			</if>
+	</sql>
+	<!-- 该全宗下的年度查询 -->
+	<select id="filePackingBoxAnnualQuery" resultMap="AmCoArchivefile" parameterType="Map">
+		select 
+			aca.ARCHIVEFILE_ANUAL
+		from am_co_archivefile aca
+		inner join am_ma_sm_quanzong amaq on amaq.quanzong_id = aca.quanzong_id
+		<where> 
+			ARCHIVEFILE_FINISHINGSTATUS = '3' and BOX_ID is null
+			<if test="null != quanzongid and  '' != quanzongid ">
+			and	aca.quanzong_id = #{quanzongid ,jdbcType=VARCHAR}
+			</if>
+		</where>
+		group by aca.ARCHIVEFILE_ANUAL
+	</select>
+	<!-- 该全宗下的年度下的保管期限查询 -->
+	<select id="filePackingBoxsafekeepingTermQuery" resultMap="AmCoArchivefile" parameterType="Map">
+		select 
+			aca.retentionperiod_id,
+			amsr.retentionperiod_name as retentionperiod_name
+		from am_co_archivefile aca
+		inner join am_ma_sm_quanzong amaq on amaq.quanzong_id = aca.quanzong_id
+		inner join am_ma_sm_retentionperiod amsr on amsr.retentionperiod_id = aca.retentionperiod_id
+		<where>
+			<if test="null != quanzongid and  '' != quanzongid ">
+				aca.quanzong_id = #{quanzongid ,jdbcType=VARCHAR}
+			</if>
+			<if test="null != archivefileanual and  '' != archivefileanual ">
+			and aca.ARCHIVEFILE_ANUAL = #{archivefileanual ,jdbcType=VARCHAR}	
+			</if>
+		</where>
+		group by aca.retentionperiod_id,amsr.retentionperiod_name
+	</select>
+	<!-- 该全宗下的年度下的保管期限下的一级分类查询 -->
+	<select id="filePackingBoxArchivesPrimaryQuery" resultMap="AmCoArchivefile" parameterType="Map">
+		select 
+			aca.primaryclassification_id,
+			amsp.PC_NAME as PC_NAME
+		from am_co_archivefile aca
+		inner join am_ma_sm_quanzong amaq on amaq.quanzong_id = aca.quanzong_id
+		inner join am_ma_sm_retentionperiod amsr on amsr.retentionperiod_id = aca.retentionperiod_id
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = aca.primaryclassification_id
+		<where>
+			<if test="null != quanzongid and  '' != quanzongid ">
+				aca.quanzong_id = #{quanzongid ,jdbcType=VARCHAR} 
+			</if>
+			<if test="null != archivefileanual and  '' != archivefileanual ">
+			and aca.ARCHIVEFILE_ANUAL = #{archivefileanual ,jdbcType=VARCHAR}	
+			</if>
+			<if test="null != retentionperiodid and  '' != retentionperiodid ">
+			and aca.retentionperiod_id = #{retentionperiodid ,jdbcType=VARCHAR}	
+			</if>
+		</where> 
+		group by aca.primaryclassification_id,amsp.PC_NAME
+	</select>
+	<!-- 该全宗下的年度下的保管期限下的一级分类下的二级分类查询 -->
+	<select id="filePackingBoxArchiveSsecondaryQuery" resultMap="AmCoArchivefile" parameterType="Map">
+		select 
+			aca.SECONDARYCLASSIFICATION_ID,
+			amss.SC_NAME
+		from am_co_archivefile aca
+		inner join am_ma_sm_quanzong amaq on amaq.quanzong_id = aca.quanzong_id
+		inner join am_ma_sm_retentionperiod amsr on amsr.retentionperiod_id = aca.retentionperiod_id
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = aca.primaryclassification_id
+		inner join am_ma_sm_sclassification amss on amss.sc_id = aca.secondaryclassification_id
+		<where>
+			<if test="null != quanzongid and  '' != quanzongid ">
+				aca.quanzong_id = #{quanzongid ,jdbcType=VARCHAR}
+			</if>
+			<if test="null != archivefileanual and  '' != archivefileanual ">
+			and aca.ARCHIVEFILE_ANUAL = #{archivefileanual ,jdbcType=VARCHAR}	
+			</if>
+			<if test="null != retentionperiodid and  '' != retentionperiodid ">
+			and aca.retentionperiod_id =#{retentionperiodid ,jdbcType=VARCHAR}	
+			</if>
+			<if test="null != primaryclassificationid and  '' != primaryclassificationid ">
+			and aca.primaryclassification_id=#{primaryclassificationid ,jdbcType=VARCHAR}	
+			</if>
+		</where> 
+		group by SECONDARYCLASSIFICATION_ID,amss.SC_NAME
+	</select>
+	<!-- 该全宗下的年度下的保管期限下的一级分类下的二级分类查询下的所有文件	(可根据关键词查询) -->
+	<select id="filePackingBoxALLQuery" resultMap="AmCoArchivefile" parameterType="Map">
+		select 
+			<!-- 主数据查询 -->
+			<include refid="mainDataQuery"></include>
+		from(
+			 <!-- 基础数据复用 -->
+			 <include refid="dataQuery"></include>
+			) acaAll
+		<where>
+	         <!-- 关键词条件复用 -->
+			 <include refid="keyWords"></include>
+		</where>
+		order by ARCHIVEFILE_CREATETIME asc
+	</select>
+	<!-- 该全宗下的年度下的保管期限下的一级分类下的二级分类查询下的所有文件	(可根据关键词查询)(总数) -->
+	<select id="filePackingBoxALLQueryCount" resultType="int" parameterType="Map">
+		select count(*) from(
+			 <!-- 基础数据复用 -->
+			 <include refid="dataQuery"></include>
+			) acaAll
+		<where>
+			<!-- 关键词条件复用 -->
+			<include refid="keyWords"></include>
+		</where> 
+	</select>
+	<!-- 数据分页 -->
+	<select id="pagingDataQuery" parameterType="Map" resultMap="AmCoArchivefile">
+		select Paging.* from (
+		    select 
+		           rownum as r,
+		           <!-- 主数据查询 -->
+		           <include refid="mainDataQuery"></include>
+		    from(
+		      <!-- 基础数据复用 -->
+			  <include refid="dataQuery"></include>
+					) acaAll
+					<where>
+						rownum &lt;= 5
+						<if test="null != archivefilefilenumber and  '' != archivefilefilenumber ">
+							and	acaAll.ARCHIVEFILE_FILENUMBER 
+					        || acaAll.ARCHIVEFILE_REFERENCENUMBER 
+					        || acaAll.ARCHIVEFILE_RESPONSIBLE  
+							|| acaAll.ARCHIVEFILE_TITLE 	
+							|| acaAll.ARCHIVEFILE_CREATETIME 
+							|| acaAll.AF_SECURITYCLASSRIFICATION like CONCAT(CONCAT('%',#{archivefilefilenumber,jdbcType=VARCHAR}),'%')
+						</if>
+					</where> 
+		   )Paging
+		    where Paging.r &gt;=1
+	</select>
+	<!-- 档案合计(可根据关键词) -->
+	<select id="countFilePackingBox" resultMap="AmCoArchivefile" parameterType="Map">
+		select count(ARCHIVEFILE_ID) from am_co_archivefile aca
+		<where>
+			<if test="null != archivefilefilenumber and  '' != archivefilefilenumber ">
+				aca.ARCHIVEFILE_FILENUMBER = #{archivefilefilenumber ,jdbcType=VARCHAR}	
+			</if>
+			<if test="null != archivefilereferencenumber and  '' != archivefilereferencenumber ">
+			and aca.ARCHIVEFILE_REFERENCENUMBER = #{archivefilereferencenumber ,jdbcType=VARCHAR}
+			</if>
+			<if test="null != archivefileresponsible and  '' != archivefileresponsible ">
+			and aca.ARCHIVEFILE_RESPONSIBLE = #{archivefileresponsible ,jdbcType=VARCHAR}	
+			</if>
+			<if test="null != archivefiletitle and  '' != archivefiletitle ">
+			and aca.ARCHIVEFILE_TITLE = #{archivefiletitle ,jdbcType=VARCHAR}	
+			</if>
+			<if test="null != archivefilecreatetime and  '' != archivefilecreatetime ">
+			and aca.ARCHIVEFILE_CREATETIME = #{archivefilecreatetime ,jdbcType=VARCHAR}	
+			</if>
+			<if test="null != afsecurityclassrification and  '' != afsecurityclassrification ">
+			and aca.AF_SECURITYCLASSRIFICATION = #{afsecurityclassrification ,jdbcType=VARCHAR}		
+			</if>
+		</where> 
+	</select>
+	<!-- 档案页数合计(可根据关键词) -->
+	<select id="countArchivefilePages" resultMap="AmCoArchivefile" parameterType="Map">
+		select count(ARCHIVEFILE_PAGES) from am_co_archivefile aca
+		<where>
+			<if test="null != archivefilefilenumber and  '' != archivefilefilenumber ">
+				aca.ARCHIVEFILE_FILENUMBER = #{archivefilefilenumber ,jdbcType=VARCHAR}	
+			</if>
+			<if test="null != archivefilereferencenumber and  '' != archivefilereferencenumber ">
+			and aca.ARCHIVEFILE_REFERENCENUMBER = #archivefilereferencenumber ,jdbcType=VARCHAR}
+			</if>
+			<if test="null != archivefileresponsible and  '' != archivefileresponsible ">
+			and aca.ARCHIVEFILE_RESPONSIBLE = #{archivefileresponsible ,jdbcType=VARCHAR}	
+			</if>
+			<if test="null != archivefiletitle and  '' != archivefiletitle ">
+			and aca.ARCHIVEFILE_TITLE = #{archivefiletitle ,jdbcType=VARCHAR}	
+			</if>
+			<if test="null != archivefilecreatetime and  '' != archivefilecreatetime ">
+			and aca.ARCHIVEFILE_CREATETIME = #{archivefilecreatetime ,jdbcType=VARCHAR}		
+			</if>
+			<if test="null != afsecurityclassrification and  '' != afsecurityclassrification ">
+			and aca.AF_SECURITYCLASSRIFICATION = #{afsecurityclassrification ,jdbcType=VARCHAR}	
+			</if>
+		</where>     
+	</select>
+	<!-- 根据全宗ID查询全宗号 -->
+	<select id="queryQuanzongNumber" resultType="String" parameterType="filemanage.collectandorganize.vo.AmCoArchivefile">
+		select amsq.quanzong_number from am_ma_sm_quanzong amsq
+		       where amsq.quanzong_id = #{quanzongid ,jdbcType=VARCHAR}
+	</select>
+	<!-- 根据一级分类主键查询一级分类代码 -->
+	<select id="queryPCCode" resultType="String" parameterType="filemanage.collectandorganize.vo.AmCoArchivefile">
+		select amsp.pc_code from am_ma_sm_primaryclassification  amsp
+		       where amsp.pc_id = #{primaryclassificationid ,jdbcType=VARCHAR}
+	</select>
+	<!-- 根据保管期限ID查询保管期限代码 -->
+	<select id="queryRetentionperiodCode" resultType="String" parameterType="filemanage.collectandorganize.vo.AmCoArchivefile">
+		select amsr.retentionperiod_code from am_ma_sm_retentionperiod  amsr
+		       where amsr.retentionperiod_id = #{retentionperiodid ,jdbcType=VARCHAR}	
+	</select>
+	<!-- 根据二级分类ID查询二级分类代码 -->
+	<select id="querySCCode" resultType="String" parameterType="filemanage.collectandorganize.vo.AmCoArchivefile">
+		select amsa.sc_code from am_ma_sm_sclassification amsa
+		       where amsa.sc_id =  #{secondaryclassificationid ,jdbcType=VARCHAR}
+	</select>
+	<!-- 生成档号更新文件表	(全宗号-一级分类代码?年度-保管期限代码-机构问题代码-件号) -->
+	<update id="updateFileNumber" parameterType="filemanage.collectandorganize.vo.AmCoArchivefile">
+		update am_co_archivefile 
+		set 
+			ARCHIVEFILE_FILENUMBER = #{archivefilefilenumber ,jdbcType=VARCHAR} 
+		<where>
+			<if test="null != archivefileid and  '' != archivefileid ">
+				ARCHIVEFILE_ID = #{archivefileid ,jdbcType=VARCHAR}	
+			</if>
+		</where>  
+	</update>
+	<!-- 进行文件装盒操作(更新文件表装盒的文件，添加盒主键)		(②	盒编号格式：全宗号-年度-保管期限代码-盒号 	盒编号根据格式生成，确定盒的唯一性) -->
+	<update id="updateFilePackingBox" parameterType="filemanage.collectandorganize.vo.AmCoArchivefile">
+		update am_co_archivefile 
+		set 
+			BOX_ID = #{boxid ,jdbcType=VARCHAR}
+		<where>
+			<if test="null != archivefileid and  '' != archivefileid ">
+				ARCHIVEFILE_ID = #{archivefileid ,jdbcType=VARCHAR}
+			</if>
+			<if test="null != archivefilefilenumber and  '' != archivefilefilenumber ">
+				and  ARCHIVEFILE_FILENUMBER = #{archivefilefilenumber ,jdbcType=VARCHAR}
+			</if>
+		</where> 
+	</update>
+	
+	
+	<!-- 根据文件编号更新备注信息 -->
+	<update id="updateArchivefileremark" parameterType="filemanage.collectandorganize.vo.AmCoArchivefile">
+		update am_co_archivefile 
+			set ARCHIVEFILE_REMARK= #{archivefileremark ,jdbcType=VARCHAR}
+		<where>
+				ARCHIVEFILE_ID = #{archivefileid ,jdbcType=VARCHAR}
+		</where> 
+	</update>
+	<!-- 查看该盒的盒号是否存在并计算最大的盒号 -->
+	<select id="queryMaxBoxNumber"  resultMap="AmCoBox" parameterType="filemanage.systemmanage.pojo.AmCoBox">
+		 select Max(BOX_NUMBER) as BOX_NUMBER  from am_co_box
+		 where
+				QUANZONG_ID = #{archive.quanzongId,jdbcType=VARCHAR}
+			 <if test="null != boxanual and  '' != boxanual ">
+			AND	BOX_ANUAL = #{boxanual ,jdbcType=VARCHAR}
+			</if>
+			<!-- <if test="null != retentionperiodid and  '' != retentionperiodid ">
+				ARCHIVEFILE_ANUAL = #{retentionperiodid ,jdbcType=VARCHAR}
+			</if> -->
+	</select>
+	<!-- 填充档案盒的数据 -->
+	<insert id="insertAmCoBox" parameterType="filemanage.systemmanage.pojo.AmCoBox">
+		insert into am_co_box(
+		BOX_ID,
+		BOX_SITUATION,
+		BOX_SERICALNUMBER,
+		BOX_THICKNESS,
+		BOX_PAGE,
+		BOX_STATUS,
+		BOX_CASESNUMBER,
+		QUANZONG_ID,
+		BOX_ANUAL,
+		RETENTIONPERIOD_ID,
+		BOX_STARTNUMBER,
+		BOX_ENDNUMBER,
+		BOX_NUMBER,
+		BOX_CREATETIME,
+		BOX_AUDITSTART,
+		SC_ID
+		<!-- ARCHIVEFILE_ID -->
+		) values(
+			#{boxid,jdbcType=VARCHAR},
+			#{boxsituation,jdbcType=VARCHAR},
+			#{boxsericalnumber,jdbcType=VARCHAR},
+			#{boxthickness,jdbcType=VARCHAR},
+			#{boxpage,jdbcType=VARCHAR},
+			'0',
+			#{boxcasesnumber,jdbcType=VARCHAR},
+			#{archive.quanzongId},
+			#{boxanual,jdbcType=VARCHAR},
+			#{retentionperiodid,jdbcType=VARCHAR},
+			#{boxstartnumber,jdbcType=VARCHAR},
+			#{boxendnumber,jdbcType=VARCHAR},
+			#{boxnumber,jdbcType=VARCHAR},
+			sysdate,
+			'0',
+			#{secondryClassFication.scId, jdbcType=VARCHAR}
+			<!-- #{archivefileid.archivefileid, jdbcType=VARCHAR} -->
+		)
+	</insert>
+	
+	<!-- 填充档案盒附件表 -->
+	<insert id="insertAmCoBoxattachment" parameterType="filemanage.collectandorganize.pojo.AmCoBoxattachment">
+		insert into am_co_boxattachment(
+			BOXATTACHMENT_ID,
+			BOXATTACHMENT_BOX,
+			BOXATTACHMENT_FILE,
+			BOXATTACHMENT_FORM,
+			BOX_ID,
+			BOX_YEAR,
+			QUANZONG_ID
+		) values(
+			sys_guid(),
+			#{boxattachmentBox,jdbcType=VARCHAR},
+			#{boxattachmentFile,jdbcType=VARCHAR},
+			#{boxattachmentForm,jdbcType=VARCHAR},
+			#{boxId,jdbcType=VARCHAR},
+			#{boxYear,jdbcType=VARCHAR},
+			#{archive.quanzongId,jdbcType=VARCHAR}
+		)
+		
+	</insert>
+	<!--  更新盒表（添加盒内情况说明）以及生成盒属性并更新盒表 -->
+	<update id="updatePackingBox" parameterType="filemanage.systemmanage.pojo.AmCoBox">
+		update am_co_box 
+		set 
+			BOX_SITUATION = #{boxsituation ,jdbcType=VARCHAR},
+			BOX_SERICALNUMBER = #{boxsericalnumber ,jdbcType=VARCHAR},
+			QUANZONG_ID = #{quanzongid ,jdbcType=VARCHAR},
+			BOX_ANUAL = #{boxanual ,jdbcType=VARCHAR},
+			RETENTIONPERIOD_ID = #{retentionperiodid ,jdbcType=VARCHAR},
+			ORGANIZATION_ID = #{ORGANIZATION_ID ,jdbcType=VARCHAR},
+			BOX_STARTNUMBER = #{boxstartnumber ,jdbcType=VARCHAR},
+			BOX_ENDNUMBER = #{boxendnumber ,jdbcType=VARCHAR}
+		<where>
+			<if test="null != boxid and  '' != boxid ">
+				BOX_ID = #{boxid ,jdbcType=VARCHAR}
+			</if>
+		</where>  
+	</update>
+	
+	<!-- 获取所有带有盒子主键的文件 -->
+	<select id="fileAttachmentPathQuery" resultMap="FileAttachment" parameterType="filemanage.collectandorganize.pojo.FileAttachment" >
+		select acofatta.FILE_ATTACHMENT_PATH,acofatta.archivefile_id  
+			from am_co_file_attachment acofatta
+	       where 
+	         ARCHIVEFILE_ID = #{archiveFileId ,jdbcType=VARCHAR}
+	     and FILE_ATTACHMENT_ANUAL = #{fileAttachmentAnual ,jdbcType=VARCHAR}
+	     and QUANZONG_ID = #{quanzongId ,jdbcType=VARCHAR}
+	     <if test="null != fileAttachmentMark and  '' != fileAttachmentMark ">
+	     	and acofatta.file_attachment_mark = #{fileAttachmentMark ,jdbcType=VARCHAR}
+	     </if>
+	</select>
+	
+	<!-- 根据盒表的文件主键规则查询相应的盒号 盒子主键-->
+	<select id="boxNumberQueryList"  resultMap="AmCoBox" parameterType="filemanage.systemmanage.pojo.AmCoBox">
+		select acbox.BOX_NUMBER,acbox.BOX_ID from am_co_box acbox
+	          where acbox.box_id = #{boxid, jdbcType=VARCHAR}
+	</select>
+	<!-- 根据文件主键查询文件的提名 -->
+	<select id="archivefiletitleQuery" resultMap="AmCoArchivefile" parameterType="filemanage.collectandorganize.vo.AmCoArchivefile">
+		select ARCHIVEFILE_TITLE from am_co_archivefile
+       			where ARCHIVEFILE_ID = #{archivefileid, jdbcType=VARCHAR}
+	</select>
+	<!-- Excel生成数据查询 -->
+	<select id="ExcelQuery" resultMap="AmCoArchivefile" parameterType="filemanage.collectandorganize.vo.AmCoArchivefile">
+				select 
+				  acaFile.ARCHIVEFILE_FILENUMBER as ARCHIVEFILE_FILENUMBER,
+		          acaFile.ARCHIVEFILE_REFERENCENUMBER as ARCHIVEFILE_REFERENCENUMBER,
+		          acaFile.ARCHIVEFILE_RESPONSIBLE as ARCHIVEFILE_RESPONSIBLE,
+		          acaFile.ARCHIVEFILE_TITLE as ARCHIVEFILE_TITLE,
+		          ARCHIVEFILE_CREATETIME,
+		          acaFile.AF_SECURITYCLASSRIFICATION as AF_SECURITYCLASSRIFICATION,
+		          acaFile.ARCHIVEFILE_PAGES as ARCHIVEFILE_PAGES,
+		          acaFile.ARCHIVEFILE_REMARK as ARCHIVEFILE_REMARK
+			    from am_co_archivefile acaFile
+				inner join am_co_box acb on acb.box_id = acaFile.Box_Id
+				      where acb.box_id = #{boxid, jdbcType=VARCHAR}
+				order by  to_date(acaFile.ARCHIVEFILE_CREATETIME, 'yyyy-MM-dd')
+	</select>
+	<!-- 根据指定的封面文件主键获取页数，档号（截取件号） -->
+	<select id="getFileNumber" resultMap="AmCoArchivefile" parameterType="filemanage.collectandorganize.vo.AmCoArchivefile">
+		    select ARCHIVEFILE_FILENUMBER,ARCHIVEFILE_PAGES from am_co_archivefile
+		   		where ARCHIVEFILE_ID = #{archivefileid,jdbcType=VARCHAR}
+	</select>
+</mapper>

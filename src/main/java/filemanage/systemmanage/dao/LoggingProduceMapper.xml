@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.systemmanage.dao.LoggingProduceMapper">
+	<resultMap type="filemanage.systemmanage.pojo.LoggingProduce" id="loggingMap">
+		<id property="logId" column="LOG_ID" jdbcType="VARCHAR"/>
+		<result property="logContent" column="LOG_CONTENT" jdbcType="VARCHAR"/>
+		<result property="logCreateTime" column="LOG_CREATETIME" jdbcType="DATE"/>
+		<association property="user" javaType="filemanage.login.pojo.User">
+			<id property="userId" column="USER_ID" jdbcType="VARCHAR"/>
+			<result property="userName" column="USER_NAME" jdbcType="VARCHAR"/>
+			<result property="userPassword" column="USER_PASSWORD" jdbcType="VARCHAR"/>
+			<result property="userIdNumber" column="USER_IDNUMBER" jdbcType="VARCHAR"/>
+			<result property="userTelePhone" column="USER_TELEPHONE" jdbcType="VARCHAR"/>
+			<result property="userWorkNumber" column="USER_WORKNUMBER" jdbcType="VARCHAR"/>
+			<result property="userSex" column="USER_SEX" jdbcType="VARCHAR"/>
+			<result property="userIpAddress" column="USER_IPADDRESS" jdbcType="VARCHAR"/>
+			<result property="userHostName" column="USER_HOSTNAME" jdbcType="VARCHAR"/>
+			<result property="userCreateTime" column="USER_CREATETIME" jdbcType="DATE"/>
+		</association>
+	</resultMap>
+	
+	<sql id="logSql">
+		select 
+		amsl.log_id,
+		amsl.log_content,
+		amsl.log_createtime,
+		amsu.user_id,
+		amsu.user_name,
+		amsu.user_password,
+		amsu.user_idnumber,
+		amsu.user_telephone,
+		amsu.user_worknumber,
+		amsu.user_sex,
+		amsu.user_ipaddress,
+		amsu.user_hostname,
+		amsu.user_createtime 
+		from 
+		am_ma_sm_log amsl 
+		left join 
+		am_ma_sm_user amsu 
+		on amsl.user_id=amsu.user_id 
+	</sql>
+	<insert id="addLoogingProduce">
+		insert into 
+		am_ma_sm_log
+		(
+		log_id,
+		log_content,
+		log_createtime,
+		user_id
+		) 
+		values
+		(
+		sys_guid(),
+		#{logContent},
+		sysdate,
+		#{userId}
+		)
+	</insert>
+	<select id="findLoggingProduce" resultMap="loggingMap" parameterType="map">
+		select am.*  
+		from 
+		(
+			select ams.*,rownum row_num  from 
+			(
+				<include refid="logSql"/> 
+				order by amsl.log_createtime 
+			) ams
+		) am
+		where am.row_num between #{begin} and #{end}
+	</select>
+	<select id="countLoggingProduce" resultType="int">
+		select count(log_id) 
+		from 
+		am_ma_sm_log
+	</select>
+	<select id="findLoggingProduceByCondition" resultMap="loggingMap" parameterType="filemanage.systemmanage.vo.LogginProduceCondition">
+		select am.*  
+		from 
+		(
+			select ams.*,rownum row_num  from 
+			(
+				<include refid="logSql"/> 
+				<where>
+					<if test="userName !='' and userName !=null ">
+						amsu.user_name=#{userName}
+					</if>
+					<if test="beginTime !='' and endTime ==''">
+						and amsl.log_createtime&gt;to_date(#{beginTime},'yyyy-mm-dd hh24:mi:ss')
+					</if>
+					<if test="endTime !='' and beginTime ==''">
+						and amsl.log_createtime&lt;to_date(#{endTime},'yyyy-mm-dd hh24:mi:ss') 
+					</if>
+					<if test="endTime !='' and beginTime !=''">
+						and amsl.log_createtime between to_date(#{beginTime},'yyyy-mm-dd hh24:mi:ss') and to_date(#{endTime},'yyyy-mm-dd hh24:mi:ss')
+					</if>
+				</where> 
+				order by amsl.log_createtime 
+			) ams
+		) am
+		where am.row_num between #{begin} and #{end}
+	</select>
+	<select id="countLoggingProduceByCondition" resultType="int" parameterType="filemanage.systemmanage.vo.LogginProduceCondition">
+		select count(amsl.log_id) 
+		from 
+		am_ma_sm_log amsl 
+		left join 
+		am_ma_sm_user amsu 
+		on amsl.user_id=amsu.user_id 
+		<where>
+			<if test="userName !='' and userName !=null ">
+				amsu.user_name=#{userName}
+			</if>
+			<if test="beginTime !='' and endTime ==''">
+				and amsl.log_createtime&gt;to_date(#{beginTime},'yyyy-mm-dd hh24:mi:ss')
+			</if>
+			<if test="endTime !='' and beginTime ==''">
+				and amsl.log_createtime&lt;to_date(#{endTime},'yyyy-mm-dd hh24:mi:ss') 
+			</if>
+			<if test="endTime !='' and beginTime !=''">
+				and amsl.log_createtime between to_date(#{beginTime},'yyyy-mm-dd hh24:mi:ss') and to_date(#{endTime},'yyyy-mm-dd hh24:mi:ss')
+			</if>
+		</where>
+	</select>
+	<select id="expuctLoggingProduce" resultMap="loggingMap">
+		<include refid="logSql"/> 
+		where 
+		amsl.log_id=#{logId}
+	</select>
+</mapper>

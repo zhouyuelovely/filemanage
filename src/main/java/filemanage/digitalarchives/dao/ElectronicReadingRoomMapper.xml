@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.digitalarchives.dao.ElectronicReadingRoomMapper">
+	<resultMap type="filemanage.collectandorganize.pojo.ArchiveFile" id="fileMap">
+		<id column="ARCHIVEFILE_ID" property="archiveFileId" jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_RESPONSIBLE" property="archiveFileResponsible" jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_CREATETIME" property="archiveFileCreatetime" jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_ANUAL" property="archiveFileAnual" jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_TITLE" property="archiveFileTitle" jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_FILENUMBER" property="archiveFileFileNumber" jdbcType="VARCHAR" />
+		<result column="ARCHIVEFILE_REFERENCENUMBER" property="archiveFileReferenceNumber" jdbcType="VARCHAR" />
+		<!-- 全宗表 -->
+		<association property="archive" javaType="filemanage.systemmanage.pojo.Archive">
+			<result property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR" />
+			<result property="quanzongName" column="QUANZONG_NAME" jdbcType="VARCHAR" />
+		</association>
+		<!-- 保管期限表 -->
+		<association property="amMaSmRetentionperiod" javaType="filemanage.systemmanage.pojo.AmMaSmRetentionperiod">
+			<result property="retentionperiodid" column="RETENTIONPERIOD_ID" jdbcType="VARCHAR" />
+			<result property="retentionperiodname" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR" />
+		</association>
+		<!-- 一级分类表 -->
+		<association property="primaryClassFication" javaType="filemanage.systemmanage.pojo.PrimaryClassFication">
+		    <result column="PC_ID" property="pcId" jdbcType="VARCHAR"/>
+            <result column="PC_NAME" property="pcName" jdbcType="VARCHAR"/>
+		</association>
+		<!-- 二级分类表 -->
+		<association property="secondryClassFication" javaType="filemanage.systemmanage.pojo.SecondryClassFication">
+			<result property="scId" column="SC_ID" jdbcType="VARCHAR" />
+			<result property="scName" column="SC_NAME" jdbcType="VARCHAR" />
+		</association>
+	</resultMap>
+	
+	<!-- 文件附件 -->
+	<resultMap type="filemanage.collectandorganize.pojo.FileAttachment" id="attachmentMap">
+	    <id property="fileAttachmentId" column="FILE_ATTACHMENT_ID" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPath" column="FILE_ATTACHMENT_PATH" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentName" column="FILE_ATTACHMENT_NAME" jdbcType="VARCHAR"/>
+		 <result column="ARCHIVEFILE_ID" property="archiveFileId" jdbcType="VARCHAR"/> 
+		<result property="fileAttachmentPageNumber" column="FILE_ATTACHMENT_PAGENUMBER" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentMark" column="FILE_ATTACHMENT_MARK" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentAnual" column="FILE_ATTACHMENT_ANUAL" jdbcType="VARCHAR"/>
+		<result property="fileCreatetime" column="FILE_CREATETIME" jdbcType="DATE"/>
+		<result property="fileCreator" column="FILE_CREATOR" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+	<!-- 文件辅助类 -->
+	<resultMap type="filemanage.digitalarchives.vo.ElecReadingRoomVo" id="eleMap">
+	    <id property="archiveFileId" column="ARCHIVEFILE_ID" jdbcType="VARCHAR" />
+		<result property="archiveFileResponsible" column="ARCHIVEFILE_RESPONSIBLE" jdbcType="VARCHAR" />
+		<result property="archiveFileCreatetime" column="ARCHIVEFILE_CREATETIME" jdbcType="VARCHAR" />
+		<result property="archiveFileAnual" column="ARCHIVEFILE_ANUAL" jdbcType="VARCHAR" />
+		<result property="archiveFileTitle" column="ARCHIVEFILE_TITLE" jdbcType="VARCHAR" />
+		<result property="archiveFileFileNumber" column="ARCHIVEFILE_FILENUMBER" jdbcType="VARCHAR" />
+		<result property="archiveFileReferenceNumber" column="ARCHIVEFILE_REFERENCENUMBER" jdbcType="VARCHAR" />
+		<result property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR" />
+		<result property="quanzongName" column="QUANZONG_NAME" jdbcType="VARCHAR" />
+		<result property="retentionperiodid" column="RETENTIONPERIOD_ID" jdbcType="VARCHAR" />
+		<result property="retentionperiodname" column="RETENTIONPERIOD_NAME" jdbcType="VARCHAR" />
+		<result property="pcId" column="PC_ID" jdbcType="VARCHAR"/>
+        <result property="pcName" column="PC_NAME"  jdbcType="VARCHAR"/>
+		<result property="scId" column="SC_ID" jdbcType="VARCHAR" />
+		<result property="scName" column="SC_NAME" jdbcType="VARCHAR" />
+		<result property="fileAttachmentId" column="FILE_ATTACHMENT_ID" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPath" column="FILE_ATTACHMENT_PATH" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentName" column="FILE_ATTACHMENT_NAME" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPageNumber" column="FILE_ATTACHMENT_PAGENUMBER" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentMark" column="FILE_ATTACHMENT_MARK" jdbcType="VARCHAR"/>
+		
+	</resultMap>
+	
+	<resultMap type="filemanage.collectandorganize.pojo.FileAttachment" id="fileAttachmentMap">
+		<id property="fileAttachmentId" column="FILE_ATTACHMENT_ID" jdbcType="VARCHAR"/>
+		<result property="archiveFileId" column="ARCHIVEFILE_ID" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPath" column="FILE_ATTACHMENT_PATH" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentName" column="FILE_ATTACHMENT_NAME" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentPageNumber" column="FILE_ATTACHMENT_PAGENUMBER" jdbcType="VARCHAR"/>
+		<result property="fileAttachmentMark" column="FILE_ATTACHMENT_MARK" jdbcType="VARCHAR"/>
+		<result property="quanzongId" column="QUANZONG_ID" jdbcType="VARCHAR"/>
+	</resultMap>
+	
+
+	<!-- 电子阅览室页面全部公开列表展示 -->
+	<select id="selectAllPublicArchive" resultMap="eleMap">
+		select a.* 
+		from (
+			select ac.*,rownum row_num 
+			from (
+select aca.archivefile_id,
+       amsq.quanzong_name,
+       aca.archivefile_filenumber,
+       aca.archivefile_referencenumber,
+       aca.archivefile_responsible,
+       aca.archivefile_title,
+       aca.archivefile_createtime
+  from am_co_archivefile aca
+  left join am_ma_sm_quanzong amsq
+    on aca.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on aca.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on aca.primaryclassification_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on aca.secondaryclassification_id = amss.sc_id
+ where aca.af_securityclassrification = '公开'
+ ) ac
+		) a  
+		where a.row_num between #{begin} and #{end}
+	</select>
+
+	<!-- 统计全部公开档案数 -->
+	<select id="countAllPublicArchive" resultType="int">
+select count(*) from am_co_archivefile aca
+  left join am_ma_sm_quanzong amsq
+    on aca.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on aca.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on aca.primaryclassification_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on aca.secondaryclassification_id = amss.sc_id
+ where aca.af_securityclassrification = '公开'
+	</select>
+	
+	<!-- 根据文件主键查询单个文件附件信息 -->
+	<select id="selectFileAttachmentByArchiveFileId" resultMap="fileAttachmentMap">
+	select acfa.* from am_co_file_attachment acfa
+  left join am_co_archivefile aca
+    on acfa.archivefile_id = aca.archivefile_id
+ where aca.af_securityclassrification = '公开'
+   and aca.archivefile_id = #{archiveFileId,jdbcType=VARCHAR}
+ order by to_number(file_attachment_pagenumber)
+	</select>
+	
+	<!-- 根据文件主键查询文件附件信息/分页后的附件信息 -->
+	<select id="selectFileAttachmentByArchiveFileIdPages" resultMap="fileAttachmentMap">
+	select * from 
+			(select a.*,rownum row_num from
+				(select * from am_co_file_attachment
+				where aca.af_securityclassrification = '公开'
+				and archivefile_id = #{archiveFileId, jdbcType = VARCHAR}
+				order by to_number(file_attachment_pagenumber) 
+				) a
+			) acfa 
+		where acfa.row_num between #{begin,jdbcType=NUMERIC} and #{end,jdbcType=NUMERIC}
+	</select>
+	
+	<select id="countFileAttachmentByArchiveFileIdPages" resultType="int">
+	select count(FILE_ATTACHMENT_ID) from am_co_file_attachment
+ where aca.af_securityclassrification = '公开'
+   and archivefile_id = #{archiveFileId, jdbcType = VARCHAR}
+	</select>
+	
+	<!-- 缩略图展示所有密级为公开文件附件的图片首页(档号) -->
+	<select id="selectAllPublicArchiveDh" resultMap="eleMap" parameterType="Map">
+	 select sus.* from(
+    select su.*,rownum rownu from(
+	    select acfa.file_attachment_path,aca.archivefile_id,aca.archivefile_filenumber from am_co_file_attachment acfa
+  left join am_co_archivefile aca
+    on acfa.archivefile_id = aca.archivefile_id
+ where aca.af_securityclassrification = '公开'
+   and acfa.file_attachment_mark = '1')su where
+   rownum &lt;=${(start+size)} ) sus where sus.rownu &gt;#{start}
+	</select>
+	
+	<!-- 统计缩略图展示所有密级为公开文件附件的首页的图片数(档号) -->
+	<select id="countAllPublicArchiveDh" resultType="int">
+	select count(*) from am_co_file_attachment acfa
+  left join am_co_archivefile aca
+    on acfa.archivefile_id = aca.archivefile_id
+ where aca.af_securityclassrification = '公开'
+   and acfa.file_attachment_mark = '1'
+	</select>
+	
+	<!-- 多条件关键词查询 -->
+	<select id="queryAllPublicAchiveFileByConditions" resultMap="eleMap" parameterType="filemanage.digitalarchives.vo.ElecReadingRoomVo">
+	select a.* 
+		from (
+			select ac.*,rownum row_num 
+			from (
+	select aca.archivefile_id,
+	   amsq.quanzong_id,
+       amsq.quanzong_name,
+       aca.archivefile_filenumber,
+       aca.archivefile_referencenumber,
+       aca.archivefile_responsible,
+       aca.archivefile_title,
+       aca.archivefile_createtime
+  from am_co_archivefile aca
+  left join am_ma_sm_quanzong amsq
+    on aca.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on aca.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on aca.primaryclassification_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on aca.secondaryclassification_id = amss.sc_id
+    <where>
+    <if test="quanzongName != null and quanzongName != ''">
+    and amsq.QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+    </if>
+    <if test="archiveFileAnual != null and archiveFileAnual != ''">
+    and aca.ARCHIVEFILE_ANUAL=#{archiveFileAnual,jdbcType=VARCHAR}
+    </if>
+     <if test="retentionperiodname != null and retentionperiodname != ''">
+    and amsr.RETENTIONPERIOD_NAME=#{retentionperiodname,jdbcType=VARCHAR}
+    </if>
+     <if test="pcName != null and pcName != ''">
+    and amsp.PC_NAME=#{pcName,jdbcType=VARCHAR}
+    </if>
+     <if test="scName != null and scName != ''">
+    and amss.SC_NAME=#{scName,jdbcType=VARCHAR}
+    </if>
+    <if test="conditions != null and conditions != ''">
+    and 
+    	aca.ARCHIVEFILE_FILENUMBER 
+    ||  aca.ARCHIVEFILE_REFERENCENUMBER 
+    ||  aca.ARCHIVEFILE_RESPONSIBLE 
+    ||  aca.ARCHIVEFILE_TITLE 
+    ||  aca.ARCHIVEFILE_CREATETIME 
+    like 
+    	CONCAT(CONCAT('%',#{conditions,jdbcType = VARCHAR}),'%')
+    </if>
+    </where>
+    and aca.af_securityclassrification = '公开'
+     ) ac
+		) a
+		where a.row_num between #{begin} and #{end}
+	</select>
+	
+	<!-- 统计多条件查询的个数 -->
+	<select id="countAllPublicAchiveFileByConditions" resultType="int" parameterType="java.lang.String">
+	select count(aca.ARCHIVEFILE_ID) from am_co_archivefile aca
+  left join am_ma_sm_quanzong amsq
+    on aca.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on aca.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on aca.primaryclassification_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on aca.secondaryclassification_id = amss.sc_id
+    <where>
+    <if test="quanzongName != null and quanzongName != ''">
+    and amsq.QUANZONG_NAME=#{quanzongName,jdbcType=VARCHAR}
+    </if>
+    <if test="archiveFileAnual != null and archiveFileAnual != ''">
+    and aca.ARCHIVEFILE_ANUAL=#{archiveFileAnual,jdbcType=VARCHAR}
+    </if>
+     <if test="retentionperiodname != null and retentionperiodname != ''">
+    and amsr.RETENTIONPERIOD_NAME=#{retentionperiodname,jdbcType=VARCHAR}
+    </if>
+     <if test="pcName != null and pcName != ''">
+    and amsp.PC_NAME=#{pcName,jdbcType=VARCHAR}
+    </if>
+     <if test="scName != null and scName != ''">
+    and amss.SC_NAME=#{scName,jdbcType=VARCHAR}
+    </if>
+     <if test="conditions != null and conditions != ''">
+    and 
+    	aca.ARCHIVEFILE_FILENUMBER 
+    ||  aca.ARCHIVEFILE_REFERENCENUMBER 
+    ||  aca.ARCHIVEFILE_RESPONSIBLE 
+    ||  aca.ARCHIVEFILE_TITLE 
+    ||  aca.ARCHIVEFILE_CREATETIME 
+    like 
+    	CONCAT(CONCAT('%',#{conditions,jdbcType = VARCHAR}),'%')
+    </if>
+    </where>
+    and aca.af_securityclassrification = '公开'
+	</select>
+
+	<!-- 获取档案文件拥有的全宗信息 -->
+	<select id="listAllArchiveInfo" resultMap="eleMap">
+select distinct(amsq.quanzong_name) from am_co_archivefile aca
+  left join am_ma_sm_quanzong amsq
+    on aca.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on aca.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on aca.primaryclassification_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on aca.secondaryclassification_id = amss.sc_id
+ where aca.af_securityclassrification = '公开'
+	</select>
+	
+	<!-- 获取密级为公开的文件的年度 -->
+	<select id="listArchiveFileAnual" resultMap="eleMap">
+select distinct(aca.archivefile_anual) from am_co_archivefile aca
+  left join am_ma_sm_quanzong amsq
+    on aca.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on aca.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on aca.primaryclassification_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on aca.secondaryclassification_id = amss.sc_id
+ where aca.af_securityclassrification = '公开'
+	</select>
+	
+	<!-- 获取密级为公开的文件的保管期限 -->
+	<select id="listRetentionperiodName" resultMap="eleMap">
+select distinct(amsr.retentionperiod_name) from am_co_archivefile aca
+  left join am_ma_sm_quanzong amsq
+    on aca.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on aca.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on aca.primaryclassification_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on aca.secondaryclassification_id = amss.sc_id
+ where aca.af_securityclassrification = '公开'
+	</select>
+	
+	<!-- 获取密级为公开的文件的一级分类 -->
+	<select id="listPCName" resultMap="eleMap">
+select distinct(amsp.pc_name) from am_co_archivefile aca
+  left join am_ma_sm_quanzong amsq
+    on aca.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on aca.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on aca.primaryclassification_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on aca.secondaryclassification_id = amss.sc_id
+ where aca.af_securityclassrification = '公开'
+	</select>
+	
+	<!-- 获取密级为公开的文件的二级分类 -->
+	<select id="listSCName" resultMap="eleMap">
+select distinct(amss.sc_name) from am_co_archivefile aca
+  left join am_ma_sm_quanzong amsq
+    on aca.quanzong_id = amsq.quanzong_id
+  left join am_ma_sm_retentionperiod amsr
+    on aca.retentionperiod_id = amsr.retentionperiod_id
+  left join am_ma_sm_primaryclassification amsp
+    on aca.primaryclassification_id = amsp.pc_id
+  left join am_ma_sm_sclassification amss
+    on aca.secondaryclassification_id = amss.sc_id
+ where aca.af_securityclassrification = '公开'
+	</select>
+
+</mapper>

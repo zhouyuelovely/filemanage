@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.systemmanage.dao.PrimaryClassFicationMapper">
+   <resultMap type="filemanage.systemmanage.pojo.PrimaryClassFication" id="pcMap">
+     <id column="PC_ID" property="pcId" jdbcType="VARCHAR"/>
+     <result column="PC_CODE" property="pcCode" jdbcType="VARCHAR"/>
+     <result column="PC_NAME" property="pcName" jdbcType="VARCHAR"/>
+     <result column="PC_DESCRIPTION" property="pcDescription" jdbcType="VARCHAR"/>
+     <result column="PC_PROPERTY" property="pcProperty" jdbcType="VARCHAR"/>
+     <result column="PC_CREATETIME" property="pcCreateTime" jdbcType="DATE"/>
+     <result column="PC_CREATOR" property="pcCreator" jdbcType="VARCHAR"/>
+     <!-- 机构数据  一对一 -->
+     <association property="org" javaType="filemanage.systemmanage.pojo.Organization">
+        <result column="ORGANIZATION_ID" property="organizationId" jdbcType="VARCHAR" />
+       <result column="PC_ID" property="pcId" jdbcType="VARCHAR" />
+       <result column="ORGANIZATION_CODE" property="organizationCode"
+			jdbcType="VARCHAR" />
+       <result column="ORGANIZATION_NAME" property="organizationName"
+			jdbcType="VARCHAR" />
+     </association>
+     <collection property="twos" ofType="filemanage.systemmanage.pojo.SecondryClassFication">
+	    <id column="SC_ID" property="scId" jdbcType="VARCHAR"/>
+	    <result column="SC_CODE" property="scCode" jdbcType="VARCHAR"/>
+	    <result column="SC_NAME" property="scName" jdbcType="VARCHAR"/>
+	    <result column="SC_DESCRIPTION" property="scDescription" jdbcType="VARCHAR"/>
+	    <result column="PC_ID" property="pcId" jdbcType="VARCHAR"/>
+	    <result column="SC_PROPERTY" property="scProperty" jdbcType="VARCHAR"/>
+	    <result column="SC_CREATETIME" property="scCreateTime" jdbcType="DATE"/>
+	    <result column="SC_STATUS" property="scStatus" jdbcType="VARCHAR"/>
+	    <result column="SC_CREATOR" property="scCreator" jdbcType="VARCHAR"/>
+     </collection> 
+   </resultMap>
+   
+   <!-- 查询所有的一级分类 -->
+   <select id="queryAllPrimaryClass" resultMap="pcMap">
+    select * from am_ma_sm_primaryclassification
+   </select>
+
+  <!-- 添加一级分类 -->
+  <insert id="addPrimaryClass" parameterType="filemanage.systemmanage.pojo.PrimaryClassFication">
+   insert into am_ma_sm_primaryclassification(PC_ID,PC_CODE,PC_NAME,PC_DESCRIPTION,PC_PROPERTY,PC_CREATETIME,PC_CREATOR)
+    values(szda_pc_seq.nextval,#{pcCode,jdbcType=VARCHAR},#{pcName,jdbcType=VARCHAR},#{pcDescription,jdbcType=VARCHAR},
+    #{pcProperty,jdbcType=VARCHAR},sysdate,#{pcCreator,jdbcType=VARCHAR})
+  </insert>
+  
+  <!-- 按一级分类名pcName查询一级分类是否存在 -->
+  <select id="isExitPrimaryClassName" parameterType="filemanage.systemmanage.pojo.PrimaryClassFication" resultType="int">
+    select count(1) from am_ma_sm_primaryclassification where PC_NAME=#{pcName,jdbcType=VARCHAR}
+  </select>
+
+  <!-- 按一级分类代码pcCode查询一级分类代码是否存在-->
+  <select id="isExitPrimaryClassCode" parameterType="filemanage.systemmanage.pojo.PrimaryClassFication" resultType="int">
+    select count(1) from am_ma_sm_primaryclassification where PC_CODE=#{pcCode,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询所有的问题分类 -->
+  <select id="selectAllPc" resultMap="pcMap">
+    
+      SELECT *
+     FROM 
+      AM_MA_SM_PRIMARYCLASSIFICATION PC left JOIN AM_MA_SM_SCLASSIFICATION SC ON SC.PC_ID=PC.PC_ID 
+      and SC.SC_STATUS='1' order by PC.PC_ID
+    
+  </select>
+  <!--  遍历文书档案下的机构数据，调取的是机构表里的数据-->
+  	<select id="queryScByIdAndStatus" parameterType="java.lang.String" resultMap="pcMap">
+  
+	SELECT pc.pc_id,
+       pc.pc_code,
+       pc.pc_name,
+       sc.SC_CODE,
+       sc.SC_NAME,
+       sc.SC_PROPERTY,
+       sc.sc_status
+  FROM AM_MA_SM_PRIMARYCLASSIFICATION PC
+ inner join am_ma_sm_sclassification sc
+    on sc.pc_id = pc.pc_id
+		inner join AM_MA_SM_ORGANIZATION amso on amso.PC_ID = pc.PC_ID
+ where sc.sc_status = '0' and sc.SC_CODE in (select amso.ORGANIZATION_CODE from AM_MA_SM_ORGANIZATION amso where amso.QUANZONG_ID = #{pcDescription,jdbcType=VARCHAR}) 
+ group by pc.pc_id,
+       pc.pc_code,
+       pc.pc_name,
+       sc.SC_CODE,
+       sc.SC_NAME,
+       sc.SC_PROPERTY,
+       sc.sc_status
+  </select>
+  <!-- 根据全宗id查询二级分类（机构分类） -->
+  <select id="queryScByOrg" parameterType="java.lang.String" resultMap="pcMap">
+    select 
+		amss.SC_ID as SC_ID,
+		amss.SC_NAME as SC_NAME,
+		amss.PC_ID as PC_ID
+	from am_ma_sm_sclassification amss
+	where 
+	SC_CODE in (
+		select 
+			ORGANIZATION_CODE
+		from AM_MA_SM_ORGANIZATION amso
+		where 
+			amso.QUANZONG_ID = #{quanzongid,jdbcType=VARCHAR}
+		and 
+			amso.PC_ID = '1'
+	)
+  </select>
+  
+  <!-- 遍历所有的文书档案 -->
+  <select id="queryAllPcById" resultMap="pcMap">
+    SELECT
+	pc.pc_id,
+	pc.pc_code,
+	pc.pc_name,
+	amso.organization_id as SC_ID,
+	amso.organization_code as SC_CODE,
+	amso.organization_name as SC_NAME,
+	sc.SC_PROPERTY,
+	SC_STATUS
+	FROM
+	AM_MA_SM_PRIMARYCLASSIFICATION PC
+	left join am_ma_sm_organization amso on amso.pc_id = PC.Pc_Id
+	inner join am_ma_sm_sclassification sc on sc.pc_id = pc.pc_id
+	where
+	sc.pc_id=1
+	GROUP by
+	pc.pc_id,
+	pc.pc_code,
+	pc.pc_name,
+	amso.organization_id,
+	amso.organization_code,
+	amso.organization_name,
+	sc.SC_PROPERTY,
+	sc_status
+  </select>
+  
+  <!-- 统计所有的一级分类 -->
+  <select id="countAllPc" resultType="int">
+    select count(*) from AM_MA_SM_PRIMARYCLASSIFICATION
+  </select>
+  
+  <select id="queryAllScByPc" resultMap="pcMap" parameterType="Map">
+     select sus.* from(
+ select rownum rownu,su.* from(
+
+     SELECT pc.pc_id,
+       pc.pc_code,
+       pc.pc_name,
+       amso.ORGANIZATION_ID   as SC_ID,
+       amso.ORGANIZATION_CODE as SC_CODE,
+       amso.ORGANIZATION_NAME as SC_NAME,
+       sc.SC_PROPERTY,
+       SC_STATUS
+  FROM AM_MA_SM_PRIMARYCLASSIFICATION PC
+ left join am_ma_sm_organization amso
+    on amso.pc_id = PC.Pc_Id
+ left join am_ma_sm_sclassification sc
+    on sc.pc_id = pc.pc_id
+ and sc.sc_status = #{scStatus,jdbcType=VARCHAR}
+ group by pc.pc_id,
+          pc.pc_code,
+          pc.pc_name,
+          amso.ORGANIZATION_ID ,
+          amso.ORGANIZATION_CODE ,
+         amso.ORGANIZATION_NAME,
+          sc.SC_PROPERTY,
+          sc_status
+     order by PC.PC_ID)su where rownum &lt;=${(before+after)}
+    )sus where sus.rownu &gt;#{before}
+  </select>
+  
+  <select id="queryAllPc" resultMap="pcMap" parameterType="Map">
+    select sus.* from(
+ select rownum rownu,su.* from(
+
+     SELECT pc.pc_id,
+       pc.pc_code,
+       pc.pc_name,
+       sc.sc_id,
+       sc.sc_code,
+       sc.sc_name,
+       sc.SC_STATUS
+  FROM AM_MA_SM_PRIMARYCLASSIFICATION PC
+ left join am_ma_sm_sclassification sc
+    on sc.pc_id = pc.pc_id
+ and sc.sc_status = #{scStatus,jdbcType=VARCHAR}
+ group by pc.pc_id,
+          pc.pc_code,
+          pc.pc_name,
+          sc.sc_id,
+       sc.sc_code,
+       sc.sc_name,
+         sc. sc_status
+     order by PC.PC_ID)su where rownum &lt;=${(before+after)}
+    )sus where sus.rownu &gt;#{before}
+  </select>
+  
+  <select id="countPcByStatus" parameterType="String" resultType="int">
+    select count(*) from am_ma_sm_sclassification where sc_status=#{scStatus,jdbcType=VARCHAR}
+  </select>
+  
+ <delete id="deletePcByPcId" parameterType="java.lang.String">
+   delete from am_ma_sm_primaryclassification where PC_ID=#{pcId,jdbcType=VARCHAR}
+ </delete>
+  
+  <select id="countPcIdBySc" parameterType="java.lang.String" resultType="int">
+     select count(sc.pc_id) from am_ma_sm_sclassification sc
+       where sc.pc_id = (
+             select pc_id from am_ma_sm_primaryclassification pc
+                    where pc.pc_id = #{pcId,jdbcType=VARCHAR} 
+       )
+  </select>
+  
+  
+  
+ 
+
+
+
+</mapper>

@@ -1,0 +1,34 @@
+@charset "utf-8"; 
+/*.layui-body{overflow-y: scroll;} 滚动条问题*/
+			
+			table tr th div,
+			table tr td {
+				text-align: center;
+			}
+			
+			body .add_label_bg>.layui-layer-title,
+			.btn_color {
+				background: #EA5519;
+				color: #FFFFFF;
+			}
+			
+			.gong_color {
+				color: red;
+				font-weight: bold;
+			}
+			.viewer-container,
+			.viewer-fixed,
+			.viewer-fade,
+			.viewer-transition,
+			.viewer-in {
+				z-index: 99999999999!important;
+				/*弹出层与图片预览层级*/
+			}
+			.font_color{
+				color: #EA5519;
+				font-weight: 300;
+			}
+			#tba{
+				padding-left: 15px;
+				padding-bottom: 15px;
+			}

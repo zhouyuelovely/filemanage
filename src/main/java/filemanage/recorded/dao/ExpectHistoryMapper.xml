@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.recorded.dao.ExpectHistoryMapper">
+	<resultMap type="filemanage.recorded.vo.ExportHistoryHelp" id="expMap">
+		<result property="fileId" column="fileId" jdbcType="VARCHAR"/>
+		<result property="expectTitle" column="expectTitle" jdbcType="VARCHAR"/>
+		<result property="expectNumbering" column="expectNumbering" jdbcType="VARCHAR"/>
+		<result property="expectRPerson" column="expectRPerson" jdbcType="VARCHAR"/>
+		<result property="expectWrittenDate" column="expectWrittenDate" jdbcType="VARCHAR"/>
+		<result property="expectSecretLevel" column="expectSecretLevel" jdbcType="VARCHAR"/>
+		<result property="expectPages" column="expectPages" jdbcType="VARCHAR"/>
+		<result property="expectTypeName" column="expectTypeName" jdbcType="VARCHAR"/>
+		<result property="expectArchiveNumber" column="expectArchiveNumber" jdbcType="VARCHAR"/>
+		<result property="expectSTimeName" column="expectSTimeName" jdbcType="VARCHAR"/>
+		<result property="expectAnual" column="expectAnual" jdbcType="VARCHAR"/>
+		<result property="expectSCName" column="expectSCName" jdbcType="VARCHAR"/>
+		<result property="expectPartNumber" column="expectPartNumber" jdbcType="VARCHAR"/>
+		<result property="expectSTimeCode" column="expectSTimeCode" jdbcType="VARCHAR"/>
+		<result property="expectSCCode" column="expectSCCode" jdbcType="VARCHAR"/>
+		<result property="expectTextItem" column="expectTextItem" jdbcType="VARCHAR"/>
+		<result property="expectPageNumber" column="expectPageNumber" jdbcType="VARCHAR"/>
+	</resultMap>
+	<sql id="fileSql">
+		select
+		aca.archivefile_id fileId, 
+		aca.archivefile_title expectTitle,
+		aca.archivefile_referencenumber expectNumbering,
+		aca.archivefile_responsible expectRPerson,
+		aca.archivefile_createtime expectWrittenDate,
+		aca.af_securityclassrification expectSecretLevel,
+		aca.archivefile_pages expectPages,
+		amsp.pc_name expectTypeName,
+		amsq.quanzong_number expectArchiveNumber,
+		amsr.retentionperiod_name expectSTimeName,
+		aca.archivefile_anual expectAnual,
+		amss.sc_name expectSCName,
+		aca.archivefile_filenumber expectPartNumber,
+		amsr.retentionperiod_code expectSTimeCode,
+		amss.sc_code expectSCCode
+		from 
+		am_co_archivefile aca 
+		left join 
+		am_ma_sm_primaryclassification amsp 
+		on aca.primaryclassification_id=amsp.pc_id 
+		left join 
+		am_ma_sm_quanzong amsq 
+		on amsq.quanzong_id=aca.quanzong_id 
+		left join 
+		am_ma_sm_retentionperiod amsr
+		on amsr.retentionperiod_id=aca.retentionperiod_id 
+		left join 
+		am_ma_sm_sclassification amss 
+		on amss.sc_id=aca.secondaryclassification_id 
+	</sql>
+	<sql id="historySql">
+		select 
+		afh.historydata_id fileId,
+		afh.historydata_title expectTitle,
+		afh.historydata_referencenumber expectNumbering,
+		afh.historydata_af_responsible expectRPerson,
+		afh.historydata_filedate expectWrittenDate,
+		afh.historydata_security_level expectSecretLevel,
+		afh.historydata_pages expectPages,
+		afh.historydata_type expectTypeName,
+		afh.quanzong_number expectArchiveNumber,
+		afh.retentionperiod_name expectSTimeName,
+		afh.historydata_archivalyear expectAnual,
+		afh.organization_name expectSCName,
+		afh.historydata_partnumber expectPartNumber,
+		afh.retentionperiod_code expectSTimeCode,
+		afh.organization_code expectSCCode,
+		afh.historydata_textitem expectTextItem 
+		from 
+		am_fd_historydata afh
+	</sql>
+	<select id="queryFile" resultType="filemanage.recorded.vo.ExportHistoryHelp" parameterType="java.util.Arrays">
+		<include refid="fileSql"/> 
+		where 
+		aca.archivefile_id in 
+		<foreach item="id" index="index" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</select>
+	<select id="queryHistory" resultType="filemanage.recorded.vo.ExportHistoryHelp" parameterType="java.util.Arrays">
+		<include refid="historySql"/> 
+		where 
+		afh.historydata_id in 
+		<foreach item="id" index="index" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</select>
+	<select id="findFile" resultType="java.lang.String">
+		select 
+		acfa.file_attachment_path 
+		from 
+		am_co_file_attachment acfa 
+		where 
+		acfa.archivefile_id=#{fileId}
+	</select>
+	<select id="findHistory" resultType="java.lang.String">
+		select 
+		afh.historyannex_path 
+		from 
+		am_fd_historyannex afh 
+		where 
+		afh.historydata_id=#{fileId}
+	</select>
+</mapper>

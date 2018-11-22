@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.statistics.dao.AmCoBoxReportMapper">
+	<resultMap type="filemanage.statistics.pojo.AmCoBoxReport" id="amCoBoxReport">
+		<result column="r_pc_name" property="pcname" jdbcType="VARCHAR" />
+		<result column="r_quanzong_id" property="quanzongid" jdbcType="VARCHAR" />
+		<result column="r_quanzong_name" property="quanzongname" jdbcType="VARCHAR" />
+		<result column="r_countnum" property="countnum" jdbcType="VARCHAR" />
+		<result column="r_anual" property="anual" jdbcType="VARCHAR" />
+		<result column="r_sumnum" property="sumnum" jdbcType="VARCHAR" />
+		<result column="r_borrowingnum" property="borrowingnum" jdbcType="VARCHAR" />
+		<result column="r_borrowingcount" property="borrowingcount" jdbcType="VARCHAR" />
+		<result column="r_rejectnum" property="rejectnum" jdbcType="VARCHAR" />
+		<result column="r_rejectCount" property="rejectCount" jdbcType="VARCHAR" />
+	</resultMap>
+	<!-- 根据档案类型和全宗id查询出一个档案盒数量数组 -->
+	<select id="queryfileSumnum" resultType="string">
+		SELECT
+		sum(acb.BOX_CASESNUMBER) AS r_sumnum
+		FROM
+		am_co_box acb
+		inner join am_ma_sm_sclassification amss on amss.Sc_Id = acb.Sc_Id 
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = amss.pc_id
+		where
+			acb.BOX_STATUS = '2'
+			and
+		amsp.pc_name = #{pcname}
+		AND acb.QUANZONG_ID = #{quanzongid}
+		<if test="anual!=null and anual!= ''">
+			and acb.box_anual = #{anual}
+		</if>
+	</select>
+	
+	<!-- 根据档案类型和全宗id查询出一个档案盒数量数组 -->
+	<select id="queryboxCountnum" resultType="string">
+		select distinct
+	    count(acb.box_id) as r_countnum
+	    from 
+	    am_co_box acb
+	    inner join am_ma_sm_sclassification amss on amss.Sc_Id = acb.Sc_Id 
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = amss.pc_id
+	    where amsp.pc_name = #{pcname}
+	    and 
+	    acb.quanzong_id = #{quanzongid}
+	    and 
+      	acb.BOX_STATUS = '2'
+      	<if test="anual!=null and anual!= ''">
+			and acb.box_anual = #{anual}
+		</if>
+	</select>
+	
+	<!-- 查询所有盒年份 -->
+	<select id="queryAnual" resultMap="amCoBoxReport">
+		SELECT
+    	acb.BOX_ANUAL AS r_anual
+		FROM
+		am_co_box acb
+		where 
+		acb.BOX_STATUS = '2'
+		GROUP BY
+		acb.BOX_ANUAL
+		order by acb.BOX_ANUAL desc
+	</select>
+	
+	<!-- 查询所有件年份 -->
+	<select id="queryFileAnual" resultMap="amCoBoxReport">
+		SELECT
+    	acb.BOX_ANUAL AS r_anual
+		FROM
+		am_co_box acb
+		where 
+		acb.BOX_STATUS = '2'
+		GROUP BY
+		acb.BOX_ANUAL
+		order by acb.BOX_ANUAL desc
+	</select>
+	
+	<!-- 查询盒横坐标(全宗名称) -->
+	<select id="queryQuanzongname" resultMap="amCoBoxReport">
+		select
+    	acb.quanzong_id AS r_quanzong_id,
+		amsq.quanzong_name AS r_quanzong_name
+		from am_ma_sm_quanzong amsq
+		inner join am_co_box acb on acb.quanzong_id = amsq.quanzong_id
+		<where>
+			acb.BOX_STATUS = '2'
+			<if test="anual!=null and anual!= ''">
+				and acb.box_anual = #{anual}
+			</if>
+		</where>
+		
+		group by amsq.quanzong_name,acb.quanzong_id
+	</select>
+	
+	<!-- 查询件横坐标(全宗名称) -->
+	<select id="queryFileQuanzongname" resultMap="amCoBoxReport">
+		select
+    	acb.quanzong_id AS r_quanzong_id,
+		amsq.quanzong_name AS r_quanzong_name
+		from am_ma_sm_quanzong amsq
+		inner join am_co_box acb on acb.quanzong_id = amsq.quanzong_id
+		<where>
+			acb.BOX_STATUS = '2'
+			<if test="anual!=null and anual!= ''">
+				and acb.box_anual = #{anual}
+			</if>
+		</where>
+		
+		group by amsq.quanzong_name,acb.quanzong_id
+	</select>
+	
+	
+	<!-- 查询档案类型 -->
+	<select id="queryPcname" resultMap="amCoBoxReport">
+		SELECT
+		amsp.pc_name AS r_pc_name
+		FROM
+		am_co_box acb
+		inner join am_ma_sm_sclassification amss on amss.Sc_Id = acb.Sc_Id 
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = amss.pc_id
+		where 
+		acb.BOX_STATUS = '2'
+		<if test="anual!=null and anual!= ''">
+			and acb.box_anual = #{anual}
+		</if>
+		GROUP BY
+    	amsp.pc_name
+	</select>
+	
+	<!-- 查询档案类型 -->
+	<select id="queryFilePcname" resultMap="amCoBoxReport">
+		SELECT
+		amsp.pc_name AS r_pc_name
+		FROM
+		am_co_box acb
+		inner join am_ma_sm_sclassification amss on amss.Sc_Id = acb.Sc_Id 
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = amss.pc_id
+		where 
+		acb.BOX_STATUS = '2'
+		<if test="anual!=null and anual!= ''">
+			and acb.box_anual = #{anual}
+		</if>
+		GROUP BY
+    	amsp.pc_name
+	</select>
+	
+	<!-- 以盒查询统计 -->
+	<select id="queryByBox"  resultMap="amCoBoxReport">
+		SELECT
+		amsp.pc_id,
+		amsp.pc_name AS r_pc_name,
+		count(acb.BOX_ID) AS r_countnum
+		FROM
+		am_co_box acb
+		inner join am_ma_sm_sclassification amss on amss.Sc_Id = acb.Sc_Id 
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = amss.pc_id
+		<where>
+			acb.BOX_STATUS = '2'
+			<if test="anual!=null and anual!= ''">
+				and acb.box_anual = #{anual}
+			</if>
+		</where>
+		AND acb.QUANZONG_ID = #{quanzongid}
+		GROUP BY
+		amsp.pc_id,
+		amsp.pc_name
+	</select>
+	
+	<!-- 以盒查询统计(表格) -->
+	<select id="queryByBoxTable"  resultMap="amCoBoxReport">
+	 select b.* from 
+    (select rownum as rn,a.* from(
+	 SELECT
+		amsp.pc_id,
+		amsp.pc_name AS r_pc_name,
+    	amsq.quanzong_name as r_quanzong_name,
+		count(acb.BOX_ID) AS r_countnum
+		FROM
+		am_co_box acb
+		inner join am_ma_sm_sclassification amss on amss.Sc_Id = acb.Sc_Id 
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = amss.pc_id
+    	inner join am_ma_sm_quanzong amsq on amsq.quanzong_id = acb.quanzong_id
+		<where>
+			acb.BOX_STATUS = '2'
+			<if test="anual!=null and anual!= ''">
+				and acb.box_anual = #{anual}
+			</if>
+		</where>
+		GROUP BY
+		amsp.pc_id,
+		amsp.pc_name,
+    	amsq.quanzong_name
+    	order by amsq.quanzong_name)a )b
+    	<if test="before !=-1 and after !=-1">
+				where rn >= #{before} and <![CDATA[rn <= #{after}]]>
+		</if>
+    	
+	</select>
+	
+	<!-- 以盒查询统计总数(表格) -->
+	<select id="queryByBoxTableTotal"  resultType="int">
+	select count(*) from (
+	 SELECT
+		amsp.pc_id,
+		amsp.pc_name AS r_pc_name,
+    	amsq.quanzong_name as r_quanzong_name,
+		count(acb.BOX_ID) AS r_countnum
+		FROM
+		am_co_box acb
+		inner join am_ma_sm_sclassification amss on amss.Sc_Id = acb.Sc_Id 
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = amss.pc_id
+    	inner join am_ma_sm_quanzong amsq on amsq.quanzong_id = acb.quanzong_id
+		<where>
+			acb.BOX_STATUS = '2'
+			<if test="anual!=null and anual!= ''">
+				and acb.box_anual = #{anual}
+			</if>
+		</where>
+		GROUP BY
+		amsp.pc_id,
+		amsp.pc_name,
+    	amsq.quanzong_name
+    	)
+	</select>
+	
+	<!-- 以件查询统计 -->
+	<select id="queryByFile"  resultMap="amCoBoxReport">
+		SELECT
+		amsp.pc_id,
+		amsp.pc_name AS r_pc_name,
+		sum(acb.BOX_CASESNUMBER) AS r_sumnum
+		FROM
+		am_co_box acb
+		inner join am_ma_sm_sclassification amss on amss.Sc_Id = acb.Sc_Id 
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = amss.pc_id
+		where
+			acb.BOX_STATUS = '2'
+			<if test="anual!=null and anual!= ''">
+				and acb.box_anual = #{anual}
+			</if>
+		<if test="quanzongid!=null and quanzongid!= ''">
+			AND acb.QUANZONG_ID = #{quanzongid}
+		</if>
+		GROUP BY
+		amsp.pc_id,
+		amsp.pc_name
+	</select>
+	
+	<!-- 以件查询统计(表格) -->
+	<select id="queryByFileTable"  resultMap="amCoBoxReport">
+		select b.* from 
+    	(select rownum as rn,a.* from(
+		SELECT
+		amsp.pc_id,
+		amsp.pc_name AS r_pc_name,
+		amsq.quanzong_name AS r_quanzong_name,
+		sum(acb.BOX_CASESNUMBER) AS r_sumnum
+		FROM
+		am_co_box acb
+		inner join am_ma_sm_sclassification amss on amss.Sc_Id = acb.Sc_Id 
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = amss.pc_id
+		inner join am_ma_sm_quanzong amsq on amsq.quanzong_id = acb.quanzong_id
+		where
+			acb.BOX_STATUS = '2'
+			<if test="anual!=null and anual!= ''">
+				and acb.box_anual = #{anual}
+			</if>
+		GROUP BY
+		amsp.pc_id,
+		amsp.pc_name,
+    	amsq.quanzong_name
+    	order by amsq.quanzong_name)a )b
+    	<if test="before !=-1 and after !=-1">
+				where rn >= #{before} and <![CDATA[rn <= #{after}]]>
+		</if>
+	</select>
+	
+	<!-- 以件查询统计总数(表格) -->
+	<select id="queryByFileTableTotal"  resultType="int">
+		select count(*) from(
+		SELECT
+		amsp.pc_id,
+		amsp.pc_name AS r_pc_name,
+		amsq.quanzong_name AS r_quanzong_name,
+		sum(acb.BOX_CASESNUMBER) AS r_sumnum
+		FROM
+		am_co_box acb
+		inner join am_ma_sm_sclassification amss on amss.Sc_Id = acb.Sc_Id 
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = amss.pc_id
+		inner join am_ma_sm_quanzong amsq on amsq.quanzong_id = acb.quanzong_id
+		where
+			acb.BOX_STATUS = '2'
+			<if test="anual!=null and anual!= ''">
+				and acb.box_anual = #{anual}
+			</if>
+		GROUP BY
+		amsp.pc_id,
+		amsp.pc_name,
+    	amsq.quanzong_name)
+	</select>
+	
+	<!-- 查询借阅占比统计 -->
+	<select id="queryBorrowing"  resultMap="amCoBoxReport">
+		select 
+	      pc_id,
+	      pc_name AS r_pc_name,
+	      count(archivefile_id) AS r_borrowingnum
+	    from (
+	      select 
+	      amsp.pc_id as pc_id,
+	      amsp.pc_name as pc_name,
+	      abbs.archivefile_id as archivefile_id
+	      from 
+	      am_borrowing_borrowdetails abbs
+	      inner join am_borrowing_borrowrecords abb on abb.borrowrecords_id = abbs.borrowrecords_id
+	      inner join am_co_archivefile aca on aca.archivefile_id = abbs.archivefile_id
+	      inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = aca.primaryclassification_id
+	      where abb.borrowrecords_status = '3'
+	      <if test="anual!=null and anual!= ''">
+			and
+      		aca.archivefile_anual = #{anual}
+		</if>
+	      group by abbs.archivefile_id,amsp.pc_id,amsp.pc_name
+	    )
+	    group by  pc_id, pc_name
+	</select>
+	
+	<!-- 查询借阅占比统计(表格) -->
+	<select id="queryBorrowingTable"  resultMap="amCoBoxReport">
+		select b.* from 
+    	(select rownum as rn,a.* from(
+		select 
+	      pc_id,
+	      pc_name AS r_pc_name,
+	      count(archivefile_id) AS r_borrowingnum
+	    from (
+	      select 
+	      amsp.pc_id as pc_id,
+	      amsp.pc_name as pc_name,
+	      abbs.archivefile_id as archivefile_id
+	      from 
+	      am_borrowing_borrowdetails abbs
+	      inner join am_borrowing_borrowrecords abb on abb.borrowrecords_id = abbs.borrowrecords_id
+	      inner join am_co_archivefile aca on aca.archivefile_id = abbs.archivefile_id
+	      inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = aca.primaryclassification_id
+	      where abb.borrowrecords_status = '3'
+	      <if test="anual!=null and anual!= ''">
+			and
+      		aca.archivefile_anual = #{anual}
+		</if>
+	      group by abbs.archivefile_id,amsp.pc_id,amsp.pc_name
+	    )
+	    group by  pc_id, pc_name)a )b
+	   <if test="before !=-1 and after !=-1">
+				where rn >= #{before} and <![CDATA[rn <= #{after}]]>
+		</if>
+	</select>
+	<!-- 查询总借阅数 -->
+	<select id="queryBorrowingTableTotal"  resultType="int">
+		    select count(*) from(
+      select 
+	      pc_id,
+	      pc_name AS r_pc_name,
+	      count(archivefile_id) AS r_borrowingnum
+	    from (
+	      select 
+	      amsp.pc_id as pc_id,
+	      amsp.pc_name as pc_name,
+	      abbs.archivefile_id as archivefile_id
+	      from 
+	      am_borrowing_borrowdetails abbs
+	      inner join am_borrowing_borrowrecords abb on abb.borrowrecords_id = abbs.borrowrecords_id
+	      inner join am_co_archivefile aca on aca.archivefile_id = abbs.archivefile_id
+	      inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = aca.primaryclassification_id
+	      where abb.borrowrecords_status = '3'
+	      <if test="anual!=null and anual!= ''">
+			and
+      		aca.archivefile_anual = #{anual}
+		</if>
+	      group by abbs.archivefile_id,amsp.pc_id,amsp.pc_name
+	    )
+	    group by  pc_id, pc_name)
+	</select>
+	
+	<!-- 查询总借阅数 -->
+	<select id="queryBorrowingCount"  resultType="int">
+		select 
+	      count(archivefile_id) AS r_borrowingcount
+	    from (
+	      select 
+	      abbs.archivefile_id as archivefile_id
+	      from 
+	      am_borrowing_borrowdetails abbs
+	      inner join am_borrowing_borrowrecords abb on abb.borrowrecords_id = abbs.borrowrecords_id
+	      inner join am_co_archivefile aca on aca.archivefile_id = abbs.archivefile_id
+	      where abb.borrowrecords_status = '3'
+	      <if test="anual!=null and anual!= ''">
+			and
+      		aca.archivefile_anual = #{anual}
+		  </if>
+	      group by abbs.archivefile_id
+	    )
+	</select>
+	
+	<!-- 根据年份查询借阅档案类型 -->
+	<select id="queryBorrowingType"  resultMap="amCoBoxReport">
+		 select 
+		   pc_name as r_pc_name
+		 from (
+		   select 
+		   amsp.pc_id as pc_id,
+		   amsp.pc_name as pc_name,
+		   abbs.archivefile_id as archivefile_id
+		   
+		   from 
+		   am_borrowing_borrowdetails abbs
+		   inner join am_borrowing_borrowrecords abb on abb.borrowrecords_id = abbs.borrowrecords_id
+		   inner join am_co_archivefile aca on aca.archivefile_id = abbs.archivefile_id
+		   inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = aca.primaryclassification_id
+		   where abb.borrowrecords_status = '3'
+		   <if test="anual!=null and anual!= ''">
+			and
+      		aca.archivefile_anual = #{anual}
+		  </if>
+		   group by abbs.archivefile_id,amsp.pc_id,amsp.pc_name
+		 )
+		 group by  pc_id, pc_name
+	</select>
+	
+	<!-- 查询借阅年份 -->
+	<select id="queryBorrowingAnual"  resultMap="amCoBoxReport">
+		 select 
+	       archivefile_anual as r_anual
+	     from (
+	       select 
+	       aca.archivefile_anual as archivefile_anual
+	       
+	       from 
+	       am_borrowing_borrowdetails abbs
+	       inner join am_borrowing_borrowrecords abb on abb.borrowrecords_id = abbs.borrowrecords_id
+	       inner join am_co_archivefile aca on aca.archivefile_id = abbs.archivefile_id
+	       where abb.borrowrecords_status = '3'
+	     )
+	     group by archivefile_anual
+	     order by archivefile_anual desc
+	</select>
+	
+	<!-- 查询某全宗下的驳回次数 -->
+	<select id="queryReject"  resultMap="amCoBoxReport">
+		select 
+	    amsq.quanzong_name AS r_quanzong_name,
+	    sum(acb.box_rejectnum) AS r_rejectnum
+	    from 
+	    am_co_box acb
+	    inner join am_ma_sm_quanzong amsq on amsq.quanzong_id = acb.quanzong_id
+	    where 
+	    acb.box_rejectnum !=0
+	    <if test="anual!=null and anual!= ''">
+			and acb.box_anual = #{anual}
+		</if>
+	    group by amsq.quanzong_name
+	</select>
+	
+	<!-- 查询驳回图中的所有全宗 -->
+	<select id="queryRejectQuanzong"  resultMap="amCoBoxReport">
+		select 
+	    amsq.quanzong_name AS r_quanzong_name
+	    from 
+	    am_co_box acb
+	    inner join am_ma_sm_quanzong amsq on amsq.quanzong_id = acb.quanzong_id
+	    where 
+	    acb.box_rejectnum !=0
+	    <if test="anual!=null and anual!= ''">
+			and acb.box_anual = #{anual}
+		</if>
+	    group by amsq.quanzong_name
+	</select>
+	
+	<!-- 查询某全宗下的驳回次数(表格)总条数 -->
+	<select id="queryRejectTableTotal"  resultType="int">
+		select count(*) from (
+		select 
+		amsp.pc_name AS r_pc_name,
+	    sum(acb.box_rejectnum) AS r_rejectnum
+	    from 
+	    am_co_box acb
+	    inner join am_ma_sm_sclassification amss on amss.Sc_Id = acb.Sc_Id 
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = amss.pc_id
+	    where 
+	    acb.box_rejectnum !=0
+	    <if test="anual!=null and anual!= ''">
+			and acb.box_anual = #{anual}
+		</if>
+	    group by amsp.pc_name)
+	</select>
+	<!-- 查询某全宗下的驳回次数(表格) -->
+	<select id="queryRejectTable"  resultMap="amCoBoxReport">
+		select b.* from 
+    	(select rownum as rn,a.* from(
+		select 
+		amsp.pc_name AS r_pc_name,
+	    sum(acb.box_rejectnum) AS r_rejectnum
+	    from 
+	    am_co_box acb
+	    inner join am_ma_sm_sclassification amss on amss.Sc_Id = acb.Sc_Id 
+		inner join am_ma_sm_primaryclassification amsp on amsp.pc_id = amss.pc_id
+	    where 
+	    acb.box_rejectnum !=0
+	    <if test="anual!=null and anual!= ''">
+			and acb.box_anual = #{anual}
+		</if>
+	    group by amsp.pc_name)a )b
+	   <if test="before !=-1 and after !=-1">
+				where rn >= #{before} and <![CDATA[rn <= #{after}]]>
+		</if>
+	</select>
+	
+	<!-- 查询驳回的总次数 -->
+	<select id="queryRejectTotal"  resultType="int">
+		select 
+	    sum(acb.box_rejectnum) AS r_rejectCount
+	    from 
+	    am_co_box acb
+	    where 
+	    acb.box_rejectnum !=0
+	    <if test="anual!=null and anual!= ''">
+			and acb.box_anual = #{anual}
+		</if>
+	</select>
+	
+	<!-- 查询所有的驳回年份 -->
+	<select id="queryRejectAnual"  resultMap="amCoBoxReport">
+		select 
+	    acb.box_anual as r_anual
+	    from 
+	    am_co_box acb
+	    where acb.box_rejectnum != 0
+	    group by acb.box_anual
+	    order by acb.box_anual desc
+	</select>
+</mapper>

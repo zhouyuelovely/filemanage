@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="filemanage.warningandediting.dao.BorrowingFileMapper">
+	<resultMap type="filemanage.warningandediting.pojo.BorrowingFile"
+		id="borrowingFile">
+
+		<result property="archivefileId" column="archivefile_id" />
+		<result property="qzName" column="Quanzong_name" />
+		<result property="fileNumber" column="Archivefile_filenumber" />
+		<result property="rackNumber" column="storage_racknumber" />
+		<result property="boxNumber" column="box_number" />
+		<result property="startDate" column="borrowrecords_borrowdate" />
+		<result property="endDate" column="borrowrecords_returndate" />
+
+	</resultMap>
+
+	<!-- 查询所有未归还档案 -->
+	<select id="queryBorrowingFile" resultMap="borrowingFile">
+		select su.* from (
+		  select 
+		   data.QUANZONG_NAME as Quanzong_name,
+		   data.ARCHIVEFILE_ID as archivefile_id,
+		   data.BOX_NUMBER as box_number,
+		   data.archivefile_filenumber as Archivefile_filenumber,
+		   data.BORROWRECORDS_BORROWDATE as borrowrecords_borrowdate,
+		   data.BORROWRECORDS_RETURNDATE as borrowrecords_returndate,
+		   data.STORAGE_RACKNUMBER as storage_racknumber,
+		   rownum rown from(
+		    	select amsq.quanzong_name as QUANZONG_NAME,
+		  		 aca.archivefile_id as ARCHIVEFILE_ID,
+		         aca.archivefile_filenumber as archivefile_filenumber,
+		         acb.box_number as BOX_NUMBER,
+		         aws.storage_racknumber as STORAGE_RACKNUMBER,
+		         abbs.borrowrecords_borrowdate as BORROWRECORDS_BORROWDATE,
+		         abbs.borrowrecords_returndate as BORROWRECORDS_RETURNDATE,
+		         rownum rown
+		    from am_co_archivefile aca
+		    inner join am_ma_sm_quanzong amsq on aca.quanzong_id = amsq.quanzong_id
+		    inner join am_co_box acb on aca.box_id = acb.box_id
+		    inner join am_warehouse_storage aws on acb.storage_id = aws.storage_id
+		    inner join am_borrowing_borrowdetails abb on aca.archivefile_id = abb.archivefile_id
+		    inner join am_borrowing_borrowrecords abbs on abb.borrowrecords_id = abbs.borrowrecords_id
+		    where 
+		    abbs.BORROWRECORDS_STATUS = '3'
+		  )data
+		  where rownum&lt;=${(after)}
+		)su where rown &gt;#{before}
+	</select>
+
+	<!-- 统计未归还档案数量 -->
+	<select id="countBorrowingFile" resultType="int">
+		select COUNT(Quanzong_name) from (
+		  select 
+		   data.QUANZONG_NAME as Quanzong_name,
+		   data.ARCHIVEFILE_ID as archivefile_id,
+		   data.BOX_NUMBER as box_number,
+		   data.archivefile_filenumber as Archivefile_filenumber,
+		   data.BORROWRECORDS_BORROWDATE as borrowrecords_borrowdate,
+		   data.BORROWRECORDS_RETURNDATE as borrowrecords_returndate,
+		   data.STORAGE_RACKNUMBER as storage_racknumber,
+		   rownum rown from(
+		    	select amsq.quanzong_name as QUANZONG_NAME,
+		  		 aca.archivefile_id as ARCHIVEFILE_ID,
+		         aca.archivefile_filenumber as archivefile_filenumber,
+		         acb.box_number as BOX_NUMBER,
+		         aws.storage_racknumber as STORAGE_RACKNUMBER,
+		         abbs.borrowrecords_borrowdate as BORROWRECORDS_BORROWDATE,
+		         abbs.borrowrecords_returndate as BORROWRECORDS_RETURNDATE,
+		         rownum rown
+		    from am_co_archivefile aca
+		    inner join am_ma_sm_quanzong amsq on aca.quanzong_id = amsq.quanzong_id
+		    inner join am_co_box acb on aca.box_id = acb.box_id
+		    inner join am_warehouse_storage aws on acb.storage_id = aws.storage_id
+		    inner join am_borrowing_borrowdetails abb on aca.archivefile_id = abb.archivefile_id
+		    inner join am_borrowing_borrowrecords abbs on abb.borrowrecords_id = abbs.borrowrecords_id
+		    where 
+		    abbs.BORROWRECORDS_STATUS = '3'
+		  )data
+		)su
+	</select>
+
+	<!-- 预警天数集合用到 -->
+	<select id="queryAllBorrowingFile" resultMap="borrowingFile">
+		select distinct
+		r.borrowrecords_returndate
+		from
+		am_ma_sm_quanzong q,
+		am_co_archivefile f,
+		am_co_box b,
+		AM_WAREHOUSE_STORAGE s,
+		Am_borrowing_borrowRecords r
+		where
+		f.quanzong_id =
+		q.quanzong_id
+		and
+		f.box_id = b.box_id
+		and
+		b.quanzong_id =
+		q.quanzong_id
+		and
+		r.BORROWRECORDS_STATUS = '3'
+	</select>
+
+	<!-- 根据预警天数查询信息 -->
+	<select id="queryByEndDate" resultMap="borrowingFile">
+		select su.* from (
+		  select 
+		   data.QUANZONG_NAME as Quanzong_name,
+		   data.ARCHIVEFILE_ID as archivefile_id,
+		   data.BOX_NUMBER as box_number,
+		   data.archivefile_filenumber as Archivefile_filenumber,
+		   data.BORROWRECORDS_BORROWDATE as borrowrecords_borrowdate,
+		   data.BORROWRECORDS_RETURNDATE as borrowrecords_returndate,
+		   data.STORAGE_RACKNUMBER as storage_racknumber,
+		   rownum rown from(
+		    	select amsq.quanzong_name as QUANZONG_NAME,
+		  		 aca.archivefile_id as ARCHIVEFILE_ID,
+		         aca.archivefile_filenumber as archivefile_filenumber,
+		         acb.box_number as BOX_NUMBER,
+		         aws.storage_racknumber as STORAGE_RACKNUMBER,
+		         abbs.borrowrecords_borrowdate as BORROWRECORDS_BORROWDATE,
+		         abbs.borrowrecords_returndate as BORROWRECORDS_RETURNDATE,
+		         rownum rown
+		    from am_co_archivefile aca
+		    inner join am_ma_sm_quanzong amsq on aca.quanzong_id = amsq.quanzong_id
+		    inner join am_co_box acb on aca.box_id = acb.box_id
+		    inner join am_warehouse_storage aws on acb.storage_id = aws.storage_id
+		    inner join am_borrowing_borrowdetails abb on aca.archivefile_id = abb.archivefile_id
+		    inner join am_borrowing_borrowrecords abbs on abb.borrowrecords_id = abbs.borrowrecords_id
+		    where 
+		    	abbs.BORROWRECORDS_STATUS = '3'
+		    	and abbs.borrowrecords_returndate = #{endDate}
+		  )data
+		  where rownum&lt;=${(after)}
+		)su where rown &gt;#{before}
+	</select>
+
+	<!-- 统计根据预警天数>0查询信息 -->
+	<select id="countByEndDate" resultType="int">
+		select COUNT(Quanzong_name) from (
+		  select 
+		   data.QUANZONG_NAME as Quanzong_name,
+		   data.ARCHIVEFILE_ID as archivefile_id,
+		   data.BOX_NUMBER as box_number,
+		   data.archivefile_filenumber as Archivefile_filenumber,
+		   data.BORROWRECORDS_BORROWDATE as borrowrecords_borrowdate,
+		   data.BORROWRECORDS_RETURNDATE as borrowrecords_returndate,
+		   data.STORAGE_RACKNUMBER as storage_racknumber,
+		   rownum rown from(
+		    	select amsq.quanzong_name as QUANZONG_NAME,
+		  		 aca.archivefile_id as ARCHIVEFILE_ID,
+		         aca.archivefile_filenumber as archivefile_filenumber,
+		         acb.box_number as BOX_NUMBER,
+		         aws.storage_racknumber as STORAGE_RACKNUMBER,
+		         abbs.borrowrecords_borrowdate as BORROWRECORDS_BORROWDATE,
+		         abbs.borrowrecords_returndate as BORROWRECORDS_RETURNDATE,
+		         rownum rown
+		    from am_co_archivefile aca
+		    inner join am_ma_sm_quanzong amsq on aca.quanzong_id = amsq.quanzong_id
+		    inner join am_co_box acb on aca.box_id = acb.box_id
+		    inner join am_warehouse_storage aws on acb.storage_id = aws.storage_id
+		    inner join am_borrowing_borrowdetails abb on aca.archivefile_id = abb.archivefile_id
+		    inner join am_borrowing_borrowrecords abbs on abb.borrowrecords_id = abbs.borrowrecords_id
+		    where 
+		    	abbs.BORROWRECORDS_STATUS = '3'
+		    and abbs.borrowrecords_returndate = #{endDate}
+		  )data
+		)su
+	</select>
+
+	<!-- 统计根据预警天数=0查询信息 -->
+	<select id="countByZeroDate" resultType="int">
+		select
+		COUNT(
+		q.Quanzong_name)
+		from
+		am_ma_sm_quanzong q,
+		am_co_archivefile f,
+		am_co_box
+		b,
+		AM_WAREHOUSE_STORAGE s,
+		Am_borrowing_borrowRecords r
+		where
+		f.quanzong_id =
+		q.quanzong_id
+		and
+		f.box_id = b.box_id
+		and
+		b.quanzong_id =
+		q.quanzong_id
+		and
+		b.storage_id = s.storage_id
+		AND
+		r.borrowrecords_returndate &lt;=to_date(sysdate)
+	</select>
+</mapper>

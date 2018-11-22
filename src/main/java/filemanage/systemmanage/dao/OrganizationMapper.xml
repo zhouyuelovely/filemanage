@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<mapper namespace="filemanage.systemmanage.dao.OrganizationMapper">
+	<resultMap type="filemanage.systemmanage.pojo.Organization" id="organizationMap">
+		<id column="ORGANIZATION_ID" property="organizationId" jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_CODE" property="organizationCode" jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_NAME" property="organizationName" jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_PHONE" property="organizationPhone" jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_CREATETIME" property="organizationCreatetime" jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_CREATOR" property="organizationCreator" jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_DESCRIPTION" property="quanzongDescription" jdbcType="VARCHAR" />
+		<result column="ORGANIZATION_REMARK" property="quanzongRemark" jdbcType="VARCHAR" />
+		<result column="QUANZONG_ID" property="quanzongId" jdbcType="VARCHAR" />
+		<result column="PC_ID" property="pcId" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<!-- 辅助 -->
+	<resultMap type="filemanage.systemmanage.pojo.Organization" id="scMap">
+		<id column="SC_ID" property="organizationId" jdbcType="VARCHAR" />
+		<result column="SC_CODE" property="organizationCode" jdbcType="VARCHAR" />
+		<result column="SC_NAME" property="organizationName" jdbcType="VARCHAR" />
+		<result column="SC_PROPERTY" property="organizationProperty" jdbcType="VARCHAR" />
+		<result column="SC_STATUS" property="organizationStatus" jdbcType="VARCHAR" />
+		<result column="PC_ID" property="pcId" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 添加机构信息 -->
+	<insert id="addOneOrganization" parameterType="filemanage.systemmanage.pojo.Organization">
+		INSERT INTO
+		AM_MA_SM_ORGANIZATION
+		(ORGANIZATION_ID,QUANZONG_ID,ORGANIZATION_CODE,ORGANIZATION_NAME,ORGANIZATION_PHONE,ORGANIZATION_CREATETIME,PC_ID)
+		VALUES
+		(sys_guid(),
+		#{quanzongId,jdbcType=VARCHAR},
+		#{organizationCode,jdbcType=VARCHAR},
+		#{organizationName,jdbcType=VARCHAR},
+		#{organizationPhone,jdbcType=VARCHAR},
+		#{organizationCreatetime,jdbcType=VARCHAR},1)
+	</insert>
+	<!-- 判断机构代码是否存在 -->
+	<select id="isExitOrgCode" parameterType="filemanage.systemmanage.pojo.Organization"
+		resultType="int">
+		select count(ORGANIZATION_CODE) from AM_MA_SM_ORGANIZATION
+		where
+		QUANZONG_ID=#{quanzongId,jdbcType=VARCHAR}
+		and
+		ORGANIZATION_CODE=#{organizationCode,jdbcType=VARCHAR}
+	</select>
+	<!-- 判断机构名是否存在 -->
+	<select id="isExitOrgName" parameterType="filemanage.systemmanage.pojo.Organization"
+		resultType="int">
+		select count(ORGANIZATION_NAME) from AM_MA_SM_ORGANIZATION
+		where
+		QUANZONG_ID=#{quanzongId,jdbcType=VARCHAR}
+		and
+		ORGANIZATION_NAME=#{organizationName,jdbcType=VARCHAR}
+	</select>
+	<!-- 判断机构电话是否存在 -->
+	<select id="isExitOrgPhone" parameterType="filemanage.systemmanage.pojo.Organization"
+	    resultType="int">
+	    select count(1) from AM_MA_SM_ORGANIZATION
+		where
+		ORGANIZATION_PHONE=#{organizationPhone,jdbcType=VARCHAR}
+	</select>
+	<!-- 添加二级分类 -->
+	<insert id="addSecondry" parameterType="filemanage.systemmanage.pojo.Organization">
+		insert into
+		am_ma_sm_sclassification
+		(SC_ID,SC_CODE,SC_NAME,SC_PROPERTY,SC_STATUS,PC_ID)
+		values
+		(sys_guid(),
+		#{organizationCode,jdbcType=VARCHAR},
+		#{organizationName,jdbcType=VARCHAR},1,0,1)
+	</insert>
+	<!-- 按二级分类名scName查询二级分类是否存在 -->
+	<select id="isExitSecondryName" parameterType="filemanage.systemmanage.pojo.Organization"
+		resultType="int">
+		select count(1) from am_ma_sm_sclassification
+		where
+		SC_NAME=#{organizationName,jdbcType=VARCHAR}
+	</select>
+	<!-- 判断是否存在重复 的二级分类代码 -->
+	<select id="isExitSecondryCode" parameterType="filemanage.systemmanage.pojo.Organization"
+		resultType="int">
+		select count(1) from am_ma_sm_sclassification
+		where
+		SC_CODE=#{organizationCode,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 删除机构 -->
+	<delete id="deleteOneOrganization" parameterType="String">
+		delete from
+		AM_MA_SM_ORGANIZATION
+		where
+		ORGANIZATION_ID=#{organizationId,jdbcType=VARCHAR}
+	</delete>
+	<!-- 删除前查询 -->
+	<select id="countOrgLinkInfo" parameterType="java.lang.String"
+		resultType="int">
+		select count(amsu.USER_ID) from AM_MA_SM_USER amsu
+		where
+		amsu.ORGANIZATION_ID = (
+		select amso.ORGANIZATION_ID from
+		AM_MA_SM_ORGANIZATION amso
+		where amso.ORGANIZATION_ID =
+		#{organizationId,jdbcType=VARCHAR})
+	</select>
+
+	<!-- 修改并保存编辑后的机构信息 -->
+	<update id="updateOneOrganization" parameterType="filemanage.systemmanage.pojo.Organization">
+		UPDATE
+		AM_MA_SM_ORGANIZATION
+		SET
+		ORGANIZATION_CODE=#{organizationCode,jdbcType=VARCHAR},
+		ORGANIZATION_NAME=#{organizationName,jdbcType=VARCHAR},
+		ORGANIZATION_PHONE=#{organizationPhone,jdbcType=VARCHAR},
+		ORGANIZATION_CREATETIME=#{organizationCreatetime,jdbcType=VARCHAR}
+		where
+		ORGANIZATION_ID=#{organizationId,jdbcType=VARCHAR}
+	</update>
+	<!-- 根据主键查询机构信息 -->
+	<select id="queryOrganizationById" resultMap="organizationMap"
+	    parameterType="java.lang.String">
+		select * from
+		AM_MA_SM_ORGANIZATION
+		where
+		ORGANIZATION_ID=#{organizationId,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 列表展示机构信息 -->
+	<select id="selectAllOrganization" resultMap="organizationMap">
+		select * from
+		AM_MA_SM_ORGANIZATION
+		order by to_date(ORGANIZATION_CREATETIME,
+		'yyyy-mm-dd') DESC
+	</select>
+
+	<!-- 根据全宗主键查询机构 -->
+	<select id="queryOrganizationByQuanzongId" resultMap="organizationMap"
+		parameterType="String">
+		select
+		QUANZONG_ID,ORGANIZATION_ID,ORGANIZATION_CODE,ORGANIZATION_NAME,ORGANIZATION_PHONE,ORGANIZATION_CREATETIME
+		from AM_MA_SM_ORGANIZATION
+		where
+		QUANZONG_ID=#{quanzongId,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 导入时去重判断，如果Count(*)为0，则成功导入，如果Count(*)大于0，则有重复的数据，导入失败 -->
+	<select id="countAllByImportOrganization" resultType="int"
+		parameterType="filemanage.systemmanage.vo.OrganizationQueryConditions">
+		select * from AM_MA_SM_ORGANIZATION
+		where
+		ORGANIZATION_CODE=#{organizationCode,jdbcType=VARCHAR}
+		or
+		ORGANIZATION_NAME=#{organizationName,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 机构管理_关键词查询机构信息 -->
+	<select id="queryOrganizationByOrganizationQueryCondition"
+		resultMap="organizationMap" parameterType="filemanage.systemmanage.pojo.Organization">
+		select * from
+		AM_MA_SM_ORGANIZATION
+		where
+		ORGANIZATION_CODE || ORGANIZATION_NAME ||
+		ORGANIZATION_PHONE || ORGANIZATION_CREATETIME
+		like
+		CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')
+	</select>
+
+	<!-- 查询机构的关键词个数 -->
+	<select id="countOrgByConditions" resultType="int"
+		parameterType="java.lang.String">
+		select count(*) from AM_MA_SM_ORGANIZATION
+		where
+		ORGANIZATION_CODE || ORGANIZATION_NAME || ORGANIZATION_PHONE ||
+		ORGANIZATION_CREATETIME like
+		CONCAT(CONCAT('%',#{conditions,jdbcType=VARCHAR}),'%')
+	</select>
+
+	<!-- 统计全宗下机构数 -->
+	<select id="countAllOrganization" resultType="int"
+		parameterType="java.lang.String">
+		select count(*) from AM_MA_SM_ORGANIZATION where
+		QUANZONG_ID=#{quanzongId,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 导入去重传参(全宗主键) -->
+	<select id="listAchiveId" parameterType="filemanage.systemmanage.pojo.Organization"
+		resultMap="organizationMap">
+		select QUANZONG_ID from AM_MA_SM_ORGANIZATION
+		where QUANZONG_ID=#{quanzongId,jdbcType=VARCHAR}
+		<!-- from AM_MA_SM_ORGANIZATION
+		where QUANZONG_ID=#{quanzongId,jdbcType=VARCHAR} -->
+	</select>
+
+</mapper>
